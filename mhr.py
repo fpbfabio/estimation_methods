@@ -1,0 +1,93 @@
+from datetime import datetime
+from threading import Lock
+from random import randrange
+
+from abs_estimator import AbsEstimator
+from config import Config
+
+
+class Mhr(AbsEstimator):
+
+	MAX_NUMBER_MATCHES = 4500
+	MIN_NUMBER_MATCHES = 3500
+	NUMBER_QUERIES = 5000
+
+	@property
+	def commom_api(self):
+		return self.__commom_api
+
+	@commom_api.setter
+	def commom_api(self, val):
+		self.__commom_api = val
+
+	def __init__(self, commom_api):
+		self.commom_api = commom_api
+		self.lock_accumulators = Lock()
+		self.lock_query_list = Lock()
+		self.query_count = 0
+		self.total_matches = 0
+		self.total_documents_returned = 0
+		self.document_id_dict = {}
+		self.query_list = []
+		self.query_pool_size = 0
+		self.progress_count = 0
+
+	def init_accumulators(self):
+		self.query_count = 0
+		self.total_matches = 0
+		self.total_documents_returned = 0
+		self.document_id_dict = {}
+		self.progress_count = 0
+
+	def init_query_list(self):
+		self.query_list = self.commom_api.read_query_pool()
+		self.query_pool_size = len(self.query_list)
+
+	def take_query(self):
+		query = None
+		with self.lock_query_list:
+			self.progress_count = += 1
+			self.commom_api.report_progress(self.progress_count, Mhr.NUMBER_QUERIES)
+			if (self.query_pool_size > 0):
+				random_index = randrange(self.query_pool_size)
+				query = self.query_list[random_index]
+				del(self.query_list[random_index])
+		return query
+
+	def collect_data_for_estimation(self):
+		query = self.take_query()
+		number_matches = self.commom_api.retrieve_number_matches(query)
+		if(number_of_matches >= Mhr.MIN_NUMBER_MATCHES and number_of_matches <= Mhr.MAX_NUMBER_MATCHES):
+			document_list = self.commom_api.download(query)
+			id_list = []
+			number_documents_returned = 0
+			for document in document_list:
+				id_list.append(document[Config.ID_FIELD])
+				number_documents_returned += 1
+			with self.lock_accumulators:
+				self.query_count += 1
+				self.total_matches += number_of_matches
+				self.total_documents_returned += number_documents_returned
+				for id in id_list:
+					self.document_id_dict[id] = self.document_id_dict.get(id, 0) + 1
+
+	def calculate_estimation(self):
+		estimative = -1
+		number_unique_documents_returned = len(self.document_id_dict.keys())
+		if(self.total_documents_returned != 0 and number_unique_docs_returned != 0):
+			overflow_rate = self.total_matches / self.total_documents_returned
+			overlapping_rate = self.total_documents_returned / number_unique_documents_returned
+			if(overlapping_rate != 1):
+				estimative = overflow_rate * number_unique_docs_returned / (1 - overlapping_rate ** (-1.1))
+		return estimative
+
+	def estimate(self):
+		start = datetime.now()
+		self.init_accumulators();
+		self.init_query_list();
+		self.commom_api.execute_in_parallel(range(0, Mhr.NUMBER_QUERIES), self.collect_data_for_estimation)
+		estimation = self.calculate_estimation()
+		end = datetime.now()
+		additional_information = {"Number queries" : Mhr.NUMBER_QUERIES, "Max number matches" : Mhr.MAX_NUMBER_MATCHES, "Min number matches" : Mhr.MIN_NUMBER_MATCHES, "Accepted queries" : self.query_count}
+		self.commom_api.log_results(estimation, duration, additional_information)
+		return estimation
