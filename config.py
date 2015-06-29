@@ -2,9 +2,9 @@
 
 class Config():
 
-	URL = "http://localhost:8984/solr/new_shine/select?q=::FIELD:::::QUERY::&rows=::LIMIT::&wt=json"
+	URL = "http://localhost:8984/solr/newsgroups/select?q=::FIELD:::::QUERY::&rows=::LIMIT::&wt=json"
 	SEARCH_ENGINE_LIMIT = 1000000
-	QUERY_POOL_FILE_PATH = "C:\\Users\\Fabio\\Documents\\tcc\\listas_palavras\\new_shine.txt"
+	QUERY_POOL_FILE_PATH = "C:\\Users\\Fabio\\Documents\\tcc\\listas_palavras\\newsgroups.txt"
 	FIELD_TO_SEARCH = "text"
 	THREAD_LIMIT = 10
 	LIMIT_MASK = "::LIMIT::"

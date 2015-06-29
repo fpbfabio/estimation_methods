@@ -81,6 +81,7 @@ class CommomApi(AbsCommomApi):
 		self.log("Download count", self.download_count)
 		self.log("Duration", duration)
 		self.log("Search engine limit", Config.SEARCH_ENGINE_LIMIT)
-		self.log("Query pool file", Config.QUERY_POOL_FILE)
-		for item in additional_information:
-			self.log(item.key, item.value)
+		self.log("Query pool file", Config.QUERY_POOL_FILE_PATH)
+		key_list = additional_information.keys()
+		for key in key_list:
+			self.log(key, additional_information[key])
