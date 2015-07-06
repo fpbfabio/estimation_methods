@@ -1,7 +1,9 @@
 from urllib.request import urlopen
 from threading import Thread, Lock
 import json
+import re
 import os
+import string
 
 from abs_commom_api import AbsCommomApi
 from config import Config
@@ -28,11 +30,11 @@ class CommomApi(AbsCommomApi):
 		self.lock = Lock()
 
 	def read_query_pool(self):
-		query_list = []
+		query_pool = []
 		with open(Config.QUERY_POOL_FILE_PATH) as archive:
 			for line in archive:
-				query_list.append(line.rstrip("\n").rstrip("\r"))
-		return query_list
+				query_pool.append(line.rstrip("\n").rstrip("\r"))
+		return query_pool
 
 	def log(self, tag, content = ""):
 		with open(Config.LOG_FILE_PATH, CommomApi.LOG_FILE_PERMISSION) as archive:
@@ -43,7 +45,7 @@ class CommomApi(AbsCommomApi):
 		return dictionary[CommomApi.DOCUMENT_LIST_KEY]
 
 	def retrieve_number_matches(self, query):
-		dictionary = submit_query(query, 1)
+		dictionary = self.submit_query(query, 1)
 		return dictionary[CommomApi.NUMBER_MATCHES_KEY]
 
 	def submit_query(self, query, limit, field_to_search = Config.FIELD_TO_SEARCH):
@@ -85,3 +87,20 @@ class CommomApi(AbsCommomApi):
 		key_list = additional_information.keys()
 		for key in key_list:
 			self.log(key, additional_information[key])
+
+	def extract_words(self, text):
+		word = []
+		word_dictionary = {}
+		count = 0
+		letter_or_hyphen_pattern = re.compile(r"[a-z]|[A-Z]|-")
+		for character in text:
+			if (letter_or_hyphen_pattern.match(character) is not None):
+				word.append(character)
+			else:
+				word = str.join("", word)
+				word = word.lower().strip("-").strip("-")
+				if (len(word) > 0 and word not in word_dictionary):
+					word_dictionary[word] = count
+					count += 1
+				word = []
+		return list(word_dictionary.keys())

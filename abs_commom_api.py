@@ -56,5 +56,10 @@ class AbsCommomApi(metaclass=ABCMeta):
 
 	@abstractmethod
 	def log_result_experiment(self, estimation, duration, additional_information = {}):
-		"""Registers the experiment result data"""
+		"""Registers the experiment result data."""
+		pass
+
+	@abstractmethod
+	def extract_words(self, text):
+		"""Returns the words in the text as keys of a dictionary."""
 		pass

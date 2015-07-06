@@ -12,7 +12,7 @@ class BroderEtAl(AbsEstimator):
 	QUERY_RANDOM_SAMPLE_SIZE_INFORMATION = "Size of the random sample of queries"
 	DOCUMENT_RANDOM_SAMPLE_SIZE_INFORMATION = "Size of the random sample of documents"
 	QUERY_RANDOM_SAMPLE_SIZE = 200
-	DOCUMENT_RANDOM_SAMPLE_SIZE = 5000
+	DOCUMENT_RANDOM_SAMPLE_SIZE = 1000
 
 	@property
 	def commom_api(self):
@@ -27,7 +27,7 @@ class BroderEtAl(AbsEstimator):
 
 	def estimate(self):
 		start = datetime.now()
-		entire_dataset = self.commom_api.download_entire_dataset()
+		entire_dataset = self.commom_api.download_entire_data_set()
 		random_document_sample = random.sample(entire_dataset, BroderEtAl.DOCUMENT_RANDOM_SAMPLE_SIZE)
 		entire_dataset = None
 		gc.collect()
