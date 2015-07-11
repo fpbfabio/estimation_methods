@@ -19,6 +19,13 @@ class Mhr(AbsEstimator):
     def common_api(self, val):
         self.__common_api = val
 
+    @property
+    def experiment_details(self):
+        additional_information = {"Número de buscas": Mhr.NUMBER_QUERIES,
+                                  "Máximo número de resultados": Mhr.MAX_NUMBER_MATCHES,
+                                  "Menor número de resultados": Mhr.MIN_NUMBER_MATCHES}
+        return additional_information
+
     def __init__(self, common_api):
         self.__common_api = common_api
         self.lock_accumulators = Lock()
@@ -81,13 +88,8 @@ class Mhr(AbsEstimator):
         return estimation
 
     def estimate(self):
-        start = datetime.now()
         self.init_accumulators()
         self.init_query_list()
         self.common_api.execute_in_parallel(range(0, Mhr.NUMBER_QUERIES), self.collect_data_for_estimation)
         estimation = self.calculate_estimation()
-        end = datetime.now()
-        additional_information = {"Number queries": Mhr.NUMBER_QUERIES, "Max number matches": Mhr.MAX_NUMBER_MATCHES,
-                                  "Min number matches": Mhr.MIN_NUMBER_MATCHES, "Accepted queries": self.query_count}
-        self.common_api.log_results(estimation, end - start, additional_information)
         return estimation

@@ -7,8 +7,13 @@ from config import Config
 
 
 class RandomWalk(AbsEstimator):
-    RANDOM_WALK_SAMPLE_SIZE_INFORMATION = "Number of nodes visited during the random walk"
+    RANDOM_WALK_SAMPLE_SIZE_INFORMATION = "Número de nós visitados durante um \"random walk\""
     RANDOM_WALK_SAMPLE_SIZE = 2000
+
+    @property
+    def experiment_details(self):
+        additional_information = {RandomWalk.RANDOM_WALK_SAMPLE_SIZE_INFORMATION: RandomWalk.RANDOM_WALK_SAMPLE_SIZE}
+        return additional_information
 
     @property
     def common_api(self):
@@ -22,7 +27,6 @@ class RandomWalk(AbsEstimator):
         self.__common_api = common_api
 
     def estimate(self):
-        start = datetime.now()
         document_degree_list = []
         frequency_number_nodes_dict = self.random_walk(document_degree_list)
         n = len(document_degree_list)
@@ -33,9 +37,7 @@ class RandomWalk(AbsEstimator):
         c = sum([((math.factorial(x) / (math.factorial(x - 2) * 2)) * frequency_number_nodes_dict[x]) for x in
                  frequency_number_nodes_dict.keys()])
         estimation = (gama ** 2 + 1) * binomy_n_2 * 1 / (c + 1)
-        end = datetime.now()
-        additional_info = {RandomWalk.RANDOM_WALK_SAMPLE_SIZE_INFORMATION: RandomWalk.RANDOM_WALK_SAMPLE_SIZE}
-        self.common_api.log_result_experiment(estimation, end - start, additional_info)
+        return estimation
 
     def random_walk(self, document_degree_list):
         query_pool = self.common_api.read_query_pool()

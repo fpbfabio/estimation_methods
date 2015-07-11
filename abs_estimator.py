@@ -33,3 +33,15 @@ class AbsEstimator(metaclass=ABCMeta):
         Returns the estimation of the size of the data set.
         """
         pass
+
+    @property
+    @abstractmethod
+    def experiment_details(self):
+        """
+        Returns the parameters used in the experiment.
+        """
+        pass
+
+    @property
+    def download_count(self):
+        return self.common_api.download_count

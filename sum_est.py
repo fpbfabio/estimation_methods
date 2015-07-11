@@ -15,6 +15,12 @@ class SumEst(AbsEstimator):
     PAIR_DOCUMENT_INDEX = 1
 
     @property
+    def experiment_details(self):
+        additional_information = {SumEst.ITERATION_NUMBER_INFORMATION: SumEst.ITERATION_NUMBER,
+                                  SumEst.POOL_SAMPLE_SIZE_INFORMATION: SumEst.POOL_SAMPLE_SIZE}
+        return additional_information
+
+    @property
     def common_api(self):
         return self.__common_api
 
@@ -27,7 +33,6 @@ class SumEst(AbsEstimator):
 
     def estimate(self):
         estimation_acc = 0
-        start = datetime.now()
         query_pool = self.common_api.read_query_pool()
         pool_size = self.estimate_pool_size(query_pool)
         for i in range(0, SumEst.ITERATION_NUMBER):
@@ -39,11 +44,8 @@ class SumEst(AbsEstimator):
             partial_estimation = pool_size * degree_query * document_inverse_degree
             estimation_acc += partial_estimation
             self.common_api.report_progress(i, SumEst.ITERATION_NUMBER)
-        end = datetime.now()
         estimation = estimation_acc / SumEst.ITERATION_NUMBER
-        additional_info = {SumEst.ITERATION_NUMBER_INFORMATION: SumEst.ITERATION_NUMBER,
-                           SumEst.POOL_SAMPLE_SIZE_INFORMATION: SumEst.POOL_SAMPLE_SIZE}
-        self.common_api.log_result_experiment(estimation, end - start, additional_info)
+        return estimation
 
     def verify_match(self, query, document):
         content = document[Config.FIELD_TO_SEARCH].lower()

@@ -37,13 +37,6 @@ class AbsCommonApi(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def log(self, tag, content=None):
-        """
-        Used to write logs in the log file specified in the Config class.
-        """
-        pass
-
-    @abstractmethod
     def download_entire_data_set(self):
         """
         Returns a list with all the documents from the data set.
@@ -77,13 +70,6 @@ class AbsCommonApi(metaclass=ABCMeta):
     def report_progress(self, progress, total):
         """
         Gives a feedback about the progress of the estimation.
-        """
-        pass
-
-    @abstractmethod
-    def log_result_experiment(self, estimation, duration, additional_information=None):
-        """
-        Registers the experiment result data.
         """
         pass
 

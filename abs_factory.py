@@ -1,11 +1,25 @@
-""""Module with an abstract factory class."""
+""""
+Module with an abstract factory class.
+"""
 
 from abc import ABCMeta, abstractmethod
 
 
 class AbsFactory(metaclass=ABCMeta):
+    """"
+    Factory class.
+    """
 
     @abstractmethod
     def create_estimator(self):
-        """Instantiates an object derived from the AbsEstimator class."""
+        """
+        Instantiates an object derived from the AbsEstimator class.
+        """
+        pass
+
+    @abstractmethod
+    def create_logger(self):
+        """
+        Instantiates an object derived from the AbsLogger class.
+        """
         pass

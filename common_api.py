@@ -34,15 +34,6 @@ class CommonApi(AbsCommonApi):
                 query_pool.append(line.rstrip("\n").rstrip("\r"))
         return query_pool
 
-    def log(self, tag, content=None):
-        text = str(tag)
-        if content is not None:
-            text += ": " + str(content) + os.linesep
-        else:
-            text += os.linesep
-        with open(Config.LOG_FILE_PATH, CommonApi.LOG_FILE_PERMISSION) as archive:
-            archive.write(text)
-
     def download_entire_data_set(self):
         dictionary = self.submit_query("*", 1000000, "*")
         return dictionary[CommonApi.DOCUMENT_LIST_KEY]
@@ -80,17 +71,6 @@ class CommonApi(AbsCommonApi):
 
     def report_progress(self, progress, total):
         print("Progress: " + str(progress) + "/" + str(total))
-
-    def log_result_experiment(self, estimation, duration, additional_information=None):
-        self.log("Estimation", estimation)
-        self.log("Download count", self.download_count)
-        self.log("Duration", duration)
-        self.log("Search engine limit", Config.SEARCH_ENGINE_LIMIT)
-        self.log("Query pool file", Config.QUERY_POOL_FILE_PATH)
-        if additional_information is not None:
-            key_list = additional_information.keys()
-            for key in key_list:
-                self.log(key, additional_information[key])
 
     def extract_words(self, text):
         word = []

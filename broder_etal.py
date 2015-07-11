@@ -13,6 +13,14 @@ class BroderEtAl(AbsEstimator):
     DOCUMENT_RANDOM_SAMPLE_SIZE = 1000
 
     @property
+    def experiment_details(self):
+        additional_information = {BroderEtAl.QUERY_RANDOM_SAMPLE_SIZE_INFORMATION:
+                                  BroderEtAl.QUERY_RANDOM_SAMPLE_SIZE,
+                                  BroderEtAl.DOCUMENT_RANDOM_SAMPLE_SIZE_INFORMATION:
+                                  BroderEtAl.DOCUMENT_RANDOM_SAMPLE_SIZE}
+        return additional_information
+
+    @property
     def common_api(self):
         return self.__common_api
 
@@ -24,7 +32,6 @@ class BroderEtAl(AbsEstimator):
         self.__common_api = common_api
 
     def estimate(self):
-        start = datetime.now()
         entire_data_set = self.common_api.download_entire_data_set()
         random_document_sample = random.sample(entire_data_set, BroderEtAl.DOCUMENT_RANDOM_SAMPLE_SIZE)
         self.common_api.report_progress(1, 5)
@@ -39,10 +46,7 @@ class BroderEtAl(AbsEstimator):
         self.common_api.report_progress(5, 5)
         probability_visible_pool = number_visible_pool / len(random_document_sample)
         estimation = number_results_entire_pool / probability_visible_pool
-        end = datetime.now()
-        additional_info = {BroderEtAl.QUERY_RANDOM_SAMPLE_SIZE_INFORMATION: BroderEtAl.QUERY_RANDOM_SAMPLE_SIZE,
-                           BroderEtAl.DOCUMENT_RANDOM_SAMPLE_SIZE_INFORMATION: BroderEtAl.DOCUMENT_RANDOM_SAMPLE_SIZE}
-        self.common_api.log_result_experiment(estimation, end - start, additional_info)
+        return estimation
 
     def verify_match(self, query, document):
         content = document[Config.FIELD_TO_SEARCH].lower()

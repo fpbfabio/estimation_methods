@@ -13,9 +13,25 @@ class AbsExecutor(metaclass=ABCMeta):
 
     @property
     @abstractmethod
+    def logger(self):
+        """
+        Returns the instance of an AbsLogger class.
+        """
+        pass
+
+    @logger.setter
+    @abstractmethod
+    def logger(self, val):
+        """
+        Sets the instance of an AbsLogger class.
+        """
+        pass
+
+    @property
+    @abstractmethod
     def factory(self):
         """
-        Returns the instance of an AbsFactory object.
+        Returns the instance of an AbsFactory class.
         """
         pass
 
@@ -23,7 +39,7 @@ class AbsExecutor(metaclass=ABCMeta):
     @abstractmethod
     def factory(self, val):
         """
-        Sets the instance of an AbsFactory object.
+        Sets the instance of an AbsFactory class.
         """
         pass
 
@@ -31,7 +47,7 @@ class AbsExecutor(metaclass=ABCMeta):
     @abstractmethod
     def estimator(self):
         """
-        Returns the instance of an AbsEstimator object.
+        Returns the instance of an AbsEstimator class.
         """
         pass
 
@@ -39,7 +55,7 @@ class AbsExecutor(metaclass=ABCMeta):
     @abstractmethod
     def estimator(self, val):
         """
-        Sets the instance of an AbsEstimator object.
+        Sets the instance of an AbsEstimator class.
         """
         pass
 
