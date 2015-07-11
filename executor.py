@@ -1,7 +1,7 @@
 from abs_executor import AbsExecutor
 from factory import Factory
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class Executor(AbsExecutor):
@@ -39,7 +39,7 @@ class Executor(AbsExecutor):
         self.estimator = self.factory.create_estimator()
         self.logger.write_experiment_details(self.estimator.experiment_details)
         estimation_list = []
-        duration_sum = 0
+        duration_sum = timedelta()
         connections_sum = 0
         for i in range(0, 20):
             self.estimator = self.factory.create_estimator()
