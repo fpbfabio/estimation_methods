@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 
 
 class Executor(AbsExecutor):
+    NUMBER_ITERATIONS = 20
+
     def __init__(self):
         self.__factory = Factory()
         self.__estimator = None
@@ -41,7 +43,7 @@ class Executor(AbsExecutor):
         estimation_list = []
         duration_sum = timedelta()
         connections_sum = 0
-        for i in range(0, 20):
+        for i in range(0, Executor.NUMBER_ITERATIONS):
             self.estimator = self.factory.create_estimator()
             start = datetime.now()
             estimation = self.estimator.estimate()
