@@ -31,7 +31,7 @@ class Logger(AbsLogger):
     def write_experiment_details(self, additional_information=None):
         with open(Config.EXPERIMENT_DETAILS_FILE_PATH, "a+") as file:
             file.write("Limite da máquina de busca: " + str(Config.SEARCH_ENGINE_LIMIT) + os.linesep)
-            file.write("Lista de palavras: " + Config.QUERY_POOL_FILE_PATH) + os.linesep
+            file.write("Lista de palavras: " + Config.QUERY_POOL_FILE_PATH + os.linesep)
             if additional_information is not None:
                 key_list = list(additional_information.keys())
                 for key in key_list:

@@ -7,7 +7,7 @@ from config import Config
 
 class RandomWalk(AbsEstimator):
     RANDOM_WALK_SAMPLE_SIZE_INFORMATION = "Número de nós visitados durante um \"random walk\""
-    RANDOM_WALK_SAMPLE_SIZE = 2000
+    RANDOM_WALK_SAMPLE_SIZE = 5000
 
     @property
     def experiment_details(self):
@@ -29,13 +29,12 @@ class RandomWalk(AbsEstimator):
         document_degree_list = []
         frequency_number_nodes_dict = self.random_walk(document_degree_list)
         n = len(document_degree_list)
-        d_w = sum(document_degree_list) / n
-        d_h = n / sum([1 / x for x in document_degree_list])
-        gama = (d_w / d_h - 1) ** 0.5
+        dw = sum(document_degree_list) / n
+        dh = n / sum([1 / x for x in document_degree_list])
         binomy_n_2 = math.factorial(n) / (math.factorial(n - 2) * 2)
         c = sum([((math.factorial(x) / (math.factorial(x - 2) * 2)) * frequency_number_nodes_dict[x]) for x in
                  frequency_number_nodes_dict.keys()])
-        estimation = (gama ** 2 + 1) * binomy_n_2 * 1 / (c + 1)
+        estimation = (dw / dh) * binomy_n_2 * (1 / c)
         return estimation
 
     def random_walk(self, document_degree_list):
@@ -60,8 +59,8 @@ class RandomWalk(AbsEstimator):
                 words = self.common_api.extract_words(document[Config.FIELD_TO_SEARCH])
                 number_words = len(words)
                 document_degree_list.append(number_words)
-                node_frequency_dict[document[Config.ID_FIELD]] = node_frequency_dict.get(document[Config.ID_FIELD],
-                                                                                         0) + 1
+                node_frequency_dict[document[Config.ID_FIELD]] = \
+                    node_frequency_dict.get(document[Config.ID_FIELD], 0) + 1
                 count += 1
                 self.common_api.report_progress(count, RandomWalk.RANDOM_WALK_SAMPLE_SIZE)
             query = words[random.randrange(0, number_words)]
