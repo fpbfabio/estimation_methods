@@ -2,7 +2,6 @@ from threading import Lock
 import random
 
 from abs_estimator import AbsEstimator
-from config import Config
 
 
 class SumEst(AbsEstimator):
@@ -47,7 +46,7 @@ class SumEst(AbsEstimator):
         return estimation
 
     def verify_match(self, query, document):
-        content = document[Config.FIELD_TO_SEARCH].lower()
+        content = document.content.lower()
         if content.find(query.lower()) != -1:
             return True
         return False
@@ -58,8 +57,8 @@ class SumEst(AbsEstimator):
             random_index = random.randrange(list_size)
             random_query = query_pool[random_index]
             try:
-                document_list = self.common_api.download(random_query)
-            except Exception as exception:
+                document_list = self.common_api.download(random_query).results
+            except:
                 continue
             valid_list = []
             for document in document_list:
@@ -93,7 +92,7 @@ class SumEst(AbsEstimator):
                 with lock:
                     count += 1
 
-        document_list = self.common_api.download(query)
+        document_list = self.common_api.download(query).results
         self.common_api.execute_in_parallel(document_list, iteration)
         return count
 
@@ -106,7 +105,7 @@ class SumEst(AbsEstimator):
             nonlocal query_pool, query_pool_size, count, lock
             random_index = random.randrange(0, query_pool_size)
             query = query_pool[random_index]
-            document_list = self.common_api.download(query)
+            document_list = self.common_api.download(query).results
             for document in document_list:
                 if self.verify_match(query, document):
                     with lock:
@@ -123,10 +122,10 @@ class SumEst(AbsEstimator):
             random_index = random.randrange(0, len(matching_query_list))
             query = matching_query_list[random_index]
             try:
-                document_list = self.common_api.download(query)
-            except Exception as exception:
+                document_list = self.common_api.download(query).results
+            except:
                 continue
             for item in document_list:
-                if item[Config.ID_FIELD] == document[Config.ID_FIELD]:
+                if item.identifier == document.identifier:
                     return i / len(matching_query_list)
             i += 1

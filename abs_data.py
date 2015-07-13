@@ -12,7 +12,7 @@ class AbsData(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def id(self):
+    def identifier(self):
         """
         A unique identifier for the data in the scope of the search engine.
         """

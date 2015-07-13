@@ -31,7 +31,7 @@ class AbsExecutor(metaclass=ABCMeta):
     @abstractmethod
     def factory(self):
         """
-        Returns the instance of an AbsFactory class.
+        Returns the instance of an AbsExecutorFactory class.
         """
         pass
 
@@ -39,7 +39,7 @@ class AbsExecutor(metaclass=ABCMeta):
     @abstractmethod
     def factory(self, val):
         """
-        Sets the instance of an AbsFactory class.
+        Sets the instance of an AbsExecutorFactory class.
         """
         pass
 

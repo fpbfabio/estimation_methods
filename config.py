@@ -18,14 +18,17 @@ class Config:
         EXPERIMENT_DETAILS_FILE_PATH    Path to the file where parameters of the experiment will be saved.
         ID_FIELD                        The field in the Solr core schema which is the unique identifier of a document.
     """
-    URL = "http://localhost:8984/solr/newsgroups/select?q=::FIELD:::::QUERY::&rows=::LIMIT::&wt=json"
+    URL = ("http://localhost:8984/solr/newsgroups/select?"
+           + "q=::FIELD:::::QUERY::&start=::OFFSET::&rows=::LIMIT::&fl=::FIELDS_TO_RETURN::&wt=json")
     DATA_SET_SIZE = 19994
     SEARCH_ENGINE_LIMIT = 1000000
     QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/newsgroups.txt"
     FIELD_TO_SEARCH = "text"
     THREAD_LIMIT = 20
+    OFFSET_MASK = "::OFFSET::"
     LIMIT_MASK = "::LIMIT::"
     FIELD_TO_SEARCH_MASK = "::FIELD::"
+    FIELDS_TO_RETURN_MASK = "::FIELDS_TO_RETURN::"
     QUERY_MASK = "::QUERY::"
     EXPERIMENT_RESULTS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/ExperimentResults.csv"
     EXPERIMENT_DETAILS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/Log.txt"

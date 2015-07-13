@@ -5,7 +5,7 @@ Module with an abstract factory class.
 from abc import ABCMeta, abstractmethod
 
 
-class AbsFactory(metaclass=ABCMeta):
+class AbsExecutorFactory(metaclass=ABCMeta):
     """"
     Factory class.
     """

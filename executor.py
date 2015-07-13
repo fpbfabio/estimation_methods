@@ -1,5 +1,5 @@
 from abs_executor import AbsExecutor
-from factory import Factory
+from executor_factory import ExecutorFactory
 
 from datetime import datetime, timedelta
 
@@ -8,7 +8,7 @@ class Executor(AbsExecutor):
     NUMBER_ITERATIONS = 20
 
     def __init__(self):
-        self.__factory = Factory()
+        self.__factory = ExecutorFactory()
         self.__estimator = None
         self.__logger = self.factory.create_logger()
 

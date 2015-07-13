@@ -2,7 +2,6 @@ import random
 import math
 
 from abs_estimator import AbsEstimator
-from config import Config
 
 
 class RandomWalk(AbsEstimator):
@@ -50,17 +49,18 @@ class RandomWalk(AbsEstimator):
         while count < RandomWalk.RANDOM_WALK_SAMPLE_SIZE:
             number_matches = self.common_api.retrieve_number_matches(query)
             if number_matches > 0:
+                random_index = random.randrange(0, number_matches)
                 try:
-                    results = self.common_api.download(query)
+                    results = self.common_api.download(query, True, True, random_index, 1).results
                 except:
                     query = words[random.randrange(0, number_words)]
                     continue
-                document = results[random.randrange(0, number_matches)]
-                words = self.common_api.extract_words(document[Config.FIELD_TO_SEARCH])
+                document = results[0]
+                words = self.common_api.extract_words(document.content)
                 number_words = len(words)
                 document_degree_list.append(number_words)
-                node_frequency_dict[document[Config.ID_FIELD]] = \
-                    node_frequency_dict.get(document[Config.ID_FIELD], 0) + 1
+                node_frequency_dict[document.identifier] = \
+                    node_frequency_dict.get(document.identifier, 0) + 1
                 count += 1
                 self.common_api.report_progress(count, RandomWalk.RANDOM_WALK_SAMPLE_SIZE)
             query = words[random.randrange(0, number_words)]

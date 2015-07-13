@@ -28,6 +28,22 @@ class AbsCommonApi(metaclass=ABCMeta):
         """
         pass
 
+    @property
+    @abstractmethod
+    def factory(self):
+        """
+        Returns the instance of an AbsCommonApiFactory class.
+        """
+        pass
+
+    @factory.setter
+    @abstractmethod
+    def factory(self, val):
+        """
+        Sets the instance of an AbsCommonApiFactory class.
+        """
+        pass
+
     @abstractmethod
     def read_query_pool(self):
         """
@@ -51,7 +67,8 @@ class AbsCommonApi(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def download(self, query, limit=Config.SEARCH_ENGINE_LIMIT):
+    def download(self, query, is_to_download_id=True, is_to_download_content=True, limit=Config.SEARCH_ENGINE_LIMIT,
+                 field_to_search=Config.FIELD_TO_SEARCH):
         """
         Returns the a list with documents retrieved by the given query with
         the max size set by the given limit.

@@ -2,7 +2,6 @@ from threading import Lock
 import random
 
 from abs_estimator import AbsEstimator
-from config import Config
 
 
 class BroderEtAl(AbsEstimator):
@@ -31,7 +30,7 @@ class BroderEtAl(AbsEstimator):
         self.__common_api = common_api
 
     def estimate(self):
-        entire_data_set = self.common_api.download_entire_data_set()
+        entire_data_set = self.common_api.download_entire_data_set().results
         random_document_sample = random.sample(entire_data_set, BroderEtAl.DOCUMENT_RANDOM_SAMPLE_SIZE)
         self.common_api.report_progress(1, 5)
         query_pool = self.common_api.read_query_pool()
@@ -48,7 +47,7 @@ class BroderEtAl(AbsEstimator):
         return estimation
 
     def verify_match(self, query, document):
-        content = document[Config.FIELD_TO_SEARCH].lower()
+        content = document.content.lower()
         if content.find(query.lower()) != -1:
             return True
         return False
@@ -59,7 +58,7 @@ class BroderEtAl(AbsEstimator):
 
         def calc_iteration(query):
             nonlocal weight_sum, query_pool, lock
-            results = self.common_api.download(query)
+            results = self.common_api.download(query).results
             query_weight = 0
             for document in results:
                 count = 0

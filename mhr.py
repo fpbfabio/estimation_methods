@@ -2,7 +2,6 @@ from threading import Lock
 from random import randrange
 
 from abs_estimator import AbsEstimator
-from config import Config
 
 
 class Mhr(AbsEstimator):
@@ -63,11 +62,11 @@ class Mhr(AbsEstimator):
         query = self.take_query()
         number_matches = self.common_api.retrieve_number_matches(query)
         if Mhr.MIN_NUMBER_MATCHES <= number_matches <= Mhr.MAX_NUMBER_MATCHES:
-            document_list = self.common_api.download(query)
+            document_list = self.common_api.download(query, True, False).results
             id_list = []
             number_documents_returned = 0
             for document in document_list:
-                id_list.append(document[Config.ID_FIELD])
+                id_list.append(document.identifier)
                 number_documents_returned += 1
             with self.lock_accumulators:
                 self.query_count += 1

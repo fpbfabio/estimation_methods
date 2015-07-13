@@ -2,9 +2,9 @@ from urllib.request import urlopen
 from threading import Thread, Lock
 import json
 import re
-import os
 
 from abs_common_api import AbsCommonApi
+from common_api_factory import CommonApiFactory
 from config import Config
 
 
@@ -23,8 +23,17 @@ class CommonApi(AbsCommonApi):
     def download_count(self, val):
         self.__download_count = val
 
+    @property
+    def factory(self):
+        return self.__factory
+
+    @factory.setter
+    def factory(self, val):
+        self.__factory = val
+
     def __init__(self):
         self.__download_count = 0
+        self.__factory = CommonApiFactory()
         self.lock = Lock()
 
     def read_query_pool(self):
@@ -35,27 +44,34 @@ class CommonApi(AbsCommonApi):
         return query_pool
 
     def download_entire_data_set(self):
-        dictionary = self.submit_query("*", 1000000, "*")
-        return dictionary[CommonApi.DOCUMENT_LIST_KEY]
+        return self.download("*", True, True, 0, 1000000, "*")
 
     def retrieve_number_matches(self, query):
-        dictionary = self.submit_query(query, 1)
-        return dictionary[CommonApi.NUMBER_MATCHES_KEY]
+        search_result = self.download(query, True, False, 0, 1)
+        return search_result.number_results
 
-    def submit_query(self, query, limit, field_to_search=Config.FIELD_TO_SEARCH):
+    def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0,
+                 limit=Config.SEARCH_ENGINE_LIMIT, field_to_search=Config.FIELD_TO_SEARCH):
         url = Config.URL.replace(Config.LIMIT_MASK, str(limit))
         url = url.replace(Config.QUERY_MASK, str(query))
         url = url.replace(Config.FIELD_TO_SEARCH_MASK, field_to_search)
+        url = url.replace(Config.OFFSET_MASK, str(offset))
+        if is_to_download_id and is_to_download_content:
+            url = url.replace(Config.FIELDS_TO_RETURN_MASK, Config.ID_FIELD + "," + Config.FIELD_TO_SEARCH)
+        elif is_to_download_content and not is_to_download_id:
+            url = url.replace(Config.FIELDS_TO_RETURN_MASK, Config.FIELD_TO_SEARCH)
+        else:
+            url = url.replace(Config.FIELDS_TO_RETURN_MASK, Config.ID_FIELD)
         response = urlopen(str(url))
         with self.lock:
             self.download_count += 1
         data = response.read().decode(CommonApi.ENCODING)
         dictionary = json.loads(data)
-        return dictionary[CommonApi.RESPONSE_KEY]
-
-    def download(self, query, limit=Config.SEARCH_ENGINE_LIMIT):
-        dictionary = self.submit_query(query, limit)
-        return dictionary[CommonApi.DOCUMENT_LIST_KEY]
+        dictionary = dictionary[CommonApi.RESPONSE_KEY]
+        result_list = [self.factory.create_data(x.get(Config.ID_FIELD, None), x.get(Config.FIELD_TO_SEARCH, None)) for x
+                       in dictionary[CommonApi.DOCUMENT_LIST_KEY]]
+        search_result = self.factory.create_search_result(dictionary[CommonApi.NUMBER_MATCHES_KEY], result_list)
+        return search_result
 
     def execute_in_parallel(self, collection, callback):
         thread_list = []

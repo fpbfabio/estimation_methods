@@ -1,4 +1,4 @@
-from abs_factory import AbsFactory
+from abs_executor_factory import AbsExecutorFactory
 from logger import Logger
 from common_api import CommonApi
 # from broder_etal import BroderEtAl
@@ -6,7 +6,7 @@ from common_api import CommonApi
 from random_walk import RandomWalk
 
 
-class Factory(AbsFactory):
+class ExecutorFactory(AbsExecutorFactory):
 
     def create_estimator(self):
         return RandomWalk(CommonApi())
