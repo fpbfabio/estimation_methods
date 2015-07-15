@@ -70,7 +70,7 @@ class CommonApi(AbsCommonApi):
         dictionary = dictionary[CommonApi.RESPONSE_KEY]
         result_list = [self.factory.create_data(x.get(Config.ID_FIELD, None), x.get(Config.FIELD_TO_SEARCH, None)) for x
                        in dictionary[CommonApi.DOCUMENT_LIST_KEY]]
-        search_result = self.factory.create_search_result(dictionary[CommonApi.NUMBER_MATCHES_KEY], result_list)
+        search_result = self.factory.create_search_result(int(dictionary[CommonApi.NUMBER_MATCHES_KEY]), result_list)
         return search_result
 
     def execute_in_parallel(self, collection, callback):
