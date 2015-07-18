@@ -1,3 +1,4 @@
+import signal
 from datetime import datetime, timedelta
 
 from abs_executor import AbsExecutor
@@ -36,7 +37,13 @@ class Executor(AbsExecutor):
     def estimator(self, val):
         self.__estimator = val
 
+    def _on_fatal_failure(self, sinal, frame):
+        class FatalFailure(Exception):
+            pass
+        raise FatalFailure
+
     def execute(self):
+        signal.signal(signal.SIGUSR1, self._on_fatal_failure)
         self.logger.write_header()
         self.estimator = self.factory.create_estimator()
         self.logger.write_experiment_details(self.estimator.experiment_details)

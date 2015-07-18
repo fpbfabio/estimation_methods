@@ -3,25 +3,42 @@ import pickle
 import re
 import time
 import itertools
+import math
+import signal
 from bs4 import BeautifulSoup
 from selenium import webdriver
+
 from abs_search_result import AbsSearchResult
 from abs_base_common_api import AbsBaseCommonApi
 from config import Config
 
 
 class IEEECommonApi(AbsBaseCommonApi):
+    _PAGE_LOAD_TIMEOUT = 300
+    _ID_QUERY_STRING_VARIABLE = "arnumber"
+    _WEB_DOMAIN = "http://ieeexplore.ieee.org"
+    _HTML_PARSER = "lxml"
+    _NO_RESULTS_TAG = "li"
+    _NO_RESULTS_TAG_ATTRIBUTE = "class"
+    _NO_RESULTS_TAG_ATTRIBUTE_VALUE = "article-list-item no-results ng-scope"
+    _TITLE_TAG = True
     _TITLE_TAG_ATTRIBUTE = "ng-bind-html"
     _TITLE_TAG_ATTRIBUTE_VALUE = "::record.title"
+    _ABSTRACT_TAG = "span"
     _ABSTRACT_TAG_ATTRIBUTE = "ng-bind-html"
     _ABSTRACT_TAG_ATTRIBUTE_VALUE = "::record.abstract"
+    _ID_TAG = "a"
+    _ID_TAG_ATTRIBUTE = "class"
+    _ID_TAG_ATTRIBUTE_VALUE = "icon-pdf ng-scope"
     _HREF = "href"
-    _CLASS = "class"
-    _A_TAG = "a"
     _CRAWL_DELAY = 1
     _MAX_RESULTS_PER_PAGE = 100
     _ELEMENT_WITH_NUMBER_MATCHES_TAG = "span"
-    _ELEMENT_WITH_NUMBER_MATCHES_CLASS = "ng-binding ng-scope"
+    _ELEMENT_WITH_NUMBER_MATCHES_ATTRIBUTE = "class"
+    _ELEMENT_WITH_NUMBER_MATCHES_ATTRIBUTE_VALUE = "ng-binding ng-scope"
+    _ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_TAG = "span"
+    _ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE = "ng-if"
+    _ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE_VALUE = "records.length === 1"
     _DOWNLOAD_TRY_NUMBER = 5
     _BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
                  + "queryText=<<query>>&rowsPerPage=100&pageNumber=<<page_number>>&resultAction=ROWS_PER_PAGE")
@@ -54,7 +71,7 @@ class IEEECommonApi(AbsBaseCommonApi):
             search_result = self._filter_result_content(search_result, is_to_download_id, is_to_download_content)
             return search_result
         web_page = self._attempt_download(query, offset)
-        soup = BeautifulSoup(web_page)
+        soup = BeautifulSoup(web_page, IEEECommonApi._HTML_PARSER)
         number_matches = self._extract_number_matches_from_soup(soup)
         if number_matches == 0:
             search_result = self.factory.create_search_result(0, [])
@@ -83,20 +100,54 @@ class IEEECommonApi(AbsBaseCommonApi):
         return self.factory.create_search_result(search_result.number_results, data_list)
 
     def _extract_number_matches_from_soup(self, soup):
-        dictionary = {IEEECommonApi._CLASS: IEEECommonApi._ELEMENT_WITH_NUMBER_MATCHES_CLASS}
+        dictionary = {IEEECommonApi._NO_RESULTS_TAG_ATTRIBUTE: IEEECommonApi._NO_RESULTS_TAG_ATTRIBUTE_VALUE}
+        no_results_element = soup.find(IEEECommonApi._NO_RESULTS_TAG, dictionary)
+        if no_results_element is not None:
+            return 0
+        dictionary = {IEEECommonApi._ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE:
+                      IEEECommonApi._ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE_VALUE}
+        one_result_element = soup.find(IEEECommonApi._ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_TAG, dictionary)
+        if one_result_element is not None:
+            return 1
+        dictionary = {IEEECommonApi._ELEMENT_WITH_NUMBER_MATCHES_ATTRIBUTE:
+                      IEEECommonApi._ELEMENT_WITH_NUMBER_MATCHES_ATTRIBUTE_VALUE}
         try:
             html_element = soup.find(IEEECommonApi._ELEMENT_WITH_NUMBER_MATCHES_TAG, dictionary)
-            number_matches = int(str(html_element.next.strip().split()[4].replace(",", "")))
+            contents = html_element.next.strip().split()
+            number_matches = int(str(contents[4].replace(",", "")))
         except:
-            number_matches = 0
+            print("ERROR - Could not obtain number matches")
+            os.kill(os.getpid(), signal.SIGUSR1)
+            return 0
         return number_matches
 
     def _extract_data_list_from_soup(self, soup):
+        dictionary = {IEEECommonApi._ID_TAG_ATTRIBUTE:
+                      IEEECommonApi._ID_TAG_ATTRIBUTE_VALUE}
+        id_tag_list = soup.find_all(IEEECommonApi._ID_TAG, dictionary)
         dictionary = {IEEECommonApi._TITLE_TAG_ATTRIBUTE:
                       IEEECommonApi._TITLE_TAG_ATTRIBUTE_VALUE}
-        a_tag_list = soup.find_all(IEEECommonApi._A_TAG, dictionary)
-        data_list = [self.factory.create_data(x[IEEECommonApi._HREF], str(x.text)) for x in a_tag_list]
+        title_tag_list = soup.find_all(IEEECommonApi._TITLE_TAG, dictionary)
+        data_list = [self._create_data(x[IEEECommonApi._HREF], y.text)
+                     for x, y in zip(id_tag_list, title_tag_list)]
+        size_id_tag_list = len(id_tag_list)
+        size_data_list = len(data_list)
+        if size_id_tag_list == 0:
+            print("ERROR - Data extraction failure")
+            os.kill(os.getpid(), signal.SIGUSR1)
+        elif size_id_tag_list != size_data_list:
+            print("ERROR - Inconsistent data extraction")
+            os.kill(os.getpid(), signal.SIGUSR1)
         return data_list
+
+    def _create_data(self, href, title):
+        identifier = self._format_data_id(str(href))
+        content = str(title)
+        data = self.factory.create_data(identifier, content)
+        return data
+
+    def _format_data_id(self, href):
+        return IEEECommonApi._WEB_DOMAIN + href
 
     def _build_file_path(self, query):
         return IEEECommonApi._DATA_FOLDER_PATH + os.path.sep + query + IEEECommonApi._FILE_EXTENSION
@@ -118,29 +169,32 @@ class IEEECommonApi(AbsBaseCommonApi):
                 number_downloaded_results >= limit):
             return 0
         elif number_matches > limit:
-            return int((limit - number_downloaded_results) / IEEECommonApi._MAX_RESULTS_PER_PAGE)
+            return math.ceil((limit - number_downloaded_results) / IEEECommonApi._MAX_RESULTS_PER_PAGE)
         else:
-            return int((number_matches - number_downloaded_results) / IEEECommonApi._MAX_RESULTS_PER_PAGE)
+            return math.ceil((number_matches - number_downloaded_results) / IEEECommonApi._MAX_RESULTS_PER_PAGE)
 
     def _attempt_download(self, query, offset):
         offset = (offset + IEEECommonApi._MAX_RESULTS_PER_PAGE) / IEEECommonApi._MAX_RESULTS_PER_PAGE
         offset = int(offset)
         dictionary = {IEEECommonApi._QUERY_MASK: query, IEEECommonApi._OFFSET_MASK: str(offset)}
         url = self._multiple_replace(dictionary, IEEECommonApi._BASE_URL)
-        print(url)
-        web_page = None
+        page_source = None
         for i in range(0, IEEECommonApi._DOWNLOAD_TRY_NUMBER):
             time.sleep(IEEECommonApi._CRAWL_DELAY)
             try:
                 web_page = webdriver.Firefox()
                 web_page.get(url)
-                web_page = web_page.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
+                page_source = web_page.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
+                web_page.close()
                 self.inc_download()
                 break
             except Exception as exception:
-                web_page = None
+                page_source = None
                 print(str(exception))
-        return web_page
+        if page_source is None:
+            print("ERROR - Internet connection failure")
+            os.kill(os.getpid(), signal.SIGUSR1)
+        return page_source
 
     def _save_result(self, file_path, search_result):
         with open(file_path, "wb") as archive:
@@ -149,9 +203,10 @@ class IEEECommonApi(AbsBaseCommonApi):
     def _do_additional_downloads(self, query, number_downloaded_results, number_additional_downloads):
         data_list = []
         for i in range(0, number_additional_downloads):
-            web_page = self._attempt_download(query, number_downloaded_results
-                                              + i * IEEECommonApi._MAX_RESULTS_PER_PAGE)
-            soup = BeautifulSoup(web_page)
-            data_list = itertools.chain(data_list, self._extract_data_list_from_soup(soup))
+            offset = number_downloaded_results + i * IEEECommonApi._MAX_RESULTS_PER_PAGE
+            web_page = self._attempt_download(query, offset)
+            soup = BeautifulSoup(web_page, IEEECommonApi._HTML_PARSER)
+            list_from_soup = self._extract_data_list_from_soup(soup)
+            data_list = itertools.chain(data_list, list_from_soup)
         data_list = list(data_list)
         return data_list
