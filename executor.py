@@ -1,7 +1,7 @@
+from datetime import datetime, timedelta
+
 from abs_executor import AbsExecutor
 from executor_factory import ExecutorFactory
-
-from datetime import datetime, timedelta
 
 
 class Executor(AbsExecutor):

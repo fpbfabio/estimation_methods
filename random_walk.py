@@ -5,21 +5,21 @@ from abs_estimator import AbsEstimator
 
 
 class RandomWalk(AbsEstimator):
-    MIN_NUMBER_MATCHES_FOR_SEED_QUERY_INFORMATION = "Número mínimo de resultados para busca semente"
-    MIN_NUMBER_MATCHES_FOR_SEED_QUERY = 2
-    MIN_NUMBER_WORDS_INFORMATION = "Número mínimo de palavras em um dcumento sorteado"
-    MIN_NUMBER_WORDS = 2
-    RANDOM_WALK_SAMPLE_SIZE_INFORMATION = "Número de nós visitados durante um \"random walk\""
-    RANDOM_WALK_SAMPLE_SIZE = 5000
+    _MIN_NUMBER_MATCHES_FOR_SEED_QUERY_INFORMATION = "Número mínimo de resultados para busca semente"
+    _MIN_NUMBER_MATCHES_FOR_SEED_QUERY = 2
+    _MIN_NUMBER_WORDS_INFORMATION = "Número mínimo de palavras em um dcumento sorteado"
+    _MIN_NUMBER_WORDS = 2
+    _RANDOM_WALK_SAMPLE_SIZE_INFORMATION = "Número de nós visitados durante um \"random walk\""
+    _RANDOM_WALK_SAMPLE_SIZE = 5000
 
     @property
     def experiment_details(self):
-        additional_information = {RandomWalk.MIN_NUMBER_WORDS_INFORMATION:
-                                  RandomWalk.MIN_NUMBER_WORDS,
-                                  RandomWalk.MIN_NUMBER_MATCHES_FOR_SEED_QUERY_INFORMATION:
-                                  RandomWalk.MIN_NUMBER_MATCHES_FOR_SEED_QUERY,
-                                  RandomWalk.RANDOM_WALK_SAMPLE_SIZE_INFORMATION:
-                                  RandomWalk.RANDOM_WALK_SAMPLE_SIZE}
+        additional_information = {RandomWalk._MIN_NUMBER_WORDS_INFORMATION:
+                                  RandomWalk._MIN_NUMBER_WORDS,
+                                  RandomWalk._MIN_NUMBER_MATCHES_FOR_SEED_QUERY_INFORMATION:
+                                  RandomWalk._MIN_NUMBER_MATCHES_FOR_SEED_QUERY,
+                                  RandomWalk._RANDOM_WALK_SAMPLE_SIZE_INFORMATION:
+                                  RandomWalk._RANDOM_WALK_SAMPLE_SIZE}
         return additional_information
 
     @property
@@ -35,7 +35,7 @@ class RandomWalk(AbsEstimator):
 
     def estimate(self):
         document_degree_list = []
-        frequency_number_nodes_dict = self.random_walk(document_degree_list)
+        frequency_number_nodes_dict = self._random_walk(document_degree_list)
         n = len(document_degree_list)
         dw = sum(document_degree_list) / n
         dh = n / sum([1 / x for x in document_degree_list])
@@ -45,19 +45,19 @@ class RandomWalk(AbsEstimator):
         estimation = (dw / dh) * binomy_n_2 * (1 / c)
         return estimation
 
-    def random_walk(self, document_degree_list):
+    def _random_walk(self, document_degree_list):
         query_pool = self.common_api.read_query_pool()
         size = len(query_pool)
         query = query_pool[random.randrange(0, size)]
         number_matches = self.common_api.retrieve_number_matches(query)
-        while number_matches < RandomWalk.MIN_NUMBER_MATCHES_FOR_SEED_QUERY:
+        while number_matches < RandomWalk._MIN_NUMBER_MATCHES_FOR_SEED_QUERY:
             query = query_pool[random.randrange(0, size)]
             number_matches = self.common_api.retrieve_number_matches(query)
         words = []
         count = 0
         number_words = 0
         node_frequency_dict = {}
-        while count < RandomWalk.RANDOM_WALK_SAMPLE_SIZE:
+        while count < RandomWalk._RANDOM_WALK_SAMPLE_SIZE:
             if number_matches > 0:
                 random_index = random.randrange(0, number_matches)
                 try:
@@ -69,7 +69,7 @@ class RandomWalk(AbsEstimator):
                 document = results[0]
                 words_buffer = self.common_api.extract_words(document.content)
                 number_words_buffer = len(words_buffer)
-                if number_words_buffer < RandomWalk.MIN_NUMBER_WORDS:
+                if number_words_buffer < RandomWalk._MIN_NUMBER_WORDS:
                     query = words[random.randrange(0, number_words)]
                     number_matches = self.common_api.retrieve_number_matches(query)
                     continue
@@ -79,7 +79,7 @@ class RandomWalk(AbsEstimator):
                 node_frequency_dict[document.identifier] = \
                     node_frequency_dict.get(document.identifier, 0) + 1
                 count += 1
-                self.common_api.report_progress(count, RandomWalk.RANDOM_WALK_SAMPLE_SIZE)
+                self.common_api.report_progress(count, RandomWalk._RANDOM_WALK_SAMPLE_SIZE)
             query = words[random.randrange(0, number_words)]
             number_matches = self.common_api.retrieve_number_matches(query)
         frequency_node_dict = {}

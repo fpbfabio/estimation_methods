@@ -1,8 +1,9 @@
-from config import Config
-from abs_logger import AbsLogger
 import os
 import math
 import statistics
+
+from config import Config
+from abs_logger import AbsLogger
 
 
 class Logger(AbsLogger):
