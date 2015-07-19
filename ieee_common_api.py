@@ -7,6 +7,7 @@ import math
 import signal
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
 
 from abs_search_result import AbsSearchResult
 from abs_base_common_api import AbsBaseCommonApi
@@ -14,8 +15,8 @@ from config import Config
 
 
 class IEEECommonApi(AbsBaseCommonApi):
-    _PAGE_LOAD_TIMEOUT = 300
-    _ID_QUERY_STRING_VARIABLE = "arnumber"
+    _JAVASCRIPT_GET_PAGE_SOURCE_CODE = "return document.getElementsByTagName('html')[0].innerHTML"
+    _PAGE_LOAD_TIMEOUT = 30
     _WEB_DOMAIN = "http://ieeexplore.ieee.org"
     _HTML_PARSER = "lxml"
     _NO_RESULTS_TAG = "li"
@@ -111,15 +112,21 @@ class IEEECommonApi(AbsBaseCommonApi):
             return 1
         dictionary = {IEEECommonApi._ELEMENT_WITH_NUMBER_MATCHES_ATTRIBUTE:
                       IEEECommonApi._ELEMENT_WITH_NUMBER_MATCHES_ATTRIBUTE_VALUE}
-        try:
-            html_element = soup.find(IEEECommonApi._ELEMENT_WITH_NUMBER_MATCHES_TAG, dictionary)
-            contents = html_element.next.strip().split()
-            number_matches = int(str(contents[4].replace(",", "")))
-        except:
-            print("ERROR - Could not obtain number matches")
-            os.kill(os.getpid(), signal.SIGUSR1)
-            return 0
+        html_element = soup.find(IEEECommonApi._ELEMENT_WITH_NUMBER_MATCHES_TAG, dictionary)
+        if html_element is not None:
+            try:
+                contents = html_element.next.strip().split()
+                number_matches = int(str(contents[4].replace(",", "")))
+            except:
+                return -1
+        else:
+            return -1
         return number_matches
+
+    def test_page_loaded(self, web_page):
+        page_source = web_page.execute_script(IEEECommonApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)
+        soup = BeautifulSoup(page_source, IEEECommonApi._HTML_PARSER)
+        return self._extract_number_matches_from_soup(soup) >= 0
 
     def _extract_data_list_from_soup(self, soup):
         dictionary = {IEEECommonApi._ID_TAG_ATTRIBUTE:
@@ -181,22 +188,30 @@ class IEEECommonApi(AbsBaseCommonApi):
         page_source = None
         for i in range(0, IEEECommonApi._DOWNLOAD_TRY_NUMBER):
             time.sleep(IEEECommonApi._CRAWL_DELAY)
+            web_page = webdriver.Firefox()
+            web_page.get(url)
+            wait = WebDriverWait(web_page, IEEECommonApi._PAGE_LOAD_TIMEOUT)
             try:
-                web_page = webdriver.Firefox()
-                web_page.get(url)
-                page_source = web_page.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
-                web_page.close()
-                self.inc_download()
-                break
+                wait.until(self.test_page_loaded)
             except Exception as exception:
-                page_source = None
                 print(str(exception))
+                web_page.close()
+                page_source = None
+                continue
+            page_source = web_page.execute_script(IEEECommonApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)
+            web_page.close()
+            self.inc_download()
+            break
         if page_source is None:
             print("ERROR - Internet connection failure")
             os.kill(os.getpid(), signal.SIGUSR1)
         return page_source
 
     def _save_result(self, file_path, search_result):
+        if search_result.number_results < len(search_result.results):
+            print("ERROR - Search result corrupted - " + file_path)
+            os.kill(os.getpid(), signal.SIGUSR1)
+            return
         with open(file_path, "wb") as archive:
             pickle.dump(search_result, archive)
 
