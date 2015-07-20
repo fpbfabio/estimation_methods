@@ -30,6 +30,7 @@ class SumEst(AbsEstimator):
         self.__common_api = common_api
 
     def estimate(self):
+        super().estimate()
         estimation_acc = 0
         query_pool = self.common_api.read_query_pool()
         pool_size = self._estimate_pool_size(query_pool)
@@ -101,6 +102,7 @@ class SumEst(AbsEstimator):
         query_pool_size = len(query_pool)
         lock = Lock()
 
+        # noinspection PyUnusedLocal
         def iteration(iteration_number):
             nonlocal query_pool, query_pool_size, count, lock
             random_index = random.randrange(0, query_pool_size)

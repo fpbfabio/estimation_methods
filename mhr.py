@@ -35,20 +35,9 @@ class Mhr(AbsEstimator):
         self.__total_matches = 0
         self.__total_documents_returned = 0
         self.__document_id_dict = {}
-        self.__query_list = []
-        self.__query_pool_size = 0
-        self.__progress_count = 0
-
-    def _init_accumulators(self):
-        self.__query_count = 0
-        self.__total_matches = 0
-        self.__total_documents_returned = 0
-        self.__document_id_dict = {}
-        self.__progress_count = 0
-
-    def _init_query_list(self):
-        self.__query_list = self.common_api.read_query_pool()
+        self.__query_list = self.__common_api.read_query_pool()
         self.__query_pool_size = len(self.__query_list)
+        self.__progress_count = 0
 
     def _take_query(self):
         query = None
@@ -61,6 +50,7 @@ class Mhr(AbsEstimator):
                 del (self.__query_list[random_index])
         return query
 
+    # noinspection PyUnusedLocal
     def _collect_data_for_estimation(self, number):
         query = self._take_query()
         number_matches = self.common_api.retrieve_number_matches(query)
@@ -89,8 +79,8 @@ class Mhr(AbsEstimator):
         return estimation
 
     def estimate(self):
-        self._init_accumulators()
-        self._init_query_list()
+        super().estimate()
+        self.__init__(self.common_api)
         self.common_api.execute_in_parallel(range(0, Mhr._NUMBER_QUERIES), self._collect_data_for_estimation)
         estimation = self._calculate_estimation()
         return estimation

@@ -30,6 +30,7 @@ class BroderEtAl(AbsEstimator):
         self.__common_api = common_api
 
     def estimate(self):
+        super().estimate()
         entire_data_set = self.common_api.download_entire_data_set().results
         random_document_sample = random.sample(entire_data_set, BroderEtAl._DOCUMENT_RANDOM_SAMPLE_SIZE)
         self.common_api.report_progress(1, 5)

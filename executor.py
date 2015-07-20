@@ -37,7 +37,8 @@ class Executor(AbsExecutor):
     def estimator(self, val):
         self.__estimator = val
 
-    def _on_fatal_failure(self, sinal, frame):
+    # noinspection PyUnusedLocal
+    def _on_fatal_failure(self, signal_param, frame):
         class FatalFailure(Exception):
             pass
         raise FatalFailure
@@ -51,7 +52,6 @@ class Executor(AbsExecutor):
         duration_sum = timedelta()
         connections_sum = 0
         for i in range(0, Executor.NUMBER_ITERATIONS):
-            self.estimator = self.factory.create_estimator()
             start = datetime.now()
             estimation = self.estimator.estimate()
             end = datetime.now()

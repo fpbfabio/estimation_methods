@@ -34,6 +34,7 @@ class RandomWalk(AbsEstimator):
         self.__common_api = common_api
 
     def estimate(self):
+        super().estimate()
         document_degree_list = []
         frequency_number_nodes_dict = self._random_walk(document_degree_list)
         n = len(document_degree_list)
