@@ -28,11 +28,9 @@ class ACMCommonApi(AbsWebsiteCommonApi):
         return ACMCommonApi._BASE_URL
 
     def _extract_data_list_from_soup(self, soup):
-        dictionary = {ACMCommonApi._TITLE_TAG_ATTRIBUTE:
-                      ACMCommonApi._TITLE_TAG_ATTRIBUTE_VALUE}
+        dictionary = {ACMCommonApi._TITLE_TAG_ATTRIBUTE: ACMCommonApi._TITLE_TAG_ATTRIBUTE_VALUE}
         title_tag_list = soup.find_all(ACMCommonApi._TITLE_TAG, dictionary)
-        data_list = [self._create_data(x[ACMCommonApi._TITLE_TAG_ID_ATTRIBUTE], x.text)
-                     for x in title_tag_list]
+        data_list = [self._create_data(x[ACMCommonApi._TITLE_TAG_ID_ATTRIBUTE], x.text) for x in title_tag_list]
         return data_list
 
     def _extract_number_matches_from_soup(self, soup):
