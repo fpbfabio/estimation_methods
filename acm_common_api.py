@@ -1,3 +1,4 @@
+import os
 from abs_website_common_api import AbsWebsiteCommonApi
 
 
@@ -27,10 +28,15 @@ class ACMCommonApi(AbsWebsiteCommonApi):
     def base_url(self):
         return ACMCommonApi._BASE_URL
 
+    def _calculate_real_offset(self, offset):
+        return 2 * offset / self.max_results_per_page
+
     def _extract_data_list_from_soup(self, soup):
         dictionary = {ACMCommonApi._TITLE_TAG_ATTRIBUTE: ACMCommonApi._TITLE_TAG_ATTRIBUTE_VALUE}
         title_tag_list = soup.find_all(ACMCommonApi._TITLE_TAG, dictionary)
-        data_list = [self._create_data(x[ACMCommonApi._TITLE_TAG_ID_ATTRIBUTE], x.text) for x in title_tag_list]
+        abstract_list = [x.parent.parent.parent.find("div", {"class": "abstract2"}) for x in title_tag_list]
+        data_list = [self._create_data(x[ACMCommonApi._TITLE_TAG_ID_ATTRIBUTE], x.text, y.text)
+                     for x, y in zip(title_tag_list, abstract_list)]
         return data_list
 
     def _extract_number_matches_from_soup(self, soup):
@@ -48,11 +54,17 @@ class ACMCommonApi(AbsWebsiteCommonApi):
             return -1
         return number_matches
 
-    def _create_data(self, href, text):
+    def _create_data(self, href, text, abstract):
         identifier = self._format_data_id(str(href))
-        content = str(text)
+        content = self._format_data_content(text, abstract)
         data = self.factory.create_data(identifier, content)
         return data
 
     def _format_data_id(self, href):
         return ACMCommonApi._WEB_DOMAIN + href
+
+    def _format_data_content(self, text, abstract):
+        if abstract is not None:
+            return str(text) + os.linesep + str(abstract)
+        else:
+            return str(text)

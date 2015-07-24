@@ -49,6 +49,10 @@ class AbsWebsiteCommonApi(AbsBaseCommonApi, metaclass=ABCMeta):
     def _extract_number_matches_from_soup(self, soup):
         pass
 
+    @abstractmethod
+    def _calculate_real_offset(self, offset):
+        pass
+
     def download_entire_data_set(self):
         print("ERROR - Invalid operation")
         os.kill(os.getpid(), signal.SIGUSR1)
@@ -120,9 +124,9 @@ class AbsWebsiteCommonApi(AbsBaseCommonApi, metaclass=ABCMeta):
         return self._extract_number_matches_from_soup(soup) >= 0
 
     def _attempt_download(self, query, offset):
-        offset = (offset + self.max_results_per_page) / self.max_results_per_page
-        offset = int(offset)
-        dictionary = {AbsWebsiteCommonApi._QUERY_MASK: query, AbsWebsiteCommonApi._OFFSET_MASK: str(offset)}
+        real_offset = self._calculate_real_offset(offset)
+        real_offset = int(real_offset)
+        dictionary = {AbsWebsiteCommonApi._QUERY_MASK: query, AbsWebsiteCommonApi._OFFSET_MASK: str(real_offset)}
         url = self._multiple_replace(dictionary, self.base_url)
         page_source = None
         for i in range(0, AbsWebsiteCommonApi._DOWNLOAD_TRY_NUMBER):

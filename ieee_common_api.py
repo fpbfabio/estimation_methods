@@ -46,6 +46,9 @@ class IEEECommonApi(AbsWebsiteCommonApi):
     def data_folder_path(self):
         return IEEECommonApi._DATA_FOLDER_PATH
 
+    def _calculate_real_offset(self, offset):
+        return (offset + self.max_results_per_page) / self.max_results_per_page
+
     def _extract_number_matches_from_soup(self, soup):
         dictionary = {IEEECommonApi._NO_RESULTS_TAG_ATTRIBUTE: IEEECommonApi._NO_RESULTS_TAG_ATTRIBUTE_VALUE}
         no_results_element = soup.find(IEEECommonApi._NO_RESULTS_TAG, dictionary)
