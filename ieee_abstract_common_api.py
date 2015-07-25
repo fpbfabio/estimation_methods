@@ -32,10 +32,9 @@ class IEEEAbstractCommonApi(AbsWebsiteCommonApi):
     _ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_TAG = "span"
     _ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE = "ng-if"
     _ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE_VALUE = "records.length === 1"
-    _DOWNLOAD_TRY_NUMBER = 5
     _BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
                  + "queryText=<<query>>&rowsPerPage=100&pageNumber=<<offset>>&resultAction=ROWS_PER_PAGE")
-    _DATA_FOLDER_PATH = "/media/fabio/ieee"
+    _DATA_FOLDER_PATH = "/media/fabio/FABIO/ieee"
 
     def __init__(self):
         super().__init__()
