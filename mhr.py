@@ -8,9 +8,9 @@ class Mhr(AbsEstimator):
     _MAX_NUMBER_MATCHES_INFORMATION = "Máximo número de resultados"
     _MIN_NUMBER_MATCHES_INFORMATION = "Menor número de resultados"
     _NUMBER_QUERIES_INFORMATION = "Número de buscas"
-    _MAX_NUMBER_MATCHES = 4500
+    _MAX_NUMBER_MATCHES = 5000000
     _MIN_NUMBER_MATCHES = 0
-    _NUMBER_QUERIES = 5000
+    _NUMBER_QUERIES = 100
 
     @property
     def common_api(self):

@@ -2,3 +2,4 @@ __pycache__
 Logs/
 .idea/
 node_modules/
+*.log

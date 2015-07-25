@@ -6,11 +6,13 @@ from config import Config
 
 
 class SolrCommonApi(AbsBaseCommonApi):
+    DATA_SET_SIZE = 19994
+    _QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
+    _THREAD_LIMIT = 10
     _URL = ("http://localhost:8984/solr/newsgroups2/select?"
             + "q=::FIELD:::::QUERY::&start=::OFFSET::&rows=::LIMIT::&fl=::FIELDS_TO_RETURN::&wt=json")
     _ID_FIELD = "id"
     _FIELD_TO_SEARCH = "text"
-
     _DOCUMENT_LIST_KEY = "docs"
     _NUMBER_MATCHES_KEY = "numFound"
     _OFFSET_MASK = "::OFFSET::"
@@ -20,6 +22,14 @@ class SolrCommonApi(AbsBaseCommonApi):
     _QUERY_MASK = "::QUERY::"
     _RESPONSE_KEY = "response"
     _ENCODING = "utf-8"
+
+    @property
+    def thread_limit(self):
+        return SolrCommonApi._THREAD_LIMIT
+
+    @property
+    def query_pool_file_path(self):
+        return SolrCommonApi._QUERY_POOL_FILE_PATH
 
     def __init__(self):
         super().__init__()

@@ -16,7 +16,6 @@ from abs_search_result import AbsSearchResult
 
 
 class AbsWebsiteCommonApi(AbsBaseCommonApi, metaclass=ABCMeta):
-
     _DATA_FILE_EXTENSION = ".pkl"
     _PAGE_LOAD_TIMEOUT = 30
     _CRAWL_DELAY = 1
@@ -25,6 +24,16 @@ class AbsWebsiteCommonApi(AbsBaseCommonApi, metaclass=ABCMeta):
     _QUERY_MASK = "<<query>>"
     _HTML_PARSER = "lxml"
     _JAVASCRIPT_GET_PAGE_SOURCE_CODE = "return document.getElementsByTagName('html')[0].innerHTML"
+
+    @property
+    @abstractmethod
+    def query_pool_file_path(self):
+        pass
+
+    @property
+    @abstractmethod
+    def thread_limit(self):
+        pass
 
     @property
     @abstractmethod
@@ -131,7 +140,7 @@ class AbsWebsiteCommonApi(AbsBaseCommonApi, metaclass=ABCMeta):
         page_source = None
         for i in range(0, AbsWebsiteCommonApi._DOWNLOAD_TRY_NUMBER):
             time.sleep(AbsWebsiteCommonApi._CRAWL_DELAY)
-            web_page = webdriver.Firefox()
+            web_page = webdriver.PhantomJS()
             web_page.get(url)
             wait = WebDriverWait(web_page, AbsWebsiteCommonApi._PAGE_LOAD_TIMEOUT)
             try:

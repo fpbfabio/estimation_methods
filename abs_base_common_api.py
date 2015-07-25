@@ -9,6 +9,16 @@ from config import Config
 
 class AbsBaseCommonApi(AbsCommonApi, metaclass=ABCMeta):
     @property
+    @abstractmethod
+    def query_pool_file_path(self):
+        pass
+
+    @property
+    @abstractmethod
+    def thread_limit(self):
+        pass
+
+    @property
     def download_count(self):
         return self.__download_count
 
@@ -40,7 +50,8 @@ class AbsBaseCommonApi(AbsCommonApi, metaclass=ABCMeta):
 
     def read_query_pool(self):
         query_pool = []
-        with open(Config.QUERY_POOL_FILE_PATH) as archive:
+        # noinspection PyTypeChecker
+        with open(self.query_pool_file_path) as archive:
             for line in archive:
                 query_pool.append(line.rstrip("\n").rstrip("\r"))
         return query_pool
@@ -56,7 +67,7 @@ class AbsBaseCommonApi(AbsCommonApi, metaclass=ABCMeta):
     def execute_in_parallel(self, collection, callback):
         thread_list = []
         for item in collection:
-            if len(thread_list) >= Config.THREAD_LIMIT:
+            if len(thread_list) >= self.thread_limit:
                 thread_list[0].join()
                 del (thread_list[0])
             thread = Thread(target=callback, args=(item,))

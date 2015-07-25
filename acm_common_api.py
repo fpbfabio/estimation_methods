@@ -3,18 +3,29 @@ from abs_website_common_api import AbsWebsiteCommonApi
 
 
 class ACMCommonApi(AbsWebsiteCommonApi):
+    DATA_SET_SIZE = 445543
+    _THREAD_LIMIT = 1
+    QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
     _ELEMENT_WITH_NUMBER_MATCHES_TAG = "b"
     _NO_RESULTS_TAG = "font"
     _NO_RESULTS_TAG_ATTRIBUTE_VALUE = "+1"
     _NO_RESULTS_TAG_ATTRIBUTE = "size"
-    _BASE_URL = "http://dl.acm.org/results.cfm?query=<<query>>&start=<<offset>>1"
-    _DATA_FOLDER_PATH = "/home/fabio/Documents"
+    _BASE_URL = "http://dl.acm.org/results.cfm?query=<<query>>&start=<<offset>>1&dlr=ACM"
+    _DATA_FOLDER_PATH = "/media/fabio/FABIO/acm"
     _MAX_RESULTS_PER_PAGE = 20
     _WEB_DOMAIN = "http://dl.acm.org/"
     _TITLE_TAG_ID_ATTRIBUTE = "href"
     _TITLE_TAG = "a"
     _TITLE_TAG_ATTRIBUTE_VALUE = "medium-text"
     _TITLE_TAG_ATTRIBUTE = "class"
+
+    @property
+    def thread_limit(self):
+        return ACMCommonApi._THREAD_LIMIT
+
+    @property
+    def query_pool_file_path(self):
+        return ACMCommonApi.QUERY_POOL_FILE_PATH
 
     @property
     def max_results_per_page(self):
@@ -61,6 +72,7 @@ class ACMCommonApi(AbsWebsiteCommonApi):
         return data
 
     def _format_data_id(self, href):
+        href = str(href[0:href.find("&")])
         return ACMCommonApi._WEB_DOMAIN + href
 
     def _format_data_content(self, text, abstract):

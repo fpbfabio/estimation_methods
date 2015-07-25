@@ -5,6 +5,9 @@ from abs_website_common_api import AbsWebsiteCommonApi
 
 
 class IEEECommonApi(AbsWebsiteCommonApi):
+    DATA_SET_SIZE = 3699871
+    _THREAD_LIMIT = 1
+    _QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
     _WEB_DOMAIN = "http://ieeexplore.ieee.org"
     _NO_RESULTS_TAG = "li"
     _NO_RESULTS_TAG_ATTRIBUTE = "class"
@@ -29,10 +32,18 @@ class IEEECommonApi(AbsWebsiteCommonApi):
     _DOWNLOAD_TRY_NUMBER = 5
     _BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
                  + "queryText=<<query>>&rowsPerPage=100&pageNumber=<<offset>>&resultAction=ROWS_PER_PAGE")
-    _DATA_FOLDER_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs"
+    _DATA_FOLDER_PATH = "/media/fabio/FABIO/ieee"
 
     def __init__(self):
         super().__init__()
+
+    @property
+    def query_pool_file_path(self):
+        return IEEECommonApi._QUERY_POOL_FILE_PATH
+
+    @property
+    def thread_limit(self):
+        return IEEECommonApi._THREAD_LIMIT
 
     @property
     def max_results_per_page(self):

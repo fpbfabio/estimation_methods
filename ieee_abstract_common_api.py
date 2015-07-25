@@ -5,6 +5,9 @@ from abs_website_common_api import AbsWebsiteCommonApi
 
 
 class IEEEAbstractCommonApi(AbsWebsiteCommonApi):
+    DATA_SET_SIZE = 3699871
+    _THREAD_LIMIT = 1
+    QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
     _WEB_DOMAIN = "http://ieeexplore.ieee.org"
     _NO_RESULTS_TAG = "li"
     _NO_RESULTS_TAG_ATTRIBUTE = "class"
@@ -32,10 +35,18 @@ class IEEEAbstractCommonApi(AbsWebsiteCommonApi):
     _DOWNLOAD_TRY_NUMBER = 5
     _BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
                  + "queryText=<<query>>&rowsPerPage=100&pageNumber=<<offset>>&resultAction=ROWS_PER_PAGE")
-    _DATA_FOLDER_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs"
+    _DATA_FOLDER_PATH = "/media/fabio/ieee"
 
     def __init__(self):
         super().__init__()
+
+    @property
+    def query_pool_file_path(self):
+        return IEEEAbstractCommonApi.QUERY_POOL_FILE_PATH
+
+    @property
+    def thread_limit(self):
+        return IEEEAbstractCommonApi._THREAD_LIMIT
 
     @property
     def max_results_per_page(self):
@@ -53,13 +64,15 @@ class IEEEAbstractCommonApi(AbsWebsiteCommonApi):
         return (offset + self.max_results_per_page) / self.max_results_per_page
 
     def _extract_number_matches_from_soup(self, soup):
-        dictionary = {IEEEAbstractCommonApi._NO_RESULTS_TAG_ATTRIBUTE: IEEEAbstractCommonApi._NO_RESULTS_TAG_ATTRIBUTE_VALUE}
+        dictionary = {IEEEAbstractCommonApi._NO_RESULTS_TAG_ATTRIBUTE:
+                      IEEEAbstractCommonApi._NO_RESULTS_TAG_ATTRIBUTE_VALUE}
         no_results_element = soup.find(IEEEAbstractCommonApi._NO_RESULTS_TAG, dictionary)
         if no_results_element is not None:
             return 0
         dictionary = {IEEEAbstractCommonApi._ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE:
                       IEEEAbstractCommonApi._ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE_VALUE}
-        one_result_element = soup.find(IEEEAbstractCommonApi._ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_TAG, dictionary)
+        one_result_element = soup.find(IEEEAbstractCommonApi._ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_TAG,
+                                       dictionary)
         if one_result_element is not None:
             return 1
         dictionary = {IEEEAbstractCommonApi._ELEMENT_WITH_NUMBER_MATCHES_ATTRIBUTE:

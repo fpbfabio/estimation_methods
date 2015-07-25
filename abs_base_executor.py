@@ -2,16 +2,17 @@ import signal
 from datetime import datetime, timedelta
 
 from abs_executor import AbsExecutor
-from executor_factory import ExecutorFactory
+from abc import ABCMeta, abstractmethod
 
 
-class Executor(AbsExecutor):
+class AbsBaseExecutor(AbsExecutor, metaclass=ABCMeta):
     NUMBER_ITERATIONS = 20
 
+    @abstractmethod
     def __init__(self):
-        self.__factory = ExecutorFactory()
+        self.__factory = None
         self.__estimator = None
-        self.__logger = self.factory.create_logger()
+        self.__logger = None
 
     @property
     def logger(self):
@@ -51,7 +52,7 @@ class Executor(AbsExecutor):
         estimation_list = []
         duration_sum = timedelta()
         connections_sum = 0
-        for i in range(0, Executor.NUMBER_ITERATIONS):
+        for i in range(0, AbsBaseExecutor.NUMBER_ITERATIONS):
             start = datetime.now()
             estimation = self.estimator.estimate()
             end = datetime.now()
@@ -60,8 +61,3 @@ class Executor(AbsExecutor):
             duration_sum += end - start
             connections_sum += self.estimator.download_count
         self.logger.write_final_result(estimation_list, duration_sum, connections_sum)
-
-
-if __name__ == "__main__":
-    executor = Executor()
-    executor.execute()
