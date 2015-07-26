@@ -32,7 +32,7 @@ class AbsEstimator(metaclass=ABCMeta):
         """
         Returns the estimation of the size of the data set.
         """
-        pass
+        self.common_api.download_count = 0
 
     @property
     @abstractmethod

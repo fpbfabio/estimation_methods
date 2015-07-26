@@ -4,6 +4,7 @@ with the functions used in common in all estimators.
 """
 
 from abc import ABCMeta, abstractmethod
+
 from config import Config
 
 
@@ -25,6 +26,22 @@ class AbsCommonApi(metaclass=ABCMeta):
     def download_count(self, val):
         """
         Sets the number of downloads.
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def factory(self):
+        """
+        Returns the instance of an AbsCommonApiFactory class.
+        """
+        pass
+
+    @factory.setter
+    @abstractmethod
+    def factory(self, val):
+        """
+        Sets the instance of an AbsCommonApiFactory class.
         """
         pass
 
@@ -51,7 +68,7 @@ class AbsCommonApi(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def download(self, query, limit=Config.SEARCH_ENGINE_LIMIT):
+    def download(self, query, is_to_download_id=True, is_to_download_content=True, limit=Config.SEARCH_ENGINE_LIMIT):
         """
         Returns the a list with documents retrieved by the given query with
         the max size set by the given limit.

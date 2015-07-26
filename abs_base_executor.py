@@ -1,16 +1,18 @@
-from abs_executor import AbsExecutor
-from factory import Factory
-
+import signal
 from datetime import datetime, timedelta
 
+from abs_executor import AbsExecutor
+from abc import ABCMeta, abstractmethod
 
-class Executor(AbsExecutor):
-    NUMBER_ITERATIONS = 20
 
+class AbsBaseExecutor(AbsExecutor, metaclass=ABCMeta):
+    NUMBER_ITERATIONS = 1
+
+    @abstractmethod
     def __init__(self):
-        self.__factory = Factory()
+        self.__factory = None
         self.__estimator = None
-        self.__logger = self.factory.create_logger()
+        self.__logger = None
 
     @property
     def logger(self):
@@ -36,15 +38,21 @@ class Executor(AbsExecutor):
     def estimator(self, val):
         self.__estimator = val
 
+    # noinspection PyUnusedLocal
+    def _on_fatal_failure(self, signal_param, frame):
+        class FatalFailure(Exception):
+            pass
+        raise FatalFailure
+
     def execute(self):
+        signal.signal(signal.SIGUSR1, self._on_fatal_failure)
         self.logger.write_header()
         self.estimator = self.factory.create_estimator()
         self.logger.write_experiment_details(self.estimator.experiment_details)
         estimation_list = []
         duration_sum = timedelta()
         connections_sum = 0
-        for i in range(0, Executor.NUMBER_ITERATIONS):
-            self.estimator = self.factory.create_estimator()
+        for i in range(0, AbsBaseExecutor.NUMBER_ITERATIONS):
             start = datetime.now()
             estimation = self.estimator.estimate()
             end = datetime.now()
@@ -52,9 +60,5 @@ class Executor(AbsExecutor):
             self.logger.write_result_iteration(i + 1, estimation, end - start, self.estimator.download_count)
             duration_sum += end - start
             connections_sum += self.estimator.download_count
-        self.logger.write_final_result(estimation_list, duration_sum, connections_sum)
-
-
-if __name__ == "__main__":
-    executor = Executor()
-    executor.execute()
+        if AbsBaseExecutor.NUMBER_ITERATIONS > 1:
+            self.logger.write_final_result(estimation_list, duration_sum, connections_sum)
