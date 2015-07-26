@@ -6,7 +6,7 @@ from abc import ABCMeta, abstractmethod
 
 
 class AbsBaseExecutor(AbsExecutor, metaclass=ABCMeta):
-    NUMBER_ITERATIONS = 20
+    NUMBER_ITERATIONS = 1
 
     @abstractmethod
     def __init__(self):
@@ -60,4 +60,5 @@ class AbsBaseExecutor(AbsExecutor, metaclass=ABCMeta):
             self.logger.write_result_iteration(i + 1, estimation, end - start, self.estimator.download_count)
             duration_sum += end - start
             connections_sum += self.estimator.download_count
-        self.logger.write_final_result(estimation_list, duration_sum, connections_sum)
+        if AbsBaseExecutor.NUMBER_ITERATIONS > 1:
+            self.logger.write_final_result(estimation_list, duration_sum, connections_sum)

@@ -72,18 +72,19 @@ class AbsWebsiteCommonApi(AbsBaseCommonApi, metaclass=ABCMeta):
         file_path = self._build_file_path(query)
         if os.path.exists(file_path):
             search_result = self._get_saved_result(file_path)
-            if search_result.number_results == 0:
+            if search_result is not None:
+                if search_result.number_results == 0:
+                    return search_result
+                number_downloaded_results = len(search_result.results)
+                number_additional_downloads = self._calculate_number_additional_downloads(search_result.number_results,
+                                                                                          number_downloaded_results, limit)
+                if number_additional_downloads > 0:
+                    data_list = self._do_additional_downloads(query, number_downloaded_results, number_additional_downloads)
+                    data_list = list(itertools.chain(search_result.results, data_list))
+                    search_result = self.factory.create_search_result(search_result.number_results, data_list)
+                    self._save_result(file_path, search_result)
+                search_result = self._filter_result_content(search_result, is_to_download_id, is_to_download_content)
                 return search_result
-            number_downloaded_results = len(search_result.results)
-            number_additional_downloads = self._calculate_number_additional_downloads(search_result.number_results,
-                                                                                      number_downloaded_results, limit)
-            if number_additional_downloads > 0:
-                data_list = self._do_additional_downloads(query, number_downloaded_results, number_additional_downloads)
-                data_list = list(itertools.chain(search_result.results, data_list))
-                search_result = self.factory.create_search_result(search_result.number_results, data_list)
-                self._save_result(file_path, search_result)
-            search_result = self._filter_result_content(search_result, is_to_download_id, is_to_download_content)
-            return search_result
         web_page = self._attempt_download(query, offset)
         soup = BeautifulSoup(web_page, AbsWebsiteCommonApi._HTML_PARSER)
         number_matches = self._extract_number_matches_from_soup(soup)
@@ -110,10 +111,13 @@ class AbsWebsiteCommonApi(AbsBaseCommonApi, metaclass=ABCMeta):
         return self.data_folder_path + os.path.sep + query + AbsWebsiteCommonApi._DATA_FILE_EXTENSION
 
     def _get_saved_result(self, file_path):
-        with open(file_path, "rb") as archive:
-            search_result = pickle.load(archive)
-            assert (isinstance(search_result, AbsSearchResult))
-            return search_result
+        try:
+            with open(file_path, "rb") as archive:
+                search_result = pickle.load(archive)
+                assert (isinstance(search_result, AbsSearchResult))
+        except:
+            search_result = None
+        return search_result
 
     def _do_additional_downloads(self, query, number_downloaded_results, number_additional_downloads):
         data_list = []
@@ -140,14 +144,16 @@ class AbsWebsiteCommonApi(AbsBaseCommonApi, metaclass=ABCMeta):
         page_source = None
         for i in range(0, AbsWebsiteCommonApi._DOWNLOAD_TRY_NUMBER):
             time.sleep(AbsWebsiteCommonApi._CRAWL_DELAY)
-            web_page = webdriver.PhantomJS()
-            web_page.get(url)
-            wait = WebDriverWait(web_page, AbsWebsiteCommonApi._PAGE_LOAD_TIMEOUT)
+            web_page = None
             try:
+                web_page = webdriver.PhantomJS()
+                web_page.get(url)
+                wait = WebDriverWait(web_page, AbsWebsiteCommonApi._PAGE_LOAD_TIMEOUT)
                 wait.until(self.test_page_loaded)
             except Exception as exception:
                 print(str(exception))
-                web_page.close()
+                if web_page is not None:
+                    web_page.close()
                 page_source = None
                 continue
             page_source = web_page.execute_script(AbsWebsiteCommonApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)

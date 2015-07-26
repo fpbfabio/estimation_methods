@@ -5,9 +5,9 @@ from abs_website_common_api import AbsWebsiteCommonApi
 
 
 class IEEEAbstractCommonApi(AbsWebsiteCommonApi):
-    DATA_SET_SIZE = 3699871
-    _THREAD_LIMIT = 1
+    DATA_SET_SIZE = 3701608
     QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
+    _THREAD_LIMIT = 1
     _WEB_DOMAIN = "http://ieeexplore.ieee.org"
     _NO_RESULTS_TAG = "li"
     _NO_RESULTS_TAG_ATTRIBUTE = "class"
@@ -99,15 +99,27 @@ class IEEEAbstractCommonApi(AbsWebsiteCommonApi):
             dictio = {IEEEAbstractCommonApi._ABSTRACT_TAG_ATTRIBUTE:
                       IEEEAbstractCommonApi._ABSTRACT_TAG_ATTRIBUTE_VALUE}
             abstract_tag = item.find(IEEEAbstractCommonApi._ABSTRACT_TAG, dictio)
-            if identifier_tag is None or title_tag is None:
+            if identifier_tag is not None and title_tag is not None:
+                if abstract_tag is not None:
+                    data = self._create_data(identifier_tag[IEEEAbstractCommonApi._HREF], title_tag.text,
+                                             abstract_tag.text)
+                else:
+                    data = self._create_data(identifier_tag[IEEEAbstractCommonApi._HREF], title_tag.text)
+                return data
+            elif identifier_tag is None and title_tag is not None:
+                ampersand_index = title_tag[IEEEAbstractCommonApi._HREF].find("&")
+                if abstract_tag is not None:
+                    data = self._create_data(title_tag[IEEEAbstractCommonApi._HREF][0:ampersand_index],
+                                             title_tag.text, abstract_tag.text)
+                else:
+                    data = self._create_data(title_tag[IEEEAbstractCommonApi._HREF][0:ampersand_index],
+                                             title_tag.text)
+                return data
+            else:
+                print(str(item))
                 print("ERROR - Data extraction failure")
                 os.kill(os.getpid(), signal.SIGUSR1)
                 return
-            if abstract_tag is not None:
-                data = self._create_data(identifier_tag[IEEEAbstractCommonApi._HREF], title_tag.text, abstract_tag.text)
-            else:
-                data = self._create_data(identifier_tag[IEEEAbstractCommonApi._HREF], title_tag.text)
-            return data
 
         data_list = [extract_data(x) for x in item_tag_list]
         return data_list

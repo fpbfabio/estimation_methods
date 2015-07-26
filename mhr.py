@@ -9,7 +9,7 @@ class Mhr(AbsEstimator):
     _MIN_NUMBER_MATCHES_INFORMATION = "Menor número de resultados"
     _NUMBER_QUERIES_INFORMATION = "Número de buscas"
     _MAX_NUMBER_MATCHES = 5000000
-    _MIN_NUMBER_MATCHES = 0
+    _MIN_NUMBER_MATCHES = 1
     _NUMBER_QUERIES = 100
 
     @property
