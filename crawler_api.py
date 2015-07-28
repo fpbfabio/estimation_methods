@@ -226,17 +226,25 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
                 if search_result.number_results == 0:
                     return search_result
                 number_downloaded_results = len(search_result.results)
-                number_additional_downloads = self._calculate_number_additional_downloads(search_result.number_results,
-                                                                                          number_downloaded_results,
-                                                                                          limit)
-                if number_additional_downloads > 0:
-                    data_list = self._do_additional_downloads(query, number_downloaded_results,
-                                                              number_additional_downloads)
-                    data_list = list(itertools.chain(search_result.results, data_list))
-                    search_result = self.factory.create_search_result(search_result.number_results, data_list)
-                    self._save_result(file_path, search_result)
-                search_result = self._filter_result_content(search_result, is_to_download_id, is_to_download_content)
-                return search_result
+                if number_downloaded_results <= search_result.number_results:
+                    number_additional_downloads = self._calculate_number_additional_downloads(search_result.number_results,
+                                                                                              number_downloaded_results,
+                                                                                              limit)
+                    if number_additional_downloads > 0:
+                        data_list = self._do_additional_downloads(query, number_downloaded_results,
+                                                                  number_additional_downloads)
+                        data_list = list(itertools.chain(search_result.results, data_list))
+                        search_result = self.factory.create_search_result(search_result.number_results, data_list)
+                        number_downloaded_results = len(search_result.results)
+                        if (number_downloaded_results != limit
+                                and number_downloaded_results != search_result.number_results
+                                and number_downloaded_results != self.max_results_per_page):
+                            print("ERROR - Unexpected failure in download query = " + query)
+                            os.kill(os.getpid(), signal.SIGUSR1)
+                            return None
+                        self._save_result(file_path, search_result)
+                    search_result = self._filter_result_content(search_result, is_to_download_id, is_to_download_content)
+                    return search_result
         web_page = self._attempt_download(query, offset)
         soup = BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
         number_matches = self._extract_number_matches_from_soup(soup)
@@ -255,6 +263,13 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
                                                                  number_additional_downloads)
             data_list = list(itertools.chain(data_list, additional_data_list))
         search_result = self.factory.create_search_result(number_matches, data_list)
+        number_downloaded_results = len(search_result.results)
+        if (number_downloaded_results != limit
+                and number_downloaded_results != search_result.number_results
+                and number_downloaded_results != self.max_results_per_page):
+            print("ERROR - Unexpected failure in download query = " + query)
+            os.kill(os.getpid(), signal.SIGUSR1)
+            return None
         self._save_result(file_path, search_result)
         search_result = self._filter_result_content(search_result, is_to_download_id, is_to_download_content)
         return search_result
