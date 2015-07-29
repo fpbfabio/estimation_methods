@@ -215,36 +215,49 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         os.kill(os.getpid(), signal.SIGUSR1)
         return
 
-    def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0,
-                 limit=None):
-        if limit is None:
-            limit = self._limit_results
-        file_path = self._build_file_path(query)
-        if os.path.exists(file_path):
-            search_result = self._get_saved_result(file_path)
-            if search_result is not None:
-                if search_result.number_results == 0:
-                    return search_result
-                number_downloaded_results = len(search_result.results)
-                if number_downloaded_results <= search_result.number_results:
-                    number_additional_downloads = self._calculate_number_additional_downloads(search_result.number_results,
-                                                                                              number_downloaded_results,
-                                                                                              limit)
-                    if number_additional_downloads > 0:
-                        data_list = self._do_additional_downloads(query, number_downloaded_results,
-                                                                  number_additional_downloads)
-                        data_list = list(itertools.chain(search_result.results, data_list))
-                        search_result = self.factory.create_search_result(search_result.number_results, data_list)
-                        number_downloaded_results = len(search_result.results)
-                        if (number_downloaded_results != limit
-                                and number_downloaded_results != search_result.number_results
-                                and number_downloaded_results != self.max_results_per_page):
-                            print("ERROR - Unexpected failure in download query = " + query)
-                            os.kill(os.getpid(), signal.SIGUSR1)
-                            return None
-                        self._save_result(file_path, search_result)
-                    search_result = self._filter_result_content(search_result, is_to_download_id, is_to_download_content)
-                    return search_result
+    # noinspection PyTypeChecker
+    def terminate_if_inconsistency(self, query, search_result, limit):
+        number_downloaded_results = len(search_result.results)
+        if (number_downloaded_results != limit
+                and number_downloaded_results != search_result.number_results
+                and number_downloaded_results % self.max_results_per_page != 0):
+            print("ERROR - Unexpected failure in download query = " + query)
+            os.kill(os.getpid(), signal.SIGUSR1)
+            return True
+        return False
+
+    def _download_more_results_if_needed(self, query, number_matches, data_list, limit):
+        number_downloaded_results = len(data_list)
+        if number_downloaded_results > number_matches:
+            return None
+        number_additional_downloads = self._calculate_number_additional_downloads(number_matches,
+                                                                                  number_downloaded_results,
+                                                                                  limit)
+        if number_additional_downloads > 0:
+            additional_data_list = self._do_additional_downloads(query, number_downloaded_results,
+                                                                 number_additional_downloads)
+            data_list = list(itertools.chain(data_list, additional_data_list))
+        search_result = self.factory.create_search_result(number_matches, data_list)
+        return search_result
+
+    # noinspection PyTypeChecker
+    def _download_based_on_stored_file(self, query, limit, file_path):
+        if not os.path.exists(file_path):
+            return None
+        search_result = self._get_saved_result(file_path)
+        if search_result is None:
+            return None
+        if search_result.number_results == 0:
+            return search_result
+        search_result = self._download_more_results_if_needed(query, search_result.number_results,
+                                                              search_result.results, limit)
+        if self.terminate_if_inconsistency(query, search_result, limit):
+            return None
+        self._save_result(file_path, search_result)
+        return search_result
+
+    # noinspection PyTypeChecker
+    def _download_completely_from_web(self, query, offset, limit, file_path):
         web_page = self._attempt_download(query, offset)
         soup = BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
         number_matches = self._extract_number_matches_from_soup(soup)
@@ -253,24 +266,21 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
             self._save_result(file_path, search_result)
             return search_result
         data_list = self._extract_data_list_from_soup(soup)
-        # noinspection PyTypeChecker
-        number_downloaded_results = len(data_list)
-        # noinspection PyTypeChecker
-        number_additional_downloads = self._calculate_number_additional_downloads(number_matches,
-                                                                                  number_downloaded_results, limit)
-        if number_additional_downloads > 0:
-            additional_data_list = self._do_additional_downloads(query, number_downloaded_results,
-                                                                 number_additional_downloads)
-            data_list = list(itertools.chain(data_list, additional_data_list))
-        search_result = self.factory.create_search_result(number_matches, data_list)
-        number_downloaded_results = len(search_result.results)
-        if (number_downloaded_results != limit
-                and number_downloaded_results != search_result.number_results
-                and number_downloaded_results != self.max_results_per_page):
-            print("ERROR - Unexpected failure in download query = " + query)
-            os.kill(os.getpid(), signal.SIGUSR1)
+        search_result = self._download_more_results_if_needed(query, number_matches, data_list, limit)
+        if self.terminate_if_inconsistency(query, search_result, limit):
             return None
         self._save_result(file_path, search_result)
+        return search_result
+
+    # noinspection PyTypeChecker
+    def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0,
+                 limit=None):
+        if limit is None:
+            limit = self._limit_results
+        file_path = self._build_file_path(query)
+        search_result = self._download_based_on_stored_file(query, limit, file_path)
+        if search_result is None:
+            search_result = self._download_completely_from_web(query, offset, limit, file_path)
         search_result = self._filter_result_content(search_result, is_to_download_id, is_to_download_content)
         return search_result
 
