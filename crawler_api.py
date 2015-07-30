@@ -247,6 +247,11 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         search_result = self._get_saved_result(file_path)
         if search_result is None:
             return None
+        web_page = self._attempt_download(query, 0)
+        soup = BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
+        number_matches = self._extract_number_matches_from_soup(soup)
+        if number_matches != search_result.number_results:
+            return None
         if search_result.number_results == 0:
             return search_result
         search_result = self._download_more_results_if_needed(query, search_result.number_results,
@@ -380,8 +385,8 @@ class SolrCrawlerApi(AbsBaseCrawlerApi):
     DATA_SET_SIZE = 19994
     LIMIT_RESULTS = 5000000
     _QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
-    _THREAD_LIMIT = 10
-    _URL = ("http://localhost:8984/solr/newsgroups2/select?"
+    _THREAD_LIMIT = 5
+    _URL = ("http://localhost:8984/solr/experiment/select?"
             + "q=::FIELD:::::QUERY::&start=::OFFSET::&rows=::LIMIT::&fl=::FIELDS_TO_RETURN::&wt=json")
     _ID_FIELD = "id"
     _FIELD_TO_SEARCH = "text"

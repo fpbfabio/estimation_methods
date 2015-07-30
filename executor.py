@@ -73,13 +73,12 @@ class AbsExecutor(metaclass=ABCMeta):
 
 class AbsBaseExecutor(AbsExecutor, metaclass=ABCMeta):
 
-    NUMBER_ITERATIONS = 1
-
     @abstractmethod
     def __init__(self):
         self.__factory = None
         self.__estimator = None
         self.__logger = None
+        self.__number_iterations = None
 
     @property
     def logger(self):
@@ -105,6 +104,14 @@ class AbsBaseExecutor(AbsExecutor, metaclass=ABCMeta):
     def estimator(self, val):
         self.__estimator = val
 
+    @property
+    def number_iterations(self):
+        return self.__number_iterations
+
+    @number_iterations.setter
+    def number_iterations(self, val):
+        self.__number_iterations = val
+
     # noinspection PyUnusedLocal
     def _on_fatal_failure(self, signal_param, frame):
         class FatalFailure(Exception):
@@ -119,7 +126,7 @@ class AbsBaseExecutor(AbsExecutor, metaclass=ABCMeta):
         estimation_list = []
         duration_sum = timedelta()
         connections_sum = 0
-        for i in range(0, AbsBaseExecutor.NUMBER_ITERATIONS):
+        for i in range(0, self.number_iterations):
             start = datetime.now()
             estimation = self.estimator.estimate()
             end = datetime.now()
@@ -127,32 +134,41 @@ class AbsBaseExecutor(AbsExecutor, metaclass=ABCMeta):
             self.logger.write_result_iteration(i + 1, estimation, end - start, self.estimator.download_count)
             duration_sum += end - start
             connections_sum += self.estimator.download_count
-        if AbsBaseExecutor.NUMBER_ITERATIONS > 1:
+        if self.number_iterations > 1:
             self.logger.write_final_result(estimation_list, duration_sum, connections_sum)
 
 
 class SolrExecutor(AbsBaseExecutor):
+
+    _NUMBER_ITERATIONS = 20
 
     def __init__(self):
         super().__init__()
         self.factory = SolrExecutorFactory()
         self.estimator = self.factory.create_estimator()
         self.logger = self.factory.create_logger(self.estimator.query_pool_file_path)
+        self.number_iterations = SolrExecutor._NUMBER_ITERATIONS
 
 
 class IEEEExecutor(AbsBaseExecutor):
+
+    _NUMBER_ITERATIONS = 1
 
     def __init__(self):
         super().__init__()
         self.factory = IEEEExecutorFactory()
         self.estimator = self.factory.create_estimator()
         self.logger = self.factory.create_logger(self.estimator.query_pool_file_path)
+        self.number_iterations = IEEEExecutor._NUMBER_ITERATIONS
 
 
 class ACMExecutor(AbsBaseExecutor):
+
+    _NUMBER_ITERATIONS = 1
 
     def __init__(self):
         super().__init__()
         self.factory = ACMExecutorFactory()
         self.estimator = self.factory.create_estimator()
         self.logger = self.factory.create_logger(self.estimator.query_pool_file_path)
+        self.number_iterations = ACMExecutor._NUMBER_ITERATIONS

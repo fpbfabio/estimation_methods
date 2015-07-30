@@ -13,6 +13,22 @@ class AbsLogger(metaclass=ABCMeta):
     Class for writing logs.
     """
 
+    @property
+    @abstractmethod
+    def data_set_size(self):
+        """
+        Returns the size of the data set.
+        """
+        pass
+
+    @data_set_size.setter
+    @abstractmethod
+    def data_set_size(self, val):
+        """
+        Sets the size of the data set..
+        """
+        pass
+
     @abstractmethod
     def write_header(self):
         """
@@ -43,6 +59,14 @@ class AbsLogger(metaclass=ABCMeta):
 
 
 class Logger(AbsLogger):
+
+    @property
+    def data_set_size(self):
+        return self.__data_set_size
+
+    @data_set_size.setter
+    def data_set_size(self, val):
+        self.__data_set_size = val
 
     def __init__(self, details_file_path, results_file_path, data_set_size, limit_results, query_pool_file_path):
         self.__experiment_details_file_path = details_file_path

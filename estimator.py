@@ -216,6 +216,7 @@ class Mhr(AbsBaseEstimator):
                 random_index = random.randrange(self.__query_pool_size)
                 query = self.__query_list[random_index]
                 del (self.__query_list[random_index])
+                self.__query_pool_size -= 1
         return query
 
     # noinspection PyUnusedLocal

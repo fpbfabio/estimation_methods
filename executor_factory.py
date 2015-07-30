@@ -31,8 +31,8 @@ class AbsExecutorFactory(metaclass=ABCMeta):
 
 class SolrExecutorFactory(AbsExecutorFactory):
 
-    _EXPERIMENT_RESULTS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/IEEE/ExperimentResults.csv"
-    _EXPERIMENT_DETAILS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/IEEE/Log.txt"
+    _EXPERIMENT_RESULTS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/Solr/ExperimentResults.csv"
+    _EXPERIMENT_DETAILS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/Solr/Log.txt"
 
     def create_estimator(self):
         return Mhr(SolrCrawlerApi())
