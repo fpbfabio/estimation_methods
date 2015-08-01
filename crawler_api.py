@@ -19,7 +19,6 @@ from selenium.webdriver.support.wait import WebDriverWait
 import time
 
 from crawler_api_factory import CrawlerApiFactory
-from search_result import AbsSearchResult
 
 
 class AbsCrawlerApi(metaclass=ABCMeta):
@@ -79,7 +78,7 @@ class AbsCrawlerApi(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def download(self, query, is_to_download_id=True, is_to_download_content=True, limit=None):
+    def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0, limit=None):
         """
         Returns the a list with documents retrieved by the given query with
         the max size set by the given limit.
@@ -116,8 +115,7 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=ABCMeta):
         self.__lock = Lock()
 
     @abstractmethod
-    def download(self, query, is_to_download_id=True, is_to_download_content=True,
-                 offset=0, limit=None):
+    def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0, limit=None):
         pass
 
     @abstractmethod
@@ -207,7 +205,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def _calculate_real_offset(self, offset):
+    def _calculate_offset(self, offset):
         pass
 
     def download_entire_data_set(self):
@@ -215,24 +213,31 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         os.kill(os.getpid(), signal.SIGUSR1)
         return
 
-    # noinspection PyTypeChecker
-    def terminate_if_inconsistency(self, query, search_result, limit):
+    def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0, limit=None):
+        file_path = self._build_file_path(query)
+        search_result = self._download_based_on_stored_file(query, file_path)
+        if search_result is None:
+            search_result = self._download_completely_from_web(query, file_path)
+        search_result = self._filter_result_content(search_result, is_to_download_id,
+                                                    is_to_download_content, offset, limit)
+        return search_result
+
+    def _terminate_if_inconsistency(self, query, search_result):
         number_downloaded_results = len(search_result.results)
-        if (number_downloaded_results != limit
-                and number_downloaded_results != search_result.number_results
-                and number_downloaded_results % self.max_results_per_page != 0):
-            print("ERROR - Unexpected failure in download query = " + query)
+        if number_downloaded_results != search_result.number_results:
+            print("ERROR - number_downloaded_results != search_result.number_results = " + query)
             os.kill(os.getpid(), signal.SIGUSR1)
             return True
         return False
 
-    def _download_more_results_if_needed(self, query, number_matches, data_list, limit):
+    def _download_more_results_if_needed(self, query, number_matches, data_list):
         number_downloaded_results = len(data_list)
         if number_downloaded_results > number_matches:
+            print("ERROR - number_downloaded_results > number_matches")
+            os.kill(os.getpid(), signal.SIGUSR1)
             return None
         number_additional_downloads = self._calculate_number_additional_downloads(number_matches,
-                                                                                  number_downloaded_results,
-                                                                                  limit)
+                                                                                  number_downloaded_results)
         if number_additional_downloads > 0:
             additional_data_list = self._do_additional_downloads(query, number_downloaded_results,
                                                                  number_additional_downloads)
@@ -240,8 +245,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         search_result = self.factory.create_search_result(number_matches, data_list)
         return search_result
 
-    # noinspection PyTypeChecker
-    def _download_based_on_stored_file(self, query, limit, file_path):
+    def _download_based_on_stored_file(self, query, file_path):
         if not os.path.exists(file_path):
             return None
         search_result = self._get_saved_result(file_path)
@@ -250,20 +254,13 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         web_page = self._attempt_download(query, 0)
         soup = BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
         number_matches = self._extract_number_matches_from_soup(soup)
-        if number_matches != search_result.number_results:
+        if (number_matches != search_result.number_results
+                or search_result.number_results != len(search_result.results)):
             return None
-        if search_result.number_results == 0:
-            return search_result
-        search_result = self._download_more_results_if_needed(query, search_result.number_results,
-                                                              search_result.results, limit)
-        if self.terminate_if_inconsistency(query, search_result, limit):
-            return None
-        self._save_result(file_path, search_result)
         return search_result
 
-    # noinspection PyTypeChecker
-    def _download_completely_from_web(self, query, offset, limit, file_path):
-        web_page = self._attempt_download(query, offset)
+    def _download_completely_from_web(self, query, file_path):
+        web_page = self._attempt_download(query, 0)
         soup = BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
         number_matches = self._extract_number_matches_from_soup(soup)
         if number_matches == 0:
@@ -271,22 +268,10 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
             self._save_result(file_path, search_result)
             return search_result
         data_list = self._extract_data_list_from_soup(soup)
-        search_result = self._download_more_results_if_needed(query, number_matches, data_list, limit)
-        if self.terminate_if_inconsistency(query, search_result, limit):
+        search_result = self._download_more_results_if_needed(query, number_matches, data_list)
+        if self._terminate_if_inconsistency(query, search_result):
             return None
         self._save_result(file_path, search_result)
-        return search_result
-
-    # noinspection PyTypeChecker
-    def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0,
-                 limit=None):
-        if limit is None:
-            limit = self._limit_results
-        file_path = self._build_file_path(query)
-        search_result = self._download_based_on_stored_file(query, limit, file_path)
-        if search_result is None:
-            search_result = self._download_completely_from_web(query, offset, limit, file_path)
-        search_result = self._filter_result_content(search_result, is_to_download_id, is_to_download_content)
         return search_result
 
     def _build_file_path(self, query):
@@ -296,7 +281,6 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         try:
             with open(file_path, "rb") as archive:
                 search_result = pickle.load(archive)
-                assert (isinstance(search_result, AbsSearchResult))
         except:
             search_result = None
         return search_result
@@ -304,9 +288,8 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
     def _do_additional_downloads(self, query, number_downloaded_results, number_additional_downloads):
         data_list = []
         for i in range(0, number_additional_downloads):
-            # noinspection PyTypeChecker
-            offset = number_downloaded_results + i * self.max_results_per_page
-            web_page = self._attempt_download(query, offset)
+            number_downloaded_results += i * self.max_results_per_page
+            web_page = self._attempt_download(query, number_downloaded_results)
             soup = BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
             list_from_soup = self._extract_data_list_from_soup(soup)
             data_list = itertools.chain(data_list, list_from_soup)
@@ -318,10 +301,9 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         soup = BeautifulSoup(page_source, AbsWebsiteCrawlerApi._HTML_PARSER)
         return self._extract_number_matches_from_soup(soup) >= 0
 
-    def _attempt_download(self, query, offset):
-        real_offset = self._calculate_real_offset(offset)
-        real_offset = int(real_offset)
-        dictionary = {AbsWebsiteCrawlerApi._QUERY_MASK: query, AbsWebsiteCrawlerApi._OFFSET_MASK: str(real_offset)}
+    def _attempt_download(self, query, number_items_already_downloaded):
+        offset = self._calculate_offset(number_items_already_downloaded)
+        dictionary = {AbsWebsiteCrawlerApi._QUERY_MASK: query, AbsWebsiteCrawlerApi._OFFSET_MASK: str(offset)}
         url = self._multiple_replace(dictionary, self.base_url)
         page_source = None
         for i in range(0, AbsWebsiteCrawlerApi._DOWNLOAD_TRY_NUMBER):
@@ -352,13 +334,9 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         pattern = re.compile("|".join(dictionary.keys()))
         return pattern.sub(lambda m: dictionary[re.escape(m.group(0))], string)
 
-    def _calculate_number_additional_downloads(self, number_matches, number_downloaded_results, limit):
-        if (number_matches <= self.max_results_per_page or
-                number_downloaded_results == number_matches or
-                number_downloaded_results >= limit):
+    def _calculate_number_additional_downloads(self, number_matches, number_downloaded_results):
+        if number_matches <= self.max_results_per_page or number_downloaded_results == number_matches:
             return 0
-        elif number_matches > limit:
-            return math.ceil((limit - number_downloaded_results) / self.max_results_per_page)
         else:
             return math.ceil((number_matches - number_downloaded_results) / self.max_results_per_page)
 
@@ -370,13 +348,22 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         with open(file_path, "wb") as archive:
             pickle.dump(search_result, archive)
 
-    def _filter_result_content(self, search_result, is_to_have_id, is_to_have_content):
+    def _filter_result_content(self, search_result, is_to_have_id, is_to_have_content, offset=None, limit=None):
         if is_to_have_content and not is_to_have_id:
             data_list = [self.factory.create_data(None, x.content) for x in search_result.results]
         elif is_to_have_id and not is_to_have_content:
             data_list = [self.factory.create_data(x.identifier, None) for x in search_result.results]
         else:
-            return search_result
+            data_list = search_result.results
+        if search_result.number_results != 0:
+            if limit is not None and limit >= search_result.number_results:
+                limit = None
+            if offset is not None and limit is not None:
+                data_list = data_list[offset:limit]
+            elif offset is not None and limit is None:
+                data_list = data_list[offset:]
+            elif offset is None and limit is not None:
+                data_list = data_list[0:limit]
         return self.factory.create_search_result(search_result.number_results, data_list)
 
 
@@ -507,8 +494,8 @@ class IEEECrawlerApi(AbsWebsiteCrawlerApi):
     def data_folder_path(self):
         return IEEECrawlerApi._DATA_FOLDER_PATH
 
-    def _calculate_real_offset(self, offset):
-        return (offset + self.max_results_per_page) / self.max_results_per_page
+    def _calculate_offset(self, offset):
+        return int((offset + self.max_results_per_page) / self.max_results_per_page)
 
     def _extract_number_matches_from_soup(self, soup):
         dictionary = {IEEECrawlerApi._NO_RESULTS_TAG_ATTRIBUTE:
@@ -629,8 +616,8 @@ class ACMCrawlerApi(AbsWebsiteCrawlerApi):
     def base_url(self):
         return ACMCrawlerApi._BASE_URL
 
-    def _calculate_real_offset(self, offset):
-        return 2 * offset / self.max_results_per_page
+    def _calculate_offset(self, offset):
+        return int(2 * offset / self.max_results_per_page)
 
     def _extract_data_list_from_soup(self, soup):
         dictionary = {ACMCrawlerApi._TITLE_TAG_ATTRIBUTE: ACMCrawlerApi._TITLE_TAG_ATTRIBUTE_VALUE}
