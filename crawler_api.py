@@ -285,10 +285,10 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
             search_result = None
         return search_result
 
-    def _do_additional_downloads(self, query, number_downloaded_results, number_additional_downloads):
+    def _do_additional_downloads(self, query, starting_number_downloaded_results, number_additional_downloads):
         data_list = []
         for i in range(0, number_additional_downloads):
-            number_downloaded_results += i * self.max_results_per_page
+            number_downloaded_results = starting_number_downloaded_results + i * self.max_results_per_page
             web_page = self._attempt_download(query, number_downloaded_results)
             soup = BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
             list_from_soup = self._extract_data_list_from_soup(soup)
@@ -440,7 +440,7 @@ class SolrCrawlerApi(AbsBaseCrawlerApi):
 
 class IEEECrawlerApi(AbsWebsiteCrawlerApi):
 
-    DATA_SET_SIZE = 3701608
+    DATA_SET_SIZE = 3707749
     LIMIT_RESULTS = 5000000
     _THREAD_LIMIT = 1
     _WEB_DOMAIN = "http://ieeexplore.ieee.org"
@@ -577,7 +577,7 @@ class IEEECrawlerApi(AbsWebsiteCrawlerApi):
 
 class ACMCrawlerApi(AbsWebsiteCrawlerApi):
 
-    DATA_SET_SIZE = 445543
+    DATA_SET_SIZE = 446154
     LIMIT_RESULTS = 5000000
     _THREAD_LIMIT = 1
     _ELEMENT_WITH_NUMBER_MATCHES_TAG = "b"

@@ -112,7 +112,6 @@ class AbsBaseExecutor(AbsExecutor, metaclass=ABCMeta):
     def number_iterations(self, val):
         self.__number_iterations = val
 
-    # noinspection PyUnusedLocal
     def _on_fatal_failure(self, signal_param, frame):
         class FatalFailure(Exception):
             pass
