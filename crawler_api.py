@@ -314,14 +314,16 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
                 web_page.get(url)
                 wait = WebDriverWait(web_page, AbsWebsiteCrawlerApi._PAGE_LOAD_TIMEOUT)
                 wait.until(self.test_page_loaded)
+                page_source = web_page.execute_script(AbsWebsiteCrawlerApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)
             except Exception as exception:
                 print(str(exception))
                 if web_page is not None:
                     web_page.close()
+                    web_page.quit()
                 page_source = None
                 continue
-            page_source = web_page.execute_script(AbsWebsiteCrawlerApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)
             web_page.close()
+            web_page.quit()
             self.inc_download()
             break
         if page_source is None:
