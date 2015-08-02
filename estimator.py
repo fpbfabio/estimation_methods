@@ -121,6 +121,7 @@ class AbsEstimator(metaclass=ABCMeta):
 
 
 class AbsBaseEstimator(AbsEstimator, metaclass=ABCMeta):
+    _QUERY_POOL_FILE_PATH_INFORMATION = "Lista de palavras"
 
     def __init__(self, crawler_api):
         self.__query_pool_file_path = None
@@ -207,7 +208,8 @@ class Mhr(AbsBaseEstimator):
     def experiment_details(self):
         additional_information = {Mhr._NUMBER_QUERIES_INFORMATION: Mhr._NUMBER_QUERIES,
                                   Mhr._MAX_NUMBER_MATCHES_INFORMATION: Mhr._MAX_NUMBER_MATCHES,
-                                  Mhr._MIN_NUMBER_MATCHES_INFORMATION: Mhr._MIN_NUMBER_MATCHES}
+                                  Mhr._MIN_NUMBER_MATCHES_INFORMATION: Mhr._MIN_NUMBER_MATCHES,
+                                  AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
         return additional_information
 
     def __init__(self, crawler_api):
@@ -297,7 +299,8 @@ class RandomWalk(AbsBaseEstimator):
                                   RandomWalk._MIN_NUMBER_MATCHES_FOR_SEED_QUERY_INFORMATION:
                                   RandomWalk._MIN_NUMBER_MATCHES_FOR_SEED_QUERY,
                                   RandomWalk._RANDOM_WALK_SAMPLE_SIZE_INFORMATION:
-                                  RandomWalk._RANDOM_WALK_SAMPLE_SIZE}
+                                  RandomWalk._RANDOM_WALK_SAMPLE_SIZE,
+                                  AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
         return additional_information
 
     def __init__(self, crawler_api):
@@ -376,7 +379,8 @@ class SumEst(AbsBaseEstimator):
     @property
     def experiment_details(self):
         additional_information = {SumEst._ITERATION_NUMBER_INFORMATION: SumEst._ITERATION_NUMBER,
-                                  SumEst._POOL_SAMPLE_SIZE_INFORMATION: SumEst._POOL_SAMPLE_SIZE}
+                                  SumEst._POOL_SAMPLE_SIZE_INFORMATION: SumEst._POOL_SAMPLE_SIZE,
+                                  AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
         return additional_information
 
     def __init__(self, crawler_api):
@@ -501,7 +505,8 @@ class BroderEtAl(AbsBaseEstimator):
         additional_information = {BroderEtAl._QUERY_RANDOM_SAMPLE_SIZE_INFORMATION:
                                   BroderEtAl._QUERY_RANDOM_SAMPLE_SIZE,
                                   BroderEtAl._DOCUMENT_RANDOM_SAMPLE_SIZE_INFORMATION:
-                                  BroderEtAl._DOCUMENT_RANDOM_SAMPLE_SIZE}
+                                  BroderEtAl._DOCUMENT_RANDOM_SAMPLE_SIZE,
+                                  AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
         return additional_information
 
     def __init__(self, crawler_api):

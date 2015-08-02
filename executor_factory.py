@@ -41,8 +41,7 @@ class SolrExecutorFactory(AbsExecutorFactory):
         return Logger(SolrExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH,
                       SolrExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH,
                       SolrCrawlerApi.DATA_SET_SIZE,
-                      SolrCrawlerApi.LIMIT_RESULTS,
-                      query_pool_file_path)
+                      SolrCrawlerApi.LIMIT_RESULTS)
 
 
 class IEEEExecutorFactory(AbsExecutorFactory):
@@ -57,8 +56,7 @@ class IEEEExecutorFactory(AbsExecutorFactory):
         return Logger(IEEEExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH,
                       IEEEExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH,
                       IEEECrawlerApi.DATA_SET_SIZE,
-                      IEEECrawlerApi.LIMIT_RESULTS,
-                      query_pool_file_path)
+                      IEEECrawlerApi.LIMIT_RESULTS)
 
 
 class ACMExecutorFactory(AbsExecutorFactory):
@@ -73,5 +71,4 @@ class ACMExecutorFactory(AbsExecutorFactory):
         return Logger(ACMExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH,
                       ACMExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH,
                       ACMCrawlerApi.DATA_SET_SIZE,
-                      ACMCrawlerApi.LIMIT_RESULTS,
-                      query_pool_file_path)
+                      ACMCrawlerApi.LIMIT_RESULTS)

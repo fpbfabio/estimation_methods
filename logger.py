@@ -68,12 +68,11 @@ class Logger(AbsLogger):
     def data_set_size(self, val):
         self.__data_set_size = val
 
-    def __init__(self, details_file_path, results_file_path, data_set_size, limit_results, query_pool_file_path):
+    def __init__(self, details_file_path, results_file_path, data_set_size, limit_results):
         self.__experiment_details_file_path = details_file_path
         self.__experiment_results_file_path = results_file_path
         self.__data_set_size = data_set_size
         self.__limit_results = limit_results
-        self.__query_pool_file_path = query_pool_file_path
 
     def write_header(self):
         with open(self.__experiment_results_file_path, "a+") as file:
@@ -100,7 +99,6 @@ class Logger(AbsLogger):
     def write_experiment_details(self, additional_information=None):
         with open(self.__experiment_details_file_path, "a+") as file:
             file.write("Limite da máquina de busca: " + str(self.__limit_results) + os.linesep)
-            file.write("Lista de palavras: " + self.__query_pool_file_path + os.linesep)
             if additional_information is not None:
                 key_list = list(additional_information.keys())
                 for key in key_list:
