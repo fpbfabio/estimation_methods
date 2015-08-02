@@ -115,7 +115,7 @@ class AbsBaseExecutor(AbsExecutor, metaclass=ABCMeta):
     def _on_fatal_failure(self, signal_param, frame):
         class FatalFailure(Exception):
             pass
-        raise FatalFailure
+        raise FatalFailure()
 
     def execute(self):
         signal.signal(signal.SIGUSR1, self._on_fatal_failure)

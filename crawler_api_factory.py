@@ -6,6 +6,7 @@ from abc import ABCMeta, abstractmethod
 
 from data import Data
 from search_result import SearchResult
+from terminator import Terminator
 
 
 class AbsCrawlerApiFactory(metaclass=ABCMeta):
@@ -27,6 +28,13 @@ class AbsCrawlerApiFactory(metaclass=ABCMeta):
         """
         pass
 
+    @abstractmethod
+    def create_terminator(self):
+        """
+        Instantiates an object derived from the AbsTerminator class.
+        """
+        pass
+
 
 class CrawlerApiFactory(AbsCrawlerApiFactory):
 
@@ -35,3 +43,6 @@ class CrawlerApiFactory(AbsCrawlerApiFactory):
 
     def create_data(self, identifier, content):
         return Data(identifier, content)
+
+    def create_terminator(self):
+        return Terminator()
