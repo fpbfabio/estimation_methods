@@ -81,20 +81,20 @@ class Logger(AbsLogger):
             file.write("Iteração,Estimativa,Erro,Duração,Conexões," + os.linesep)
 
     def write_result_iteration(self, iteration_number, result, duration, cost):
-        error = math.fabs(self.__data_set_size - result) / self.__data_set_size
+        error = "%.3f" % (math.fabs(self.__data_set_size - result) / self.__data_set_size)
+        result = "%.3f" % result
         with open(self.__experiment_results_file_path, "a+") as file:
-            file.write(str(iteration_number) + "," + str(result) + "," + str(error) + "," + str(duration) + ","
+            file.write(str(iteration_number) + "," + result + "," + str(error) + "," + str(duration) + ","
                        + str(cost) + "," + os.linesep)
 
     def write_final_result(self, result_list, total_duration, total_cost):
-        average = statistics.mean(result_list)
-        std_deviation = statistics.pstdev(result_list, average)
-        coef_variation = std_deviation / average
-        error = math.fabs(self.__data_set_size - average) / self.__data_set_size
+        average = "%.3f" % statistics.mean(result_list)
+        coef_variation = "%.3f" % (statistics.pstdev(result_list, average) / statistics.mean(result_list))
+        error = "%.3f" % (math.fabs(self.__data_set_size - average) / self.__data_set_size)
         with open(self.__experiment_results_file_path, "a+") as file:
             file.write("Coeficiente de Variação,Estimativa Média,Erro da Média,Duração Total,Total de Conexões,"
                        + os.linesep)
-            file.write(str(coef_variation) + "," + str(average) + "," + str(error) + "," + str(total_duration)
+            file.write(coef_variation + "," + average + "," + error + "," + str(total_duration)
                        + "," + str(total_cost) + "," + os.linesep)
 
     def write_experiment_details(self, additional_information=None):
