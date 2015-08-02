@@ -316,7 +316,8 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
             else:
                 print("ERROR - len(list) = " + str(len(list_from_soup)) + " but number matches = " +
                       str(number_matches) + " and max results per page = " + str(self.max_results_per_page) +
-                      " - query = " + query + " and number of downloaded results = " + number_downloaded_results)
+                      " - query = " + str(query) + " and number of downloaded results = " +
+                      str(number_downloaded_results))
         return list_from_soup
 
     def _build_file_path(self, query):
@@ -350,7 +351,6 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
                 wait.until(self._test_page_loaded)
                 page_source = web_page.execute_script(AbsWebsiteCrawlerApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)
             except Exception as exception:
-                print(str(exception))
                 if web_page is not None:
                     web_page.close()
                     web_page.quit()
