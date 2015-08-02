@@ -240,7 +240,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
                                                                                   number_downloaded_results)
         if number_additional_downloads > 0:
             additional_data_list = self._do_additional_downloads(query, number_downloaded_results,
-                                                                 number_additional_downloads)
+                                                                 number_additional_downloads, number_matches)
             data_list = list(itertools.chain(data_list, additional_data_list))
         search_result = self.factory.create_search_result(number_matches, data_list)
         return search_result
@@ -267,12 +267,40 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
             search_result = self.factory.create_search_result(0, [])
             self._save_result(file_path, search_result)
             return search_result
-        data_list = self._extract_data_list_from_soup(soup)
+        data_list = self._safe_download(query, number_matches, 0)
         search_result = self._download_more_results_if_needed(query, number_matches, data_list)
         if self._terminate_if_inconsistency(query, search_result):
-            return None
+            raise RuntimeError()
         self._save_result(file_path, search_result)
         return search_result
+
+    def _do_additional_downloads(self, query, starting_number_downloaded_results,
+                                 number_additional_downloads, number_matches):
+        data_list = []
+        for i in range(0, number_additional_downloads):
+            number_downloaded_results = starting_number_downloaded_results + i * self.max_results_per_page
+            list_from_soup = self._safe_download(query, number_matches, number_downloaded_results)
+            data_list = itertools.chain(data_list, list_from_soup)
+        data_list = list(data_list)
+        return data_list
+
+    def _safe_download(self, query, number_matches, number_downloaded_results):
+        list_from_soup = []
+        while True:
+            web_page = self._attempt_download(query, number_downloaded_results)
+            soup = BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
+            list_from_soup = self._extract_data_list_from_soup(soup)
+            if number_matches - number_downloaded_results >= self.max_results_per_page:
+                is_result_valid = len(list_from_soup) == self.max_results_per_page
+            else:
+                is_result_valid = len(list_from_soup) == number_matches % self.max_results_per_page
+            if is_result_valid:
+                break
+            else:
+                print("ERROR - len(list) = " + str(len(list_from_soup)) + " but number matches = " +
+                      str(number_matches) + " and max results per page = " + str(self.max_results_per_page) +
+                      " - query = " + query + " and number of downloaded results = " + number_downloaded_results)
+        return list_from_soup
 
     def _build_file_path(self, query):
         return self.data_folder_path + os.path.sep + query + AbsWebsiteCrawlerApi._DATA_FILE_EXTENSION
@@ -285,18 +313,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
             search_result = None
         return search_result
 
-    def _do_additional_downloads(self, query, starting_number_downloaded_results, number_additional_downloads):
-        data_list = []
-        for i in range(0, number_additional_downloads):
-            number_downloaded_results = starting_number_downloaded_results + i * self.max_results_per_page
-            web_page = self._attempt_download(query, number_downloaded_results)
-            soup = BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
-            list_from_soup = self._extract_data_list_from_soup(soup)
-            data_list = itertools.chain(data_list, list_from_soup)
-        data_list = list(data_list)
-        return data_list
-
-    def test_page_loaded(self, web_page):
+    def _test_page_loaded(self, web_page):
         page_source = web_page.execute_script(AbsWebsiteCrawlerApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)
         soup = BeautifulSoup(page_source, AbsWebsiteCrawlerApi._HTML_PARSER)
         return self._extract_number_matches_from_soup(soup) >= 0
@@ -313,7 +330,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
                 web_page = webdriver.PhantomJS()
                 web_page.get(url)
                 wait = WebDriverWait(web_page, AbsWebsiteCrawlerApi._PAGE_LOAD_TIMEOUT)
-                wait.until(self.test_page_loaded)
+                wait.until(self._test_page_loaded)
                 page_source = web_page.execute_script(AbsWebsiteCrawlerApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)
             except Exception as exception:
                 print(str(exception))

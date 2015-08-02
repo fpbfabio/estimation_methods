@@ -18,6 +18,22 @@ class AbsEstimator(metaclass=ABCMeta):
 
     @property
     @abstractmethod
+    def query_pool_file_path(self):
+        """
+        Returns the path to the query pool file.
+        """
+        pass
+
+    @query_pool_file_path.setter
+    @abstractmethod
+    def query_pool_file_path(self, val):
+        """
+        Sets the path to the query pool file.
+        """
+        pass
+
+    @property
+    @abstractmethod
     def factory(self):
         """
         Returns the instance of an AbsEstimatorFactory object.
@@ -107,6 +123,7 @@ class AbsEstimator(metaclass=ABCMeta):
 class AbsBaseEstimator(AbsEstimator, metaclass=ABCMeta):
 
     def __init__(self, crawler_api):
+        self.__query_pool_file_path = None
         self.__crawler_api = crawler_api
         self.__factory = EstimatorFactory()
         self.__word_extractor = self.factory.create_word_extractor()
@@ -114,13 +131,16 @@ class AbsBaseEstimator(AbsEstimator, metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def query_pool_file_path(self):
+    def experiment_details(self):
         pass
 
     @property
-    @abstractmethod
-    def experiment_details(self):
-        pass
+    def query_pool_file_path(self):
+        return self.__query_pool_file_path
+
+    @query_pool_file_path.setter
+    def query_pool_file_path(self, val):
+        self.__query_pool_file_path = val
 
     @property
     def download_count(self):
@@ -167,7 +187,6 @@ class AbsBaseEstimator(AbsEstimator, metaclass=ABCMeta):
 
     def _read_query_pool(self):
         query_pool = []
-        # noinspection PyTypeChecker
         with open(self.query_pool_file_path) as archive:
             for line in archive:
                 query_pool.append(line.rstrip("\n").rstrip("\r"))
@@ -176,17 +195,13 @@ class AbsBaseEstimator(AbsEstimator, metaclass=ABCMeta):
 
 class Mhr(AbsBaseEstimator):
 
-    _QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
+    _DEFAULT_QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
     _MAX_NUMBER_MATCHES_INFORMATION = "Máximo número de resultados"
     _MIN_NUMBER_MATCHES_INFORMATION = "Menor número de resultados"
     _NUMBER_QUERIES_INFORMATION = "Número de buscas"
     _MAX_NUMBER_MATCHES = 5000000
     _MIN_NUMBER_MATCHES = 1
     _NUMBER_QUERIES = 100
-
-    @property
-    def query_pool_file_path(self):
-        return Mhr._QUERY_POOL_FILE_PATH
 
     @property
     def experiment_details(self):
@@ -197,14 +212,24 @@ class Mhr(AbsBaseEstimator):
 
     def __init__(self, crawler_api):
         super().__init__(crawler_api)
+        self.query_pool_file_path = Mhr._DEFAULT_QUERY_POOL_FILE_PATH
         self.__lock_accumulators = Lock()
         self.__lock_query_list = Lock()
         self.__query_count = 0
         self.__total_matches = 0
         self.__total_documents_returned = 0
         self.__document_id_dict = {}
-        self.__query_list = self._read_query_pool()
-        self.__query_pool_size = len(self.__query_list)
+        self.__query_pool = None
+        self.__query_pool_size = None
+        self.__progress_count = 0
+
+    def _reset(self):
+        self.__query_count = 0
+        self.__total_matches = 0
+        self.__total_documents_returned = 0
+        self.__document_id_dict = {}
+        self.__query_pool = self._read_query_pool()
+        self.__query_pool_size = len(self.__query_pool)
         self.__progress_count = 0
 
     def _take_query(self):
@@ -214,12 +239,11 @@ class Mhr(AbsBaseEstimator):
             self._report_progress(self.__progress_count, Mhr._NUMBER_QUERIES)
             if self.__query_pool_size > 0:
                 random_index = random.randrange(self.__query_pool_size)
-                query = self.__query_list[random_index]
-                del (self.__query_list[random_index])
+                query = self.__query_pool[random_index]
+                del (self.__query_pool[random_index])
                 self.__query_pool_size -= 1
         return query
 
-    # noinspection PyUnusedLocal
     def _collect_data_for_estimation(self, number):
         query = self._take_query()
         number_matches = self.crawler_api.retrieve_number_matches(query)
@@ -249,7 +273,7 @@ class Mhr(AbsBaseEstimator):
 
     def estimate(self):
         super().estimate()
-        self.__init__(self.crawler_api)
+        self._reset()
         self.parallelizer.execute_in_parallel(self.crawler_api.thread_limit, range(0, Mhr._NUMBER_QUERIES),
                                               self._collect_data_for_estimation)
         estimation = self._calculate_estimation()
@@ -258,17 +282,13 @@ class Mhr(AbsBaseEstimator):
 
 class RandomWalk(AbsBaseEstimator):
 
-    _QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
+    _DEFAULT_QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
     _MIN_NUMBER_MATCHES_FOR_SEED_QUERY_INFORMATION = "Número mínimo de resultados para busca semente"
     _MIN_NUMBER_MATCHES_FOR_SEED_QUERY = 2
     _MIN_NUMBER_WORDS_INFORMATION = "Número mínimo de palavras em um dcumento sorteado"
     _MIN_NUMBER_WORDS = 2
     _RANDOM_WALK_SAMPLE_SIZE_INFORMATION = "Número de nós visitados durante um \"random walk\""
     _RANDOM_WALK_SAMPLE_SIZE = 5000
-
-    @property
-    def query_pool_file_path(self):
-        return RandomWalk._QUERY_POOL_FILE_PATH
 
     @property
     def experiment_details(self):
@@ -282,6 +302,7 @@ class RandomWalk(AbsBaseEstimator):
 
     def __init__(self, crawler_api):
         super().__init__(crawler_api)
+        self.query_pool_file_path = RandomWalk._DEFAULT_QUERY_POOL_FILE_PATH
 
     def estimate(self):
         super().estimate()
@@ -343,7 +364,7 @@ class RandomWalk(AbsBaseEstimator):
 
 class SumEst(AbsBaseEstimator):
 
-    _QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
+    _DEFAULT_QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
     _THREAD_LIMIT = 10
     _ITERATION_NUMBER = 100
     _POOL_SAMPLE_SIZE = 1000
@@ -353,10 +374,6 @@ class SumEst(AbsBaseEstimator):
     _PAIR_DOCUMENT_INDEX = 1
 
     @property
-    def query_pool_file_path(self):
-        return SumEst._QUERY_POOL_FILE_PATH
-
-    @property
     def experiment_details(self):
         additional_information = {SumEst._ITERATION_NUMBER_INFORMATION: SumEst._ITERATION_NUMBER,
                                   SumEst._POOL_SAMPLE_SIZE_INFORMATION: SumEst._POOL_SAMPLE_SIZE}
@@ -364,6 +381,7 @@ class SumEst(AbsBaseEstimator):
 
     def __init__(self, crawler_api):
         super().__init__(crawler_api)
+        self.query_pool_file_path = SumEst._DEFAULT_QUERY_POOL_FILE_PATH
 
     def estimate(self):
         super().estimate()
@@ -438,7 +456,6 @@ class SumEst(AbsBaseEstimator):
         query_pool_size = len(query_pool)
         lock = Lock()
 
-        # noinspection PyUnusedLocal
         def iteration(iteration_number):
             nonlocal query_pool, query_pool_size, count, lock
             random_index = random.randrange(0, query_pool_size)
@@ -472,16 +489,12 @@ class SumEst(AbsBaseEstimator):
 
 class BroderEtAl(AbsBaseEstimator):
 
-    _QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
+    _DEFAULT_QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
     _THREAD_LIMIT = 10
     _QUERY_RANDOM_SAMPLE_SIZE_INFORMATION = "Size of the random sample of queries"
     _DOCUMENT_RANDOM_SAMPLE_SIZE_INFORMATION = "Size of the random sample of documents"
     _QUERY_RANDOM_SAMPLE_SIZE = 200
     _DOCUMENT_RANDOM_SAMPLE_SIZE = 1000
-
-    @property
-    def query_pool_file_path(self):
-        return BroderEtAl._QUERY_POOL_FILE_PATH
 
     @property
     def experiment_details(self):
@@ -493,6 +506,7 @@ class BroderEtAl(AbsBaseEstimator):
 
     def __init__(self, crawler_api):
         super().__init__(crawler_api)
+        self.query_pool_file_path = BroderEtAl._DEFAULT_QUERY_POOL_FILE_PATH
 
     def estimate(self):
         super().estimate()
