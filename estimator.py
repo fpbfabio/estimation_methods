@@ -195,7 +195,7 @@ class AbsBaseEstimator(AbsEstimator, metaclass=ABCMeta):
 
 class Mhr(AbsBaseEstimator):
 
-    _DEFAULT_QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
+    _DEFAULT_QUERY_POOL_FILE_PATH = "/home/fabio/SolrFiles/Cores/WordLists/new_shine.txt"
     _MAX_NUMBER_MATCHES_INFORMATION = "Máximo número de resultados"
     _MIN_NUMBER_MATCHES_INFORMATION = "Menor número de resultados"
     _NUMBER_QUERIES_INFORMATION = "Número de buscas"
