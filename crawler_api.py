@@ -244,12 +244,6 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
                                                     is_to_download_content, offset, limit)
         return search_result
 
-    def _terminate_if_inconsistency(self, query, search_result):
-        number_downloaded_results = len(search_result.results)
-        if number_downloaded_results != search_result.number_results:
-            self.terminator.terminate("ERROR - number_downloaded_results != search_result.number_results - query = "
-                                      + query)
-
     def _download_more_results_if_needed(self, query, number_matches, data_list):
         number_downloaded_results = len(data_list)
         if number_downloaded_results > number_matches:
@@ -285,9 +279,12 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
             search_result = self.factory.create_search_result(0, [])
             self._save_result(file_path, search_result)
             return search_result
-        data_list = self._safe_download(query, number_matches, 0)
+        data_list = self._extract_data_list_from_soup(soup)
+        if not self._is_expected_amount_of_data(data_list, number_matches, 0):
+            data_list = self._download_until_expected_amount_of_data_is_extracted(query, number_matches, 0)
         search_result = self._download_more_results_if_needed(query, number_matches, data_list)
-        self._terminate_if_inconsistency(query, search_result)
+        if len(search_result.results) != number_matches:
+            self.terminator.terminate("ERROR - len(search_result.results) != number_matches - query = " + query)
         self._save_result(file_path, search_result)
         return search_result
 
@@ -296,22 +293,25 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         data_list = []
         for i in range(0, number_additional_downloads):
             number_downloaded_results = starting_number_downloaded_results + i * self.max_results_per_page
-            list_from_soup = self._safe_download(query, number_matches, number_downloaded_results)
+            list_from_soup = self._download_until_expected_amount_of_data_is_extracted(query, number_matches,
+                                                                                       number_downloaded_results)
             data_list = itertools.chain(data_list, list_from_soup)
         data_list = list(data_list)
         return data_list
 
-    def _safe_download(self, query, number_matches, number_downloaded_results):
+    def _is_expected_amount_of_data(self, data_list, number_matches, number_previously_downloaded_results):
+        if number_matches - number_previously_downloaded_results >= self.max_results_per_page:
+            return len(data_list) == self.max_results_per_page
+        else:
+            return len(data_list) == number_matches % self.max_results_per_page
+
+    def _download_until_expected_amount_of_data_is_extracted(self, query, number_matches, number_downloaded_results):
         list_from_soup = []
         while True:
             web_page = self._attempt_download(query, number_downloaded_results)
             soup = BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
             list_from_soup = self._extract_data_list_from_soup(soup)
-            if number_matches - number_downloaded_results >= self.max_results_per_page:
-                is_result_valid = len(list_from_soup) == self.max_results_per_page
-            else:
-                is_result_valid = len(list_from_soup) == number_matches % self.max_results_per_page
-            if is_result_valid:
+            if self._is_expected_amount_of_data(list_from_soup, number_matches, number_downloaded_results):
                 break
             else:
                 print("ERROR - len(list) = " + str(len(list_from_soup)) + " but number matches = " +
