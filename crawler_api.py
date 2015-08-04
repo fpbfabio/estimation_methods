@@ -186,6 +186,7 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=ABCMeta):
 
 class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
 
+    _NUMBER_ATTEMPTS_GET_EXPECTED_AMOUNT_OF_DATA = 3
     _DATA_FILE_EXTENSION = ".pkl"
     _PAGE_LOAD_TIMEOUT = 30
     _CRAWL_DELAY = 1
@@ -233,7 +234,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         pass
 
     def download_entire_data_set(self):
-        self.terminator.terminate("ERROR - Invalid operation")
+        self.terminator.terminate("ERROR - INVALID OPERATION")
 
     def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0, limit=None):
         file_path = self._build_file_path(query)
@@ -247,7 +248,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
     def _download_more_results_if_needed(self, query, number_matches, data_list):
         number_downloaded_results = len(data_list)
         if number_downloaded_results > number_matches:
-            self.terminator.terminate("ERROR - number_downloaded_results > number_matches")
+            return self.factory.create_search_result(number_matches, data_list)
         number_additional_downloads = self._calculate_number_additional_downloads(number_matches,
                                                                                   number_downloaded_results)
         if number_additional_downloads > 0:
@@ -284,7 +285,8 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
             data_list = self._download_until_expected_amount_of_data_is_extracted(query, number_matches, 0)
         search_result = self._download_more_results_if_needed(query, number_matches, data_list)
         if len(search_result.results) != number_matches:
-            self.terminator.terminate("ERROR - len(search_result.results) != number_matches - query = " + query)
+            print("ERROR - NUMBER OF DATA ITEMS != NUMBER OF MATCHES IN QUERY =  " + query)
+            print("ERROR IGNORED")
         self._save_result(file_path, search_result)
         return search_result
 
@@ -307,17 +309,19 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
 
     def _download_until_expected_amount_of_data_is_extracted(self, query, number_matches, number_downloaded_results):
         list_from_soup = []
-        while True:
+        for i in range(0, AbsWebsiteCrawlerApi._NUMBER_ATTEMPTS_GET_EXPECTED_AMOUNT_OF_DATA):
             web_page = self._attempt_download(query, number_downloaded_results)
             soup = BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
             list_from_soup = self._extract_data_list_from_soup(soup)
             if self._is_expected_amount_of_data(list_from_soup, number_matches, number_downloaded_results):
-                break
+                return list_from_soup
             else:
-                print("ERROR - len(list) = " + str(len(list_from_soup)) + " but number matches = " +
-                      str(number_matches) + " and max results per page = " + str(self.max_results_per_page) +
-                      " - query = " + str(query) + " and number of downloaded results = " +
-                      str(number_downloaded_results))
+                print("DETECTED INCONSISTENCY")
+                print("NUMBER OF ITEMS IN THE PAGE = " + str(len(list_from_soup)))
+                print("NUMBER OF MATCHES = " + str(number_matches))
+                print("NUMBER OF RESULTS PER PAGE = " + str(self.max_results_per_page))
+                print("QUERY = " + str(query))
+        print("INCONSISTENCY COULD NOT BE SOLVED")
         return list_from_soup
 
     def _build_file_path(self, query):
@@ -361,7 +365,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
             self.inc_download()
             break
         if page_source is None:
-            self.terminator.terminate("ERROR - Internet connection failure")
+            self.terminator.terminate("ERROR - INTERNET CONNECTION FAILURE")
         return page_source
 
     def _multiple_replace(self, dictionary, string):
@@ -376,8 +380,6 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
             return math.ceil((number_matches - number_downloaded_results) / self.max_results_per_page)
 
     def _save_result(self, file_path, search_result):
-        if search_result.number_results < len(search_result.results):
-            self.terminator.terminate("ERROR - Search result corrupted - " + file_path)
         with open(file_path, "wb") as archive:
             pickle.dump(search_result, archive)
 
