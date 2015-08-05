@@ -225,6 +225,11 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
     def _handle_inconsistent_page(self, page_data_list):
         pass
 
+    @abstractmethod
+    def __init__(self):
+        super().__init__()
+        self._clean_up_data_folder()
+
     def download_entire_data_set(self):
         self.terminator.terminate("ERROR - INVALID OPERATION")
 
@@ -236,6 +241,15 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         search_result = self._filter_result_content(search_result, is_to_download_id,
                                                     is_to_download_content, offset, limit)
         return search_result
+
+    def _clean_up_data_folder(self):
+        for the_file in os.listdir(self.data_folder_path):
+            file_path = os.path.join(self.data_folder_path, the_file)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except:
+                pass
 
     def _download_more_results_if_needed(self, query, number_matches, data_list):
         number_downloaded_results = len(data_list)
@@ -616,6 +630,9 @@ class ACMCrawlerApi(AbsWebsiteCrawlerApi):
     _ABSTRACT_TAG = "div"
     _ABSTRACT_TAG_ATTRIBUTE = "class"
     _ABSTRACT_TAG_ATTRIBUTE_VALUE = "abstract2"
+
+    def __init__(self):
+        super().__init__()
 
     @property
     def _limit_results(self):
