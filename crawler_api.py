@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 import json
 import os
 import re
-from threading import Thread, Lock
+from threading import Lock
 import itertools
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
@@ -153,18 +153,6 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=ABCMeta):
     def inc_download(self):
         with self.__lock:
             self.download_count += 1
-
-    def execute_in_parallel(self, collection, callback):
-        thread_list = []
-        for item in collection:
-            if len(thread_list) >= self.thread_limit:
-                thread_list[0].join()
-                del (thread_list[0])
-            thread = Thread(target=callback, args=(item,))
-            thread_list.append(thread)
-            thread.start()
-        for thread in thread_list:
-            thread.join()
 
     def extract_words(self, text):
         word = []
