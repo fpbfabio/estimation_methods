@@ -233,6 +233,10 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
     def _calculate_offset(self, offset):
         pass
 
+    @abstractmethod
+    def _handle_inconsistent_page(self, page_data_list):
+        pass
+
     def download_entire_data_set(self):
         self.terminator.terminate("ERROR - INVALID OPERATION")
 
@@ -262,14 +266,6 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         if not os.path.exists(file_path):
             return None
         search_result = self._get_saved_result(file_path)
-        if search_result is None:
-            return None
-        web_page = self._attempt_download(query, 0)
-        soup = BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
-        number_matches = self._extract_number_matches_from_soup(soup)
-        if (number_matches != search_result.number_results
-                or search_result.number_results != len(search_result.results)):
-            return None
         return search_result
 
     def _download_completely_from_web(self, query, file_path):
@@ -322,6 +318,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
                 print("NUMBER OF RESULTS PER PAGE = " + str(self.max_results_per_page))
                 print("QUERY = " + str(query))
         print("INCONSISTENCY COULD NOT BE SOLVED")
+        list_from_soup = self._handle_inconsistent_page(list_from_soup)
         return list_from_soup
 
     def _build_file_path(self, query):
@@ -532,6 +529,9 @@ class IEEECrawlerApi(AbsWebsiteCrawlerApi):
     def _calculate_offset(self, offset):
         return int((offset + self.max_results_per_page) / self.max_results_per_page)
 
+    def _handle_inconsistent_page(self, page_data_list):
+        return []
+
     def _extract_number_matches_from_soup(self, soup):
         dictionary = {IEEECrawlerApi._NO_RESULTS_TAG_ATTRIBUTE:
                       IEEECrawlerApi._NO_RESULTS_TAG_ATTRIBUTE_VALUE}
@@ -647,6 +647,9 @@ class ACMCrawlerApi(AbsWebsiteCrawlerApi):
     @property
     def base_url(self):
         return ACMCrawlerApi._BASE_URL
+
+    def _handle_inconsistent_page(self, page_data_list):
+        return page_data_list
 
     def _calculate_offset(self, offset):
         return int(2 * offset / self.max_results_per_page)
