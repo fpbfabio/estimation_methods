@@ -186,7 +186,7 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=ABCMeta):
 
 class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
 
-    _NUMBER_ATTEMPTS_GET_EXPECTED_AMOUNT_OF_DATA = 3
+    _NUMBER_ATTEMPTS_GET_EXPECTED_AMOUNT_OF_DATA = 5
     _DATA_FILE_EXTENSION = ".pkl"
     _PAGE_LOAD_TIMEOUT = 30
     _CRAWL_DELAY = 1
