@@ -76,7 +76,7 @@ class Logger(AbsLogger):
 
     def write_header(self):
         with open(self.__experiment_results_file_path, "a+") as file:
-            file.write(str(self.__data_set_size) + "," + os.linesep)
+            file.write("Gabarito = " + str(self.__data_set_size) + "," + os.linesep)
             file.write("Iteração,Estimativa,Erro,Duração,Conexões," + os.linesep)
 
     def write_result_iteration(self, iteration_number, result, duration, cost):

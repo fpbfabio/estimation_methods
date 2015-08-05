@@ -314,6 +314,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
             else:
                 print("DETECTED INCONSISTENCY")
                 print("NUMBER OF ITEMS IN THE PAGE = " + str(len(list_from_soup)))
+                print("NUMBER OF DOWNLOADED RESULTS = " + str(number_downloaded_results))
                 print("NUMBER OF MATCHES = " + str(number_matches))
                 print("NUMBER OF RESULTS PER PAGE = " + str(self.max_results_per_page))
                 print("QUERY = " + str(query))
