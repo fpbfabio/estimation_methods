@@ -225,10 +225,36 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
     def _handle_inconsistent_page(self, page_data_list):
         pass
 
+    @classmethod
+    @abstractmethod
+    def _get_url_with_data_set_size(cls):
+        pass
+
+    @classmethod
+    @abstractmethod
+    def _extract_data_set_size(cls, soup):
+        pass
+
     @abstractmethod
     def __init__(self):
         super().__init__()
         self._clean_up_data_folder()
+
+    @classmethod
+    def _test_if_page_with_data_set_size_loaded(cls, web_driver):
+        page_source = web_driver.execute_script(AbsWebsiteCrawlerApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)
+        soup = BeautifulSoup(page_source, AbsWebsiteCrawlerApi._HTML_PARSER)
+        return cls._extract_data_set_size(soup) != -1
+
+    @classmethod
+    def get_data_set_size(cls):
+        web_driver = webdriver.PhantomJS()
+        web_driver.get(cls._get_url_with_data_set_size())
+        wait = WebDriverWait(web_driver, AbsWebsiteCrawlerApi._PAGE_LOAD_TIMEOUT)
+        wait.until(cls._test_if_page_with_data_set_size_loaded)
+        page_source = web_driver.execute_script(AbsWebsiteCrawlerApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)
+        soup = BeautifulSoup(page_source, AbsWebsiteCrawlerApi._HTML_PARSER)
+        return cls._extract_data_set_size(soup)
 
     def download_entire_data_set(self):
         self.terminator.terminate("ERROR - INVALID OPERATION")
@@ -402,11 +428,10 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
 
 class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
 
+    LIMIT_RESULTS = 5000000
     _DATA_SET_SIZE_TAG = "a"
     _DATA_SET_SIZE_TAG_ATTRIBUTE = "href"
     _DATA_SET_SIZE_TAG_ATTRIBUTE_VALUE = "/search/searchresult.jsp?sortType=desc_p_Publication_Year&newsearch=true"
-    DATA_SET_SIZE = 3707749
-    LIMIT_RESULTS = 5000000
     _THREAD_LIMIT = 1
     _WEB_DOMAIN = "http://ieeexplore.ieee.org"
     _NO_RESULTS_TAG = "li"
@@ -458,8 +483,12 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
     def data_folder_path(self):
         return AbsIEEECrawlerApi._DATA_FOLDER_PATH
 
-    @staticmethod
-    def _extract_data_set_size(soup):
+    @classmethod
+    def _get_url_with_data_set_size(cls):
+        return AbsIEEECrawlerApi._WEB_DOMAIN
+
+    @classmethod
+    def _extract_data_set_size(cls, soup):
         dictionary = {AbsIEEECrawlerApi._DATA_SET_SIZE_TAG_ATTRIBUTE:
                       AbsIEEECrawlerApi._DATA_SET_SIZE_TAG_ATTRIBUTE_VALUE}
         soup = soup.find(AbsIEEECrawlerApi._DATA_SET_SIZE_TAG, dictionary)
@@ -467,22 +496,6 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
             return -1
         data_set_size = int(str(soup.next).replace(",", ""))
         return data_set_size
-
-    @staticmethod
-    def _test_if_page_with_data_set_size_loaded(web_driver):
-        page_source = web_driver.execute_script(AbsWebsiteCrawlerApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)
-        soup = BeautifulSoup(page_source, AbsWebsiteCrawlerApi._HTML_PARSER)
-        return AbsIEEECrawlerApi._extract_data_set_size(soup) != -1
-
-    @staticmethod
-    def get_data_set_size():
-        web_driver = webdriver.PhantomJS()
-        web_driver.get(AbsIEEECrawlerApi._WEB_DOMAIN)
-        wait = WebDriverWait(web_driver, AbsWebsiteCrawlerApi._PAGE_LOAD_TIMEOUT)
-        wait.until(AbsIEEECrawlerApi._test_if_page_with_data_set_size_loaded)
-        page_source = web_driver.execute_script(AbsWebsiteCrawlerApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)
-        soup = BeautifulSoup(page_source, AbsWebsiteCrawlerApi._HTML_PARSER)
-        return AbsIEEECrawlerApi._extract_data_set_size(soup)
 
     def _calculate_offset(self, offset):
         return int((offset + self.max_results_per_page) / self.max_results_per_page)
@@ -565,15 +578,19 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
             return str(title)
 
 
-class AbsACMCrawlerApi(AbsWebsiteCrawlerApi):
+class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
 
-    DATA_SET_SIZE = 446154
     LIMIT_RESULTS = 5000000
+    _URL_WITH_DATA_SET_SIZE = "http://dl.acm.org/results.cfm?h=1&cfid=534239095&cftoken=62563351&query=test&dlr=GUIDE"
     _THREAD_LIMIT = 1
     _ELEMENT_WITH_NUMBER_MATCHES_TAG = "b"
     _DATA_FOLDER_PATH = "/media/fabio/FABIO/acm"
     _MAX_RESULTS_PER_PAGE = 20
     _WEB_DOMAIN = "http://dl.acm.org/"
+    _DATA_SET_SIZE_TAG_PARENT = "span"
+    _DATA_SET_SIZE_TAG_PARENT_ATTRIBUTE_VALUE = "class"
+    _DATA_SET_SIZE_TAG_PARENT_ATTRIBUTE = "text10"
+    _DATA_SET_SIZE_TAG = "strong"
     _NO_RESULTS_TAG = "font"
     _NO_RESULTS_TAG_ATTRIBUTE = "size"
     _NO_RESULTS_TAG_ATTRIBUTE_VALUE = "+1"
@@ -608,6 +625,23 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi):
     @property
     def base_url(self):
         pass
+
+    @classmethod
+    def _get_url_with_data_set_size(cls):
+        return AbsACMCrawlerApi._URL_WITH_DATA_SET_SIZE
+
+    @classmethod
+    def _extract_data_set_size(cls, soup):
+        dictionary = {AbsACMCrawlerApi._DATA_SET_SIZE_TAG_PARENT_ATTRIBUTE:
+                      AbsACMCrawlerApi._DATA_SET_SIZE_TAG_PARENT_ATTRIBUTE_VALUE}
+        soup = soup.find(AbsACMCrawlerApi._DATA_SET_SIZE_TAG_PARENT, dictionary)
+        if soup is None:
+            return -1
+        soup = soup.find(AbsACMCrawlerApi._DATA_SET_SIZE_TAG, dictionary)
+        if soup is None:
+            return -1
+        data_set_size = int(str(soup.next).replace(",", ""))
+        return data_set_size
 
     def _handle_inconsistent_page(self, page_data_list):
         return page_data_list

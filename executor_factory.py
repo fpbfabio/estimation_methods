@@ -86,7 +86,7 @@ class ACMExecutorFactory(AbsExecutorFactory):
     def create_logger(self, query_pool_file_path):
         return Logger(ACMExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH,
                       ACMExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH,
-                      AbsACMCrawlerApi.DATA_SET_SIZE,
+                      AbsACMCrawlerApi.get_data_set_size(),
                       AbsACMCrawlerApi.LIMIT_RESULTS)
 
 
@@ -101,5 +101,5 @@ class ACMOnlyTitleExecutorFactory(AbsExecutorFactory):
     def create_logger(self, query_pool_file_path):
         return Logger(ACMOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH,
                       ACMOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH,
-                      AbsACMCrawlerApi.DATA_SET_SIZE,
+                      AbsACMCrawlerApi.get_data_set_size(),
                       AbsACMCrawlerApi.LIMIT_RESULTS)
