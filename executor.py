@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 import signal
 from datetime import timedelta, datetime
 
-from executor_factory import IEEEExecutorFactory, ACMExecutorFactory, SolrExecutorFactory
+from executor_factory import IEEEExecutorFactory, ACMExecutorFactory, SolrExecutorFactory, IEEEOnlyTitleExecutorFactory
 
 
 class AbsExecutor(metaclass=ABCMeta):
@@ -75,9 +75,9 @@ class AbsBaseExecutor(AbsExecutor, metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(self):
-        self.__factory = None
-        self.__estimator = None
-        self.__logger = None
+        self.__factory = self._create_factory()
+        self.__estimator = self.factory.create_estimator()
+        self.__logger = self.factory.create_logger(self.__estimator.query_pool_file_path)
         self.__number_iterations = None
 
     @property
@@ -112,6 +112,10 @@ class AbsBaseExecutor(AbsExecutor, metaclass=ABCMeta):
     def number_iterations(self, val):
         self.__number_iterations = val
 
+    @abstractmethod
+    def _create_factory(self):
+        pass
+
     def _on_fatal_failure(self, signal_param, frame):
         class FatalFailure(Exception):
             pass
@@ -140,11 +144,11 @@ class SolrExecutor(AbsBaseExecutor):
 
     _NUMBER_ITERATIONS = 20
 
+    def _create_factory(self):
+        return SolrExecutorFactory()
+
     def __init__(self):
         super().__init__()
-        self.factory = SolrExecutorFactory()
-        self.estimator = self.factory.create_estimator()
-        self.logger = self.factory.create_logger(self.estimator.query_pool_file_path)
         self.number_iterations = SolrExecutor._NUMBER_ITERATIONS
 
 
@@ -152,21 +156,33 @@ class IEEEExecutor(AbsBaseExecutor):
 
     _NUMBER_ITERATIONS = 1
 
+    def _create_factory(self):
+        return IEEEExecutorFactory()
+
     def __init__(self):
         super().__init__()
-        self.factory = IEEEExecutorFactory()
-        self.estimator = self.factory.create_estimator()
-        self.logger = self.factory.create_logger(self.estimator.query_pool_file_path)
         self.number_iterations = IEEEExecutor._NUMBER_ITERATIONS
+
+
+class IEEEOnlyTitleExecutor(AbsBaseExecutor):
+
+    _NUMBER_ITERATIONS = 1
+
+    def _create_factory(self):
+        return IEEEOnlyTitleExecutorFactory()
+
+    def __init__(self):
+        super().__init__()
+        self.number_iterations = IEEEOnlyTitleExecutor._NUMBER_ITERATIONS
 
 
 class ACMExecutor(AbsBaseExecutor):
 
     _NUMBER_ITERATIONS = 1
 
+    def _create_factory(self):
+        return ACMExecutorFactory()
+
     def __init__(self):
         super().__init__()
-        self.factory = ACMExecutorFactory()
-        self.estimator = self.factory.create_estimator()
-        self.logger = self.factory.create_logger(self.estimator.query_pool_file_path)
         self.number_iterations = ACMExecutor._NUMBER_ITERATIONS

@@ -4,7 +4,7 @@ Module with an abstract factory class.
 
 from abc import ABCMeta, abstractmethod
 
-from crawler_api import ACMCrawlerApi, IEEECrawlerApi, SolrCrawlerApi
+from crawler_api import ACMCrawlerApi, AbsIEEECrawlerApi, IEEECrawlerApi, SolrCrawlerApi, IEEEOnlyTitleCrawlerApi
 from estimator import Mhr
 from logger import Logger
 
@@ -55,8 +55,23 @@ class IEEEExecutorFactory(AbsExecutorFactory):
     def create_logger(self, query_pool_file_path):
         return Logger(IEEEExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH,
                       IEEEExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH,
-                      IEEECrawlerApi.DATA_SET_SIZE,
-                      IEEECrawlerApi.LIMIT_RESULTS)
+                      AbsIEEECrawlerApi.DATA_SET_SIZE,
+                      AbsIEEECrawlerApi.LIMIT_RESULTS)
+
+
+class IEEEOnlyTitleExecutorFactory(AbsExecutorFactory):
+
+    _EXPERIMENT_RESULTS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/IEEEOnlyTitle/ExperimentResults.csv"
+    _EXPERIMENT_DETAILS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/IEEEOnlyTitle/Log.txt"
+
+    def create_estimator(self):
+        return Mhr(IEEEOnlyTitleCrawlerApi())
+
+    def create_logger(self, query_pool_file_path):
+        return Logger(IEEEOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH,
+                      IEEEOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH,
+                      AbsIEEECrawlerApi.DATA_SET_SIZE,
+                      AbsIEEECrawlerApi.LIMIT_RESULTS)
 
 
 class ACMExecutorFactory(AbsExecutorFactory):

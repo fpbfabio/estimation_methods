@@ -473,7 +473,7 @@ class SolrCrawlerApi(AbsBaseCrawlerApi):
         return search_result
 
 
-class IEEECrawlerApi(AbsWebsiteCrawlerApi):
+class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
 
     DATA_SET_SIZE = 3707749
     LIMIT_RESULTS = 5000000
@@ -502,32 +502,31 @@ class IEEECrawlerApi(AbsWebsiteCrawlerApi):
     _ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_TAG = "span"
     _ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE = "ng-if"
     _ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE_VALUE = "records.length === 1"
-    _BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
-                 + "queryText=<<query>>&rowsPerPage=100&pageNumber=<<offset>>&resultAction=ROWS_PER_PAGE")
     _DATA_FOLDER_PATH = "/media/fabio/FABIO/ieee"
 
     def __init__(self):
         super().__init__()
 
     @property
+    @abstractmethod
+    def base_url(self):
+        pass
+
+    @property
     def _limit_results(self):
-        return IEEECrawlerApi.LIMIT_RESULTS
+        return AbsIEEECrawlerApi.LIMIT_RESULTS
 
     @property
     def thread_limit(self):
-        return IEEECrawlerApi._THREAD_LIMIT
+        return AbsIEEECrawlerApi._THREAD_LIMIT
 
     @property
     def max_results_per_page(self):
-        return IEEECrawlerApi._MAX_RESULTS_PER_PAGE
-
-    @property
-    def base_url(self):
-        return IEEECrawlerApi._BASE_URL
+        return AbsIEEECrawlerApi._MAX_RESULTS_PER_PAGE
 
     @property
     def data_folder_path(self):
-        return IEEECrawlerApi._DATA_FOLDER_PATH
+        return AbsIEEECrawlerApi._DATA_FOLDER_PATH
 
     def _calculate_offset(self, offset):
         return int((offset + self.max_results_per_page) / self.max_results_per_page)
@@ -536,20 +535,20 @@ class IEEECrawlerApi(AbsWebsiteCrawlerApi):
         return []
 
     def _extract_number_matches_from_soup(self, soup):
-        dictionary = {IEEECrawlerApi._NO_RESULTS_TAG_ATTRIBUTE:
-                      IEEECrawlerApi._NO_RESULTS_TAG_ATTRIBUTE_VALUE}
-        no_results_element = soup.find(IEEECrawlerApi._NO_RESULTS_TAG, dictionary)
+        dictionary = {AbsIEEECrawlerApi._NO_RESULTS_TAG_ATTRIBUTE:
+                      AbsIEEECrawlerApi._NO_RESULTS_TAG_ATTRIBUTE_VALUE}
+        no_results_element = soup.find(AbsIEEECrawlerApi._NO_RESULTS_TAG, dictionary)
         if no_results_element is not None:
             return 0
-        dictionary = {IEEECrawlerApi._ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE:
-                      IEEECrawlerApi._ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE_VALUE}
-        one_result_element = soup.find(IEEECrawlerApi._ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_TAG,
+        dictionary = {AbsIEEECrawlerApi._ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE:
+                      AbsIEEECrawlerApi._ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE_VALUE}
+        one_result_element = soup.find(AbsIEEECrawlerApi._ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_TAG,
                                        dictionary)
         if one_result_element is not None:
             return 1
-        dictionary = {IEEECrawlerApi._ELEMENT_WITH_NUMBER_MATCHES_ATTRIBUTE:
-                      IEEECrawlerApi._ELEMENT_WITH_NUMBER_MATCHES_ATTRIBUTE_VALUE}
-        html_element = soup.find(IEEECrawlerApi._ELEMENT_WITH_NUMBER_MATCHES_TAG, dictionary)
+        dictionary = {AbsIEEECrawlerApi._ELEMENT_WITH_NUMBER_MATCHES_ATTRIBUTE:
+                      AbsIEEECrawlerApi._ELEMENT_WITH_NUMBER_MATCHES_ATTRIBUTE_VALUE}
+        html_element = soup.find(AbsIEEECrawlerApi._ELEMENT_WITH_NUMBER_MATCHES_TAG, dictionary)
         if html_element is not None:
             try:
                 contents = html_element.next.strip().split()
@@ -561,31 +560,31 @@ class IEEECrawlerApi(AbsWebsiteCrawlerApi):
         return number_matches
 
     def _extract_data_list_from_soup(self, soup):
-        dictionary = {IEEECrawlerApi._ITEM_TAG_ATTRIBUTE: IEEECrawlerApi._ITEM_TAG_ATTRIBUTE_VALUE}
-        item_tag_list = soup.find_all(IEEECrawlerApi._ITEM_TAG, dictionary)
+        dictionary = {AbsIEEECrawlerApi._ITEM_TAG_ATTRIBUTE: AbsIEEECrawlerApi._ITEM_TAG_ATTRIBUTE_VALUE}
+        item_tag_list = soup.find_all(AbsIEEECrawlerApi._ITEM_TAG, dictionary)
 
         def extract_data(item):
-            dictio = {IEEECrawlerApi._ID_TAG_ATTRIBUTE: IEEECrawlerApi._ID_TAG_ATTRIBUTE_VALUE}
-            identifier_tag = item.find(IEEECrawlerApi._ID_TAG, dictio)
-            dictio = {IEEECrawlerApi._TITLE_TAG_ATTRIBUTE: IEEECrawlerApi._TITLE_TAG_ATTRIBUTE_VALUE}
-            title_tag = item.find(IEEECrawlerApi._TITLE_TAG, dictio)
-            dictio = {IEEECrawlerApi._ABSTRACT_TAG_ATTRIBUTE:
-                      IEEECrawlerApi._ABSTRACT_TAG_ATTRIBUTE_VALUE}
-            abstract_tag = item.find(IEEECrawlerApi._ABSTRACT_TAG, dictio)
+            dictio = {AbsIEEECrawlerApi._ID_TAG_ATTRIBUTE: AbsIEEECrawlerApi._ID_TAG_ATTRIBUTE_VALUE}
+            identifier_tag = item.find(AbsIEEECrawlerApi._ID_TAG, dictio)
+            dictio = {AbsIEEECrawlerApi._TITLE_TAG_ATTRIBUTE: AbsIEEECrawlerApi._TITLE_TAG_ATTRIBUTE_VALUE}
+            title_tag = item.find(AbsIEEECrawlerApi._TITLE_TAG, dictio)
+            dictio = {AbsIEEECrawlerApi._ABSTRACT_TAG_ATTRIBUTE:
+                      AbsIEEECrawlerApi._ABSTRACT_TAG_ATTRIBUTE_VALUE}
+            abstract_tag = item.find(AbsIEEECrawlerApi._ABSTRACT_TAG, dictio)
             if identifier_tag is not None and title_tag is not None:
                 if abstract_tag is not None:
-                    data = self._create_data(identifier_tag[IEEECrawlerApi._HREF], title_tag.text,
+                    data = self._create_data(identifier_tag[AbsIEEECrawlerApi._HREF], title_tag.text,
                                              abstract_tag.text)
                 else:
-                    data = self._create_data(identifier_tag[IEEECrawlerApi._HREF], title_tag.text)
+                    data = self._create_data(identifier_tag[AbsIEEECrawlerApi._HREF], title_tag.text)
                 return data
             elif identifier_tag is None and title_tag is not None:
-                ampersand_index = title_tag[IEEECrawlerApi._HREF].find("&")
+                ampersand_index = title_tag[AbsIEEECrawlerApi._HREF].find("&")
                 if abstract_tag is not None:
-                    data = self._create_data(title_tag[IEEECrawlerApi._HREF][0:ampersand_index],
+                    data = self._create_data(title_tag[AbsIEEECrawlerApi._HREF][0:ampersand_index],
                                              title_tag.text, abstract_tag.text)
                 else:
-                    data = self._create_data(title_tag[IEEECrawlerApi._HREF][0:ampersand_index],
+                    data = self._create_data(title_tag[AbsIEEECrawlerApi._HREF][0:ampersand_index],
                                              title_tag.text)
                 return data
             else:
@@ -601,13 +600,40 @@ class IEEECrawlerApi(AbsWebsiteCrawlerApi):
         return data
 
     def _format_data_id(self, href):
-        return IEEECrawlerApi._WEB_DOMAIN + href
+        return AbsIEEECrawlerApi._WEB_DOMAIN + href
 
     def _format_data_content(self, title, abstract):
         if abstract is not None:
             return str(title) + os.linesep + os.linesep + str(abstract)
         else:
             return str(title)
+
+
+class IEEECrawlerApi(AbsIEEECrawlerApi):
+
+    _BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
+                 + "queryText=<<query>>&rowsPerPage=100&pageNumber=<<offset>>&resultAction=ROWS_PER_PAGE")
+
+    def __init__(self):
+        super().__init__()
+
+    @property
+    def base_url(self):
+        return IEEECrawlerApi._BASE_URL
+
+
+class IEEEOnlyTitleCrawlerApi(AbsIEEECrawlerApi):
+
+    _BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
+                 + "queryText=(\"Document%20Title\":<<query>>)&"
+                 + "rowsPerPage=100&pageNumber=<<offset>>&resultAction=ROWS_PER_PAGE")
+
+    def __init__(self):
+        super().__init__()
+
+    @property
+    def base_url(self):
+        return IEEEOnlyTitleCrawlerApi._BASE_URL
 
 
 class ACMCrawlerApi(AbsWebsiteCrawlerApi):
