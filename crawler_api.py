@@ -85,6 +85,14 @@ class AbsCrawlerApi(metaclass=ABCMeta):
         """
         pass
 
+    @classmethod
+    @abstractmethod
+    def get_data_set_size(cls):
+        """
+        Returns the size of the data set.
+        """
+        pass
+
     @abstractmethod
     def retrieve_number_matches(self, query):
         """
@@ -137,6 +145,11 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=ABCMeta):
         self.__factory = CrawlerApiFactory()
         self.__lock = Lock()
         self.__terminator = self.__factory.create_terminator()
+
+    @classmethod
+    @abstractmethod
+    def get_data_set_size(cls):
+        pass
 
     @abstractmethod
     def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0, limit=None):
@@ -686,7 +699,6 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
 
 class SolrCrawlerApi(AbsBaseCrawlerApi):
 
-    DATA_SET_SIZE = 19994
     LIMIT_RESULTS = 5000000
     _QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
     _THREAD_LIMIT = 5
@@ -714,6 +726,19 @@ class SolrCrawlerApi(AbsBaseCrawlerApi):
 
     def __init__(self):
         super().__init__()
+
+    @classmethod
+    def get_data_set_size(cls):
+        url = SolrCrawlerApi._URL.replace(SolrCrawlerApi._LIMIT_MASK, str(1))
+        url = url.replace(SolrCrawlerApi._QUERY_MASK, str("*"))
+        url = url.replace(SolrCrawlerApi._FIELD_TO_SEARCH_MASK, "*")
+        url = url.replace(SolrCrawlerApi._FIELDS_TO_RETURN_MASK, SolrCrawlerApi._ID_FIELD)
+        url = url.replace(SolrCrawlerApi._OFFSET_MASK, str(0))
+        response = urlopen(str(url))
+        data = response.read().decode(SolrCrawlerApi._ENCODING)
+        dictionary = json.loads(data)
+        data_set_size = int(dictionary[SolrCrawlerApi._RESPONSE_KEY][SolrCrawlerApi._NUMBER_MATCHES_KEY])
+        return data_set_size
 
     def download_entire_data_set(self):
         return self._download("*", True, True, 0, 1000000, "*")

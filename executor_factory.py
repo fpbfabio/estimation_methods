@@ -41,7 +41,7 @@ class SolrExecutorFactory(AbsExecutorFactory):
     def create_logger(self, query_pool_file_path):
         return Logger(SolrExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH,
                       SolrExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH,
-                      SolrCrawlerApi.DATA_SET_SIZE,
+                      SolrCrawlerApi.get_data_set_size(),
                       SolrCrawlerApi.LIMIT_RESULTS)
 
 
