@@ -7,7 +7,8 @@ from abc import ABCMeta, abstractmethod
 import signal
 from datetime import timedelta, datetime
 
-from executor_factory import IEEEExecutorFactory, ACMExecutorFactory, SolrExecutorFactory, IEEEOnlyTitleExecutorFactory
+from executor_factory import IEEEExecutorFactory, ACMExecutorFactory, SolrExecutorFactory, IEEEOnlyTitleExecutorFactory, \
+    ACMOnlyTitleExecutorFactory
 
 
 class AbsExecutor(metaclass=ABCMeta):
@@ -186,3 +187,15 @@ class ACMExecutor(AbsBaseExecutor):
     def __init__(self):
         super().__init__()
         self.number_iterations = ACMExecutor._NUMBER_ITERATIONS
+
+
+class ACMOnlyTitleExecutor(AbsBaseExecutor):
+
+    _NUMBER_ITERATIONS = 1
+
+    def _create_factory(self):
+        return ACMOnlyTitleExecutorFactory()
+
+    def __init__(self):
+        super().__init__()
+        self.number_iterations = ACMOnlyTitleExecutor._NUMBER_ITERATIONS

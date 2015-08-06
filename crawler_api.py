@@ -665,13 +665,12 @@ class IEEEOnlyTitleCrawlerApi(AbsIEEECrawlerApi):
         return IEEEOnlyTitleCrawlerApi._BASE_URL
 
 
-class ACMCrawlerApi(AbsWebsiteCrawlerApi):
+class AbsACMCrawlerApi(AbsWebsiteCrawlerApi):
 
     DATA_SET_SIZE = 446154
     LIMIT_RESULTS = 5000000
     _THREAD_LIMIT = 1
     _ELEMENT_WITH_NUMBER_MATCHES_TAG = "b"
-    _BASE_URL = "http://dl.acm.org/results.cfm?query=<<query>>&start=<<offset>>1&dlr=ACM"
     _DATA_FOLDER_PATH = "/media/fabio/FABIO/acm"
     _MAX_RESULTS_PER_PAGE = 20
     _WEB_DOMAIN = "http://dl.acm.org/"
@@ -691,23 +690,24 @@ class ACMCrawlerApi(AbsWebsiteCrawlerApi):
 
     @property
     def _limit_results(self):
-        return ACMCrawlerApi.LIMIT_RESULTS
+        return AbsACMCrawlerApi.LIMIT_RESULTS
 
     @property
     def thread_limit(self):
-        return ACMCrawlerApi._THREAD_LIMIT
+        return AbsACMCrawlerApi._THREAD_LIMIT
 
     @property
     def max_results_per_page(self):
-        return ACMCrawlerApi._MAX_RESULTS_PER_PAGE
+        return AbsACMCrawlerApi._MAX_RESULTS_PER_PAGE
 
     @property
     def data_folder_path(self):
-        return ACMCrawlerApi._DATA_FOLDER_PATH
+        return AbsACMCrawlerApi._DATA_FOLDER_PATH
 
+    @abstractmethod
     @property
     def base_url(self):
-        return ACMCrawlerApi._BASE_URL
+        pass
 
     def _handle_inconsistent_page(self, page_data_list):
         return page_data_list
@@ -716,20 +716,21 @@ class ACMCrawlerApi(AbsWebsiteCrawlerApi):
         return int(2 * offset / self.max_results_per_page)
 
     def _extract_data_list_from_soup(self, soup):
-        dictionary = {ACMCrawlerApi._TITLE_TAG_ATTRIBUTE: ACMCrawlerApi._TITLE_TAG_ATTRIBUTE_VALUE}
-        title_tag_list = soup.find_all(ACMCrawlerApi._TITLE_TAG, dictionary)
-        dictionary = {ACMCrawlerApi._ABSTRACT_TAG_ATTRIBUTE: ACMCrawlerApi._ABSTRACT_TAG_ATTRIBUTE_VALUE}
-        abstract_list = [x.parent.parent.parent.find(ACMCrawlerApi._ABSTRACT_TAG, dictionary) for x in title_tag_list]
-        data_list = [self._create_data(x[ACMCrawlerApi._TITLE_TAG_ID_ATTRIBUTE], x.text, y)
+        dictionary = {AbsACMCrawlerApi._TITLE_TAG_ATTRIBUTE: AbsACMCrawlerApi._TITLE_TAG_ATTRIBUTE_VALUE}
+        title_tag_list = soup.find_all(AbsACMCrawlerApi._TITLE_TAG, dictionary)
+        dictionary = {AbsACMCrawlerApi._ABSTRACT_TAG_ATTRIBUTE: AbsACMCrawlerApi._ABSTRACT_TAG_ATTRIBUTE_VALUE}
+        abstract_list = [x.parent.parent.parent.find(AbsACMCrawlerApi._ABSTRACT_TAG, dictionary) for x in
+                         title_tag_list]
+        data_list = [self._create_data(x[AbsACMCrawlerApi._TITLE_TAG_ID_ATTRIBUTE], x.text, y)
                      for x, y in zip(title_tag_list, abstract_list)]
         return data_list
 
     def _extract_number_matches_from_soup(self, soup):
-        dictionary = {ACMCrawlerApi._NO_RESULTS_TAG_ATTRIBUTE: ACMCrawlerApi._NO_RESULTS_TAG_ATTRIBUTE_VALUE}
-        no_results_element = soup.find(ACMCrawlerApi._NO_RESULTS_TAG, dictionary)
+        dictionary = {AbsACMCrawlerApi._NO_RESULTS_TAG_ATTRIBUTE: AbsACMCrawlerApi._NO_RESULTS_TAG_ATTRIBUTE_VALUE}
+        no_results_element = soup.find(AbsACMCrawlerApi._NO_RESULTS_TAG, dictionary)
         if no_results_element is not None:
             return 0
-        html_element = soup.find(ACMCrawlerApi._ELEMENT_WITH_NUMBER_MATCHES_TAG)
+        html_element = soup.find(AbsACMCrawlerApi._ELEMENT_WITH_NUMBER_MATCHES_TAG)
         if html_element is not None:
             try:
                 number_matches = int(str(html_element.text.replace(",", "")))
@@ -740,10 +741,29 @@ class ACMCrawlerApi(AbsWebsiteCrawlerApi):
         return number_matches
 
     def _create_data(self, href, title, abstract_tag):
-        identifier = ACMCrawlerApi._WEB_DOMAIN + href[0:href.find("&")]
+        identifier = AbsACMCrawlerApi._WEB_DOMAIN + href[0:href.find("&")]
         if abstract_tag is not None:
             content = str(title) + os.linesep + str(abstract_tag.text)
         else:
             content = str(title)
         data = self.factory.create_data(identifier, content)
         return data
+
+
+class ACMCrawlerApi(AbsACMCrawlerApi):
+
+    _BASE_URL = "http://dl.acm.org/results.cfm?query=<<query>>&start=<<offset>>1&dlr=ACM"
+
+    @property
+    def base_url(self):
+        return ACMCrawlerApi._BASE_URL
+
+
+class ACMOnlyTitleCrawlerApi(AbsACMCrawlerApi):
+
+    _BASE_URL = ("http://dl.acm.org/results.cfm?within=<<query>>&adv=1&termzone=Title&" +
+                 "allofem=<<query>>&start=<<offset>>&dlr=ACM")
+
+    @property
+    def base_url(self):
+        return ACMOnlyTitleCrawlerApi._BASE_URL

@@ -4,7 +4,8 @@ Module with an abstract factory class.
 
 from abc import ABCMeta, abstractmethod
 
-from crawler_api import ACMCrawlerApi, AbsIEEECrawlerApi, IEEECrawlerApi, SolrCrawlerApi, IEEEOnlyTitleCrawlerApi
+from crawler_api import ACMCrawlerApi, AbsIEEECrawlerApi, IEEECrawlerApi, SolrCrawlerApi, IEEEOnlyTitleCrawlerApi, \
+    AbsACMCrawlerApi, ACMOnlyTitleCrawlerApi
 from estimator import Mhr
 from logger import Logger
 
@@ -85,5 +86,20 @@ class ACMExecutorFactory(AbsExecutorFactory):
     def create_logger(self, query_pool_file_path):
         return Logger(ACMExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH,
                       ACMExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH,
-                      ACMCrawlerApi.DATA_SET_SIZE,
-                      ACMCrawlerApi.LIMIT_RESULTS)
+                      AbsACMCrawlerApi.DATA_SET_SIZE,
+                      AbsACMCrawlerApi.LIMIT_RESULTS)
+
+
+class ACMOnlyTitleExecutorFactory(AbsExecutorFactory):
+
+    _EXPERIMENT_RESULTS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/ACMOnlyTitle/ExperimentResults.csv"
+    _EXPERIMENT_DETAILS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/ACMOnlyTitle/Log.txt"
+
+    def create_estimator(self):
+        return Mhr(ACMOnlyTitleCrawlerApi())
+
+    def create_logger(self, query_pool_file_path):
+        return Logger(ACMOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH,
+                      ACMOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH,
+                      AbsACMCrawlerApi.DATA_SET_SIZE,
+                      AbsACMCrawlerApi.LIMIT_RESULTS)
