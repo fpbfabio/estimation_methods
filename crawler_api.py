@@ -796,6 +796,7 @@ class IEEECrawlerApi(AbsIEEECrawlerApi):
 class IEEEOnlyTitleCrawlerApi(AbsIEEECrawlerApi):
 
     _BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
+                 + "action=search&sortType=&searchField=Search_All&matchBoolean=true&"
                  + "queryText=(\"Document%20Title\":<<query>>)&"
                  + "rowsPerPage=100&pageNumber=<<offset>>&resultAction=ROWS_PER_PAGE")
 
@@ -818,8 +819,11 @@ class ACMCrawlerApi(AbsACMCrawlerApi):
 
 class ACMOnlyTitleCrawlerApi(AbsACMCrawlerApi):
 
-    _BASE_URL = ("http://dl.acm.org/results.cfm?within=<<query>>&adv=1&termzone=Title&" +
-                 "allofem=<<query>>&start=<<offset>>&dlr=ACM")
+    _BASE_URL = ("http://dl.acm.org/results.cfm?query=%28Title%3A<<query>>%29&"
+                 + "querydisp=%28Title%3A<<query>>%29&source_query=Owner%3AACM&"
+                 + "start=<<offset>>1&srt=score%20dsc&short=0&source_disp=&since_month=&"
+                 + "since_year=&before_month=&before_year=&coll=DL&dl=ACM&termshow=matchboolean&"
+                 + "range_query=&zadv=1&CFID=534239095&CFTOKEN=62563351")
 
     @property
     def base_url(self):

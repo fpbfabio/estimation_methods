@@ -237,8 +237,6 @@ class Mhr(AbsBaseEstimator):
     def _take_query(self):
         query = None
         with self.__lock_query_list:
-            self.__progress_count += 1
-            self._report_progress(self.__progress_count, Mhr._NUMBER_QUERIES)
             if self.__query_pool_size > 0:
                 random_index = random.randrange(self.__query_pool_size)
                 query = self.__query_pool[random_index]
@@ -248,29 +246,39 @@ class Mhr(AbsBaseEstimator):
 
     def _collect_data_for_estimation(self, number):
         query = self._take_query()
-        number_matches = self.crawler_api.retrieve_number_matches(query)
-        if Mhr._MIN_NUMBER_MATCHES <= number_matches <= Mhr._MAX_NUMBER_MATCHES:
-            document_list = self.crawler_api.download(query, True, False).results
-            id_list = []
-            number_documents_returned = 0
-            for document in document_list:
-                id_list.append(document.identifier)
-                number_documents_returned += 1
-            with self.__lock_accumulators:
-                self.__query_count += 1
-                self.__total_matches += number_matches
-                self.__total_documents_returned += number_documents_returned
-                for id_item in id_list:
-                    self.__document_id_dict[id_item] = self.__document_id_dict.get(id_item, 0) + 1
+        while query is not None:
+            number_matches = self.crawler_api.retrieve_number_matches(query)
+            if Mhr._MIN_NUMBER_MATCHES <= number_matches <= Mhr._MAX_NUMBER_MATCHES:
+                document_list = self.crawler_api.download(query, True, False).results
+                id_list = []
+                number_documents_returned = 0
+                for document in document_list:
+                    id_list.append(document.identifier)
+                    number_documents_returned += 1
+                with self.__lock_accumulators:
+                    self.__query_count += 1
+                    self.__total_matches += number_matches
+                    self.__total_documents_returned += number_documents_returned
+                    for id_item in id_list:
+                        self.__document_id_dict[id_item] = self.__document_id_dict.get(id_item, 0) + 1
+                    self.__progress_count += 1
+                    self._report_progress(self.__progress_count, Mhr._NUMBER_QUERIES)
+                return
+            query = self._take_query()
 
     def _calculate_estimation(self):
         estimation = -1
+        overlapping_rate = -1
         number_unique_documents_returned = len(list(self.__document_id_dict.keys()))
         if self.__total_documents_returned != 0 and number_unique_documents_returned != 0:
             overflow_rate = self.__total_matches / self.__total_documents_returned
             overlapping_rate = self.__total_documents_returned / number_unique_documents_returned
             if overlapping_rate != 1:
                 estimation = overflow_rate * number_unique_documents_returned / (1 - overlapping_rate ** (-1.1))
+        if estimation == -1:
+            print("total_documents_returned = " + str(self.__total_documents_returned))
+            print("number_unique_documents_returned = " + str(number_unique_documents_returned))
+            print("overlapping_rate = " + str(overlapping_rate))
         return estimation
 
     def estimate(self):
