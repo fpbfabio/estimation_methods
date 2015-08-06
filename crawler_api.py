@@ -475,6 +475,9 @@ class SolrCrawlerApi(AbsBaseCrawlerApi):
 
 class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
 
+    _DATA_SET_SIZE_TAG = "a"
+    _DATA_SET_SIZE_TAG_ATTRIBUTE = "href"
+    _DATA_SET_SIZE_TAG_ATTRIBUTE_VALUE = "/search/searchresult.jsp?sortType=desc_p_Publication_Year&newsearch=true"
     DATA_SET_SIZE = 3707749
     LIMIT_RESULTS = 5000000
     _THREAD_LIMIT = 1
@@ -527,6 +530,32 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
     @property
     def data_folder_path(self):
         return AbsIEEECrawlerApi._DATA_FOLDER_PATH
+
+    @staticmethod
+    def _extract_data_set_size(soup):
+        dictionary = {AbsIEEECrawlerApi._DATA_SET_SIZE_TAG_ATTRIBUTE:
+                      AbsIEEECrawlerApi._DATA_SET_SIZE_TAG_ATTRIBUTE_VALUE}
+        soup = soup.find(AbsIEEECrawlerApi._DATA_SET_SIZE_TAG, dictionary)
+        if soup is None:
+            return -1
+        data_set_size = int(str(soup.next).replace(",", ""))
+        return data_set_size
+
+    @staticmethod
+    def _test_if_page_with_data_set_size_loaded(web_driver):
+        page_source = web_driver.execute_script(AbsWebsiteCrawlerApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)
+        soup = BeautifulSoup(page_source, AbsWebsiteCrawlerApi._HTML_PARSER)
+        return AbsIEEECrawlerApi._extract_data_set_size(soup) != -1
+
+    @staticmethod
+    def get_data_set_size():
+        web_driver = webdriver.PhantomJS()
+        web_driver.get(AbsIEEECrawlerApi._WEB_DOMAIN)
+        wait = WebDriverWait(web_driver, AbsWebsiteCrawlerApi._PAGE_LOAD_TIMEOUT)
+        wait.until(AbsIEEECrawlerApi._test_if_page_with_data_set_size_loaded)
+        page_source = web_driver.execute_script(AbsWebsiteCrawlerApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)
+        soup = BeautifulSoup(page_source, AbsWebsiteCrawlerApi._HTML_PARSER)
+        return AbsIEEECrawlerApi._extract_data_set_size(soup)
 
     def _calculate_offset(self, offset):
         return int((offset + self.max_results_per_page) / self.max_results_per_page)

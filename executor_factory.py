@@ -55,7 +55,7 @@ class IEEEExecutorFactory(AbsExecutorFactory):
     def create_logger(self, query_pool_file_path):
         return Logger(IEEEExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH,
                       IEEEExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH,
-                      AbsIEEECrawlerApi.DATA_SET_SIZE,
+                      AbsIEEECrawlerApi.get_data_set_size(),
                       AbsIEEECrawlerApi.LIMIT_RESULTS)
 
 
@@ -70,7 +70,7 @@ class IEEEOnlyTitleExecutorFactory(AbsExecutorFactory):
     def create_logger(self, query_pool_file_path):
         return Logger(IEEEOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH,
                       IEEEOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH,
-                      AbsIEEECrawlerApi.DATA_SET_SIZE,
+                      AbsIEEECrawlerApi.get_data_set_size(),
                       AbsIEEECrawlerApi.LIMIT_RESULTS)
 
 
