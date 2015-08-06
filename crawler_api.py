@@ -634,8 +634,8 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
     def data_folder_path(self):
         return AbsACMCrawlerApi._DATA_FOLDER_PATH
 
-    @abstractmethod
     @property
+    @abstractmethod
     def base_url(self):
         pass
 
