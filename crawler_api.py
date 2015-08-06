@@ -601,8 +601,8 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
     _MAX_RESULTS_PER_PAGE = 20
     _WEB_DOMAIN = "http://dl.acm.org/"
     _DATA_SET_SIZE_TAG_PARENT = "span"
-    _DATA_SET_SIZE_TAG_PARENT_ATTRIBUTE_VALUE = "class"
-    _DATA_SET_SIZE_TAG_PARENT_ATTRIBUTE = "text10"
+    _DATA_SET_SIZE_TAG_PARENT_ATTRIBUTE = "class"
+    _DATA_SET_SIZE_TAG_PARENT_ATTRIBUTE_VALUE = "text10"
     _DATA_SET_SIZE_TAG = "strong"
     _NO_RESULTS_TAG = "font"
     _NO_RESULTS_TAG_ATTRIBUTE = "size"
@@ -647,10 +647,10 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
     def _extract_data_set_size(cls, soup):
         dictionary = {AbsACMCrawlerApi._DATA_SET_SIZE_TAG_PARENT_ATTRIBUTE:
                       AbsACMCrawlerApi._DATA_SET_SIZE_TAG_PARENT_ATTRIBUTE_VALUE}
-        soup = soup.find(AbsACMCrawlerApi._DATA_SET_SIZE_TAG_PARENT, dictionary)
-        if soup is None:
+        soup = soup.find_all(AbsACMCrawlerApi._DATA_SET_SIZE_TAG_PARENT, dictionary)
+        if soup is None or len(soup) < 2:
             return -1
-        soup = soup.find(AbsACMCrawlerApi._DATA_SET_SIZE_TAG, dictionary)
+        soup = soup[1].find(AbsACMCrawlerApi._DATA_SET_SIZE_TAG)
         if soup is None:
             return -1
         data_set_size = int(str(soup.next).replace(",", ""))
