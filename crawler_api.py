@@ -313,14 +313,12 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
             list_from_soup = self._extract_data_list_from_soup(soup)
             if self._is_expected_amount_of_data(list_from_soup, number_matches, number_downloaded_results):
                 return list_from_soup
-            else:
-                print("DETECTED INCONSISTENCY")
-                print("NUMBER OF ITEMS IN THE PAGE = " + str(len(list_from_soup)))
-                print("NUMBER OF DOWNLOADED RESULTS = " + str(number_downloaded_results))
-                print("NUMBER OF MATCHES = " + str(number_matches))
-                print("NUMBER OF RESULTS PER PAGE = " + str(self.max_results_per_page))
-                print("QUERY = " + str(query))
         print("INCONSISTENCY COULD NOT BE SOLVED")
+        print("NUMBER OF ITEMS IN THE PAGE = " + str(len(list_from_soup)))
+        print("NUMBER OF DOWNLOADED RESULTS = " + str(number_downloaded_results))
+        print("NUMBER OF MATCHES = " + str(number_matches))
+        print("NUMBER OF RESULTS PER PAGE = " + str(self.max_results_per_page))
+        print("QUERY = " + str(query))
         list_from_soup = self._handle_inconsistent_page(list_from_soup)
         return list_from_soup
 
