@@ -402,77 +402,6 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         return self.factory.create_search_result(search_result.number_results, data_list)
 
 
-class SolrCrawlerApi(AbsBaseCrawlerApi):
-
-    DATA_SET_SIZE = 19994
-    LIMIT_RESULTS = 5000000
-    _QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
-    _THREAD_LIMIT = 5
-    _URL = ("http://localhost:8984/solr/experiment/select?"
-            + "q=::FIELD:::::QUERY::&start=::OFFSET::&rows=::LIMIT::&fl=::FIELDS_TO_RETURN::&wt=json")
-    _ID_FIELD = "id"
-    _FIELD_TO_SEARCH = "text"
-    _DOCUMENT_LIST_KEY = "docs"
-    _NUMBER_MATCHES_KEY = "numFound"
-    _OFFSET_MASK = "::OFFSET::"
-    _LIMIT_MASK = "::LIMIT::"
-    _FIELD_TO_SEARCH_MASK = "::FIELD::"
-    _FIELDS_TO_RETURN_MASK = "::FIELDS_TO_RETURN::"
-    _QUERY_MASK = "::QUERY::"
-    _RESPONSE_KEY = "response"
-    _ENCODING = "utf-8"
-
-    @property
-    def thread_limit(self):
-        return SolrCrawlerApi._THREAD_LIMIT
-
-    @property
-    def query_pool_file_path(self):
-        return SolrCrawlerApi._QUERY_POOL_FILE_PATH
-
-    def __init__(self):
-        super().__init__()
-
-    def download_entire_data_set(self):
-        return self._download("*", True, True, 0, 1000000, "*")
-
-    def download(self, query, is_to_download_id=True, is_to_download_content=True,
-                 offset=0, limit=None):
-        if limit is not None:
-            result = self._download(query, is_to_download_id, is_to_download_content, offset, limit,
-                                    SolrCrawlerApi._FIELD_TO_SEARCH)
-        else:
-            result = self._download(query, is_to_download_id, is_to_download_content, offset,
-                                    SolrCrawlerApi.LIMIT_RESULTS, SolrCrawlerApi._FIELD_TO_SEARCH)
-        return result
-
-    def _download(self, query, is_to_download_id, is_to_download_content, offset, limit, field_to_search):
-        url = SolrCrawlerApi._URL.replace(SolrCrawlerApi._LIMIT_MASK, str(limit))
-        url = url.replace(SolrCrawlerApi._QUERY_MASK, str(query))
-        url = url.replace(SolrCrawlerApi._FIELD_TO_SEARCH_MASK, field_to_search)
-        url = url.replace(SolrCrawlerApi._OFFSET_MASK, str(offset))
-        if is_to_download_id and is_to_download_content:
-            url = url.replace(SolrCrawlerApi._FIELDS_TO_RETURN_MASK,
-                              SolrCrawlerApi._ID_FIELD + "," + SolrCrawlerApi._FIELD_TO_SEARCH)
-        elif is_to_download_content and not is_to_download_id:
-            url = url.replace(SolrCrawlerApi._FIELDS_TO_RETURN_MASK, SolrCrawlerApi._FIELD_TO_SEARCH)
-        else:
-            url = url.replace(SolrCrawlerApi._FIELDS_TO_RETURN_MASK, SolrCrawlerApi._ID_FIELD)
-        response = urlopen(str(url))
-        self.inc_download()
-        data = response.read().decode(SolrCrawlerApi._ENCODING)
-        dictionary = json.loads(data)
-        dictionary = dictionary[SolrCrawlerApi._RESPONSE_KEY]
-        result_list = [
-            self.factory.create_data(x.get(SolrCrawlerApi._ID_FIELD, None),
-                                     x.get(SolrCrawlerApi._FIELD_TO_SEARCH, None))
-            for x
-            in dictionary[SolrCrawlerApi._DOCUMENT_LIST_KEY]]
-        search_result = self.factory.create_search_result(int(dictionary[SolrCrawlerApi._NUMBER_MATCHES_KEY]),
-                                                          result_list)
-        return search_result
-
-
 class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
 
     _DATA_SET_SIZE_TAG = "a"
@@ -638,33 +567,6 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
             return str(title)
 
 
-class IEEECrawlerApi(AbsIEEECrawlerApi):
-
-    _BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
-                 + "queryText=<<query>>&rowsPerPage=100&pageNumber=<<offset>>&resultAction=ROWS_PER_PAGE")
-
-    def __init__(self):
-        super().__init__()
-
-    @property
-    def base_url(self):
-        return IEEECrawlerApi._BASE_URL
-
-
-class IEEEOnlyTitleCrawlerApi(AbsIEEECrawlerApi):
-
-    _BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
-                 + "queryText=(\"Document%20Title\":<<query>>)&"
-                 + "rowsPerPage=100&pageNumber=<<offset>>&resultAction=ROWS_PER_PAGE")
-
-    def __init__(self):
-        super().__init__()
-
-    @property
-    def base_url(self):
-        return IEEEOnlyTitleCrawlerApi._BASE_URL
-
-
 class AbsACMCrawlerApi(AbsWebsiteCrawlerApi):
 
     DATA_SET_SIZE = 446154
@@ -748,6 +650,104 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi):
             content = str(title)
         data = self.factory.create_data(identifier, content)
         return data
+
+
+class SolrCrawlerApi(AbsBaseCrawlerApi):
+
+    DATA_SET_SIZE = 19994
+    LIMIT_RESULTS = 5000000
+    _QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
+    _THREAD_LIMIT = 5
+    _URL = ("http://localhost:8984/solr/experiment/select?"
+            + "q=::FIELD:::::QUERY::&start=::OFFSET::&rows=::LIMIT::&fl=::FIELDS_TO_RETURN::&wt=json")
+    _ID_FIELD = "id"
+    _FIELD_TO_SEARCH = "text"
+    _DOCUMENT_LIST_KEY = "docs"
+    _NUMBER_MATCHES_KEY = "numFound"
+    _OFFSET_MASK = "::OFFSET::"
+    _LIMIT_MASK = "::LIMIT::"
+    _FIELD_TO_SEARCH_MASK = "::FIELD::"
+    _FIELDS_TO_RETURN_MASK = "::FIELDS_TO_RETURN::"
+    _QUERY_MASK = "::QUERY::"
+    _RESPONSE_KEY = "response"
+    _ENCODING = "utf-8"
+
+    @property
+    def thread_limit(self):
+        return SolrCrawlerApi._THREAD_LIMIT
+
+    @property
+    def query_pool_file_path(self):
+        return SolrCrawlerApi._QUERY_POOL_FILE_PATH
+
+    def __init__(self):
+        super().__init__()
+
+    def download_entire_data_set(self):
+        return self._download("*", True, True, 0, 1000000, "*")
+
+    def download(self, query, is_to_download_id=True, is_to_download_content=True,
+                 offset=0, limit=None):
+        if limit is not None:
+            result = self._download(query, is_to_download_id, is_to_download_content, offset, limit,
+                                    SolrCrawlerApi._FIELD_TO_SEARCH)
+        else:
+            result = self._download(query, is_to_download_id, is_to_download_content, offset,
+                                    SolrCrawlerApi.LIMIT_RESULTS, SolrCrawlerApi._FIELD_TO_SEARCH)
+        return result
+
+    def _download(self, query, is_to_download_id, is_to_download_content, offset, limit, field_to_search):
+        url = SolrCrawlerApi._URL.replace(SolrCrawlerApi._LIMIT_MASK, str(limit))
+        url = url.replace(SolrCrawlerApi._QUERY_MASK, str(query))
+        url = url.replace(SolrCrawlerApi._FIELD_TO_SEARCH_MASK, field_to_search)
+        url = url.replace(SolrCrawlerApi._OFFSET_MASK, str(offset))
+        if is_to_download_id and is_to_download_content:
+            url = url.replace(SolrCrawlerApi._FIELDS_TO_RETURN_MASK,
+                              SolrCrawlerApi._ID_FIELD + "," + SolrCrawlerApi._FIELD_TO_SEARCH)
+        elif is_to_download_content and not is_to_download_id:
+            url = url.replace(SolrCrawlerApi._FIELDS_TO_RETURN_MASK, SolrCrawlerApi._FIELD_TO_SEARCH)
+        else:
+            url = url.replace(SolrCrawlerApi._FIELDS_TO_RETURN_MASK, SolrCrawlerApi._ID_FIELD)
+        response = urlopen(str(url))
+        self.inc_download()
+        data = response.read().decode(SolrCrawlerApi._ENCODING)
+        dictionary = json.loads(data)
+        dictionary = dictionary[SolrCrawlerApi._RESPONSE_KEY]
+        result_list = [
+            self.factory.create_data(x.get(SolrCrawlerApi._ID_FIELD, None),
+                                     x.get(SolrCrawlerApi._FIELD_TO_SEARCH, None))
+            for x
+            in dictionary[SolrCrawlerApi._DOCUMENT_LIST_KEY]]
+        search_result = self.factory.create_search_result(int(dictionary[SolrCrawlerApi._NUMBER_MATCHES_KEY]),
+                                                          result_list)
+        return search_result
+
+
+class IEEECrawlerApi(AbsIEEECrawlerApi):
+
+    _BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
+                 + "queryText=<<query>>&rowsPerPage=100&pageNumber=<<offset>>&resultAction=ROWS_PER_PAGE")
+
+    def __init__(self):
+        super().__init__()
+
+    @property
+    def base_url(self):
+        return IEEECrawlerApi._BASE_URL
+
+
+class IEEEOnlyTitleCrawlerApi(AbsIEEECrawlerApi):
+
+    _BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
+                 + "queryText=(\"Document%20Title\":<<query>>)&"
+                 + "rowsPerPage=100&pageNumber=<<offset>>&resultAction=ROWS_PER_PAGE")
+
+    def __init__(self):
+        super().__init__()
+
+    @property
+    def base_url(self):
+        return IEEEOnlyTitleCrawlerApi._BASE_URL
 
 
 class ACMCrawlerApi(AbsACMCrawlerApi):
