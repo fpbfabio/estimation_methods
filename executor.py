@@ -8,7 +8,7 @@ import signal
 from datetime import timedelta, datetime
 
 from executor_factory import IEEEExecutorFactory, ACMExecutorFactory, SolrExecutorFactory, IEEEOnlyTitleExecutorFactory, \
-    ACMOnlyTitleExecutorFactory
+    ACMOnlyTitleExecutorFactory, ACMOnlyAbstractExecutorFactory, IEEEOnlyAbstractExecutorFactory
 
 
 class AbsExecutor(metaclass=ABCMeta):
@@ -167,7 +167,7 @@ class IEEEExecutor(AbsBaseExecutor):
 
 class IEEEOnlyTitleExecutor(AbsBaseExecutor):
 
-    _NUMBER_ITERATIONS = 1
+    _NUMBER_ITERATIONS = 20
 
     def _create_factory(self):
         return IEEEOnlyTitleExecutorFactory()
@@ -175,6 +175,18 @@ class IEEEOnlyTitleExecutor(AbsBaseExecutor):
     def __init__(self):
         super().__init__()
         self.number_iterations = IEEEOnlyTitleExecutor._NUMBER_ITERATIONS
+
+
+class IEEEOnlyAbstractExecutor(AbsBaseExecutor):
+
+    _NUMBER_ITERATIONS = 20
+
+    def _create_factory(self):
+        return IEEEOnlyAbstractExecutorFactory()
+
+    def __init__(self):
+        super().__init__()
+        self.number_iterations = IEEEOnlyAbstractExecutor._NUMBER_ITERATIONS
 
 
 class ACMExecutor(AbsBaseExecutor):
@@ -191,7 +203,7 @@ class ACMExecutor(AbsBaseExecutor):
 
 class ACMOnlyTitleExecutor(AbsBaseExecutor):
 
-    _NUMBER_ITERATIONS = 1
+    _NUMBER_ITERATIONS = 20
 
     def _create_factory(self):
         return ACMOnlyTitleExecutorFactory()
@@ -199,3 +211,15 @@ class ACMOnlyTitleExecutor(AbsBaseExecutor):
     def __init__(self):
         super().__init__()
         self.number_iterations = ACMOnlyTitleExecutor._NUMBER_ITERATIONS
+
+
+class ACMOnlyAbstractExecutor(AbsBaseExecutor):
+
+    _NUMBER_ITERATIONS = 20
+
+    def _create_factory(self):
+        return ACMOnlyAbstractExecutorFactory()
+
+    def __init__(self):
+        super().__init__()
+        self.number_iterations = ACMOnlyAbstractExecutor._NUMBER_ITERATIONS

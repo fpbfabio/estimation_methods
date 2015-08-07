@@ -5,7 +5,7 @@ Module with an abstract factory class.
 from abc import ABCMeta, abstractmethod
 
 from crawler_api import ACMCrawlerApi, AbsIEEECrawlerApi, IEEECrawlerApi, SolrCrawlerApi, IEEEOnlyTitleCrawlerApi, \
-    AbsACMCrawlerApi, ACMOnlyTitleCrawlerApi
+    AbsACMCrawlerApi, ACMOnlyTitleCrawlerApi, ACMOnlyAbstractCrawlerApi, IEEEOnlyAbstractCrawlerApi
 from estimator import Mhr
 from logger import Logger
 
@@ -75,6 +75,22 @@ class IEEEOnlyTitleExecutorFactory(AbsExecutorFactory):
                       AbsIEEECrawlerApi.LIMIT_RESULTS)
 
 
+class IEEEOnlyAbstractExecutorFactory(AbsExecutorFactory):
+
+    _EXPERIMENT_RESULTS_FILE_PATH = ("/home/fabio/GitProjects/EstimationMethods/Logs/"
+                                     + "IEEEOnlyAbstract/ExperimentResults.csv")
+    _EXPERIMENT_DETAILS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/IEEEOnlyAbstract/Log.txt"
+
+    def create_estimator(self):
+        return Mhr(IEEEOnlyAbstractCrawlerApi())
+
+    def create_logger(self, query_pool_file_path):
+        return Logger(IEEEOnlyAbstractExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH,
+                      IEEEOnlyAbstractExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH,
+                      AbsIEEECrawlerApi.get_data_set_size(),
+                      AbsIEEECrawlerApi.LIMIT_RESULTS)
+
+
 class ACMExecutorFactory(AbsExecutorFactory):
 
     _EXPERIMENT_RESULTS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/ACM/ExperimentResults.csv"
@@ -101,5 +117,21 @@ class ACMOnlyTitleExecutorFactory(AbsExecutorFactory):
     def create_logger(self, query_pool_file_path):
         return Logger(ACMOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH,
                       ACMOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH,
+                      AbsACMCrawlerApi.get_data_set_size(),
+                      AbsACMCrawlerApi.LIMIT_RESULTS)
+
+
+class ACMOnlyAbstractExecutorFactory(AbsExecutorFactory):
+
+    _EXPERIMENT_RESULTS_FILE_PATH = ("/home/fabio/GitProjects/EstimationMethods/Logs/ACMOnlyAbstract/"
+                                     + "ExperimentResults.csv")
+    _EXPERIMENT_DETAILS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/ACMOnlyAbstract/Log.txt"
+
+    def create_estimator(self):
+        return Mhr(ACMOnlyAbstractCrawlerApi())
+
+    def create_logger(self, query_pool_file_path):
+        return Logger(ACMOnlyAbstractExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH,
+                      ACMOnlyAbstractExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH,
                       AbsACMCrawlerApi.get_data_set_size(),
                       AbsACMCrawlerApi.LIMIT_RESULTS)
