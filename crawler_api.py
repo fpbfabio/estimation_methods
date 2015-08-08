@@ -799,7 +799,7 @@ class ACMOnlyTitleCrawlerApi(AbsACMCrawlerApi):
                  + "querydisp=%28Title%3A<<query>>%29&source_query=Owner%3AACM&"
                  + "start=<<offset>>1&srt=score%20dsc&short=0&source_disp=&since_month=&"
                  + "since_year=&before_month=&before_year=&coll=DL&dl=ACM&termshow=matchboolean&"
-                 + "range_query=&zadv=1&CFID=534239095&CFTOKEN=62563351")
+                 + "range_query=&zadv=1")
 
     @property
     def base_url(self):
@@ -812,7 +812,7 @@ class ACMOnlyAbstractCrawlerApi(AbsACMCrawlerApi):
                  + "querydisp=%28Abstract%3A<<query>>%29&source_query=Owner%3AACM&"
                  + "start=<<offset>>1&srt=score%20dsc&short=0&source_disp=&since_month=&"
                  + "since_year=&before_month=&before_year=&coll=DL&dl=ACM&termshow=matchboolean&"
-                 + "range_query=&zadv=1&CFID=534239095&CFTOKEN=62563351")
+                 + "range_query=&zadv=1")
 
     @property
     def base_url(self):
