@@ -155,7 +155,7 @@ class SolrExecutor(AbsBaseExecutor):
 
 class IEEEExecutor(AbsBaseExecutor):
 
-    _NUMBER_ITERATIONS = 1
+    _NUMBER_ITERATIONS = 5
 
     def _create_factory(self):
         return IEEEExecutorFactory()
@@ -167,7 +167,7 @@ class IEEEExecutor(AbsBaseExecutor):
 
 class IEEEOnlyTitleExecutor(AbsBaseExecutor):
 
-    _NUMBER_ITERATIONS = 20
+    _NUMBER_ITERATIONS = 5
 
     def _create_factory(self):
         return IEEEOnlyTitleExecutorFactory()
@@ -179,7 +179,7 @@ class IEEEOnlyTitleExecutor(AbsBaseExecutor):
 
 class IEEEOnlyAbstractExecutor(AbsBaseExecutor):
 
-    _NUMBER_ITERATIONS = 20
+    _NUMBER_ITERATIONS = 5
 
     def _create_factory(self):
         return IEEEOnlyAbstractExecutorFactory()
@@ -191,7 +191,7 @@ class IEEEOnlyAbstractExecutor(AbsBaseExecutor):
 
 class ACMExecutor(AbsBaseExecutor):
 
-    _NUMBER_ITERATIONS = 1
+    _NUMBER_ITERATIONS = 5
 
     def _create_factory(self):
         return ACMExecutorFactory()
@@ -203,7 +203,7 @@ class ACMExecutor(AbsBaseExecutor):
 
 class ACMOnlyTitleExecutor(AbsBaseExecutor):
 
-    _NUMBER_ITERATIONS = 20
+    _NUMBER_ITERATIONS = 5
 
     def _create_factory(self):
         return ACMOnlyTitleExecutorFactory()
@@ -215,7 +215,7 @@ class ACMOnlyTitleExecutor(AbsBaseExecutor):
 
 class ACMOnlyAbstractExecutor(AbsBaseExecutor):
 
-    _NUMBER_ITERATIONS = 20
+    _NUMBER_ITERATIONS = 5
 
     def _create_factory(self):
         return ACMOnlyAbstractExecutorFactory()
