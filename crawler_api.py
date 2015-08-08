@@ -194,7 +194,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
     _DOWNLOAD_TRY_NUMBER = 10000
     _OFFSET_MASK = "<<offset>>"
     _QUERY_MASK = "<<query>>"
-    _HTML_PARSER = "lxml"
+    _HTML_PARSER = "html5lib"
     _JAVASCRIPT_GET_PAGE_SOURCE_CODE = "return document.getElementsByTagName('html')[0].innerHTML"
 
     @property
@@ -507,7 +507,7 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
         soup = soup.find(AbsIEEECrawlerApi._DATA_SET_SIZE_TAG, dictionary)
         if soup is None:
             return -1
-        data_set_size = int(str(soup.next).replace(",", ""))
+        data_set_size = int(str(soup.next).replace(".", ""))
         return data_set_size
 
     def _calculate_offset(self, offset):
@@ -594,7 +594,7 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
 class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
 
     LIMIT_RESULTS = 5000000
-    _URL_WITH_DATA_SET_SIZE = "http://dl.acm.org/results.cfm?h=1&cfid=534239095&cftoken=62563351&query=test&dlr=GUIDE"
+    _URL_WITH_DATA_SET_SIZE = "http://dl.acm.org/results.cfm?h=1&query=test&dlr=GUIDE"
     _THREAD_LIMIT = 1
     _ELEMENT_WITH_NUMBER_MATCHES_TAG = "b"
     _DATA_FOLDER_PATH = "E:\\acm"
