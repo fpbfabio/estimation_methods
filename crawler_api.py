@@ -12,7 +12,7 @@ from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
 import time
 
-from crawler_api_factory import CrawlerApiFactory
+from factory import CrawlerApiFactory
 
 
 class AbsCrawlerApi(metaclass=ABCMeta):
@@ -431,7 +431,7 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
     _ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_TAG = "span"
     _ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE = "ng-if"
     _ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE_VALUE = "records.length === 1"
-    _DATA_FOLDER_PATH = "E:\\ieee"
+    _DATA_FOLDER_PATH = "AbsIEEECrawlerApi__DATA_FOLDER_PATH"
 
     def __init__(self):
         super().__init__()
@@ -455,7 +455,8 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
 
     @property
     def data_folder_path(self):
-        return AbsIEEECrawlerApi._DATA_FOLDER_PATH
+        path_dictionary = self.factory.create_path_dictionary()
+        return path_dictionary.get_path(AbsIEEECrawlerApi._DATA_FOLDER_PATH)
 
     @classmethod
     def _get_url_with_data_set_size(cls):
@@ -558,7 +559,7 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
     _URL_WITH_DATA_SET_SIZE = "http://dl.acm.org/results.cfm?h=1&query=test&dlr=GUIDE"
     _THREAD_LIMIT = 1
     _ELEMENT_WITH_NUMBER_MATCHES_TAG = "b"
-    _DATA_FOLDER_PATH = "E:\\acm"
+    _DATA_FOLDER_PATH = "AbsACMCrawlerApi__DATA_FOLDER_PATH"
     _MAX_RESULTS_PER_PAGE = 20
     _WEB_DOMAIN = "http://dl.acm.org/"
     _DATA_SET_SIZE_TAG_PARENT = "span"
@@ -593,7 +594,8 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
 
     @property
     def data_folder_path(self):
-        return AbsACMCrawlerApi._DATA_FOLDER_PATH
+        path_dictionary = self.factory.create_path_dictionary()
+        return path_dictionary.get_path(AbsACMCrawlerApi._DATA_FOLDER_PATH)
 
     @property
     @abstractmethod
@@ -661,7 +663,6 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
 class SolrCrawlerApi(AbsBaseCrawlerApi):
 
     LIMIT_RESULTS = 5000000
-    _QUERY_POOL_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ArquivosSolr\\ListaPalavras\\new_shine.txt"
     _THREAD_LIMIT = 5
     _URL = ("http://localhost:8984/solr/experiment/select?"
             + "q=::FIELD:::::QUERY::&start=::OFFSET::&rows=::LIMIT::&fl=::FIELDS_TO_RETURN::&wt=json")
@@ -680,10 +681,6 @@ class SolrCrawlerApi(AbsBaseCrawlerApi):
     @property
     def thread_limit(self):
         return SolrCrawlerApi._THREAD_LIMIT
-
-    @property
-    def query_pool_file_path(self):
-        return SolrCrawlerApi._QUERY_POOL_FILE_PATH
 
     def __init__(self):
         super().__init__()

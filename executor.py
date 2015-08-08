@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 import signal
 from datetime import timedelta, datetime
 
-from executor_factory import IEEEExecutorFactory, ACMExecutorFactory, SolrExecutorFactory, IEEEOnlyTitleExecutorFactory, \
+from factory import IEEEExecutorFactory, ACMExecutorFactory, SolrExecutorFactory, IEEEOnlyTitleExecutorFactory, \
     ACMOnlyTitleExecutorFactory, ACMOnlyAbstractExecutorFactory, IEEEOnlyAbstractExecutorFactory
 
 

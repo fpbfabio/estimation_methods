@@ -3,7 +3,7 @@ import random
 import math
 from threading import Lock
 
-from estimator_factory import EstimatorFactory
+from factory import EstimatorFactory
 
 
 class AbsEstimator(metaclass=ABCMeta):
