@@ -69,6 +69,10 @@ class AbsCrawlerApi(metaclass=ABCMeta):
     def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0, limit=None):
         pass
 
+    @abstractmethod
+    def clean_up_data_folder(self):
+        pass
+
 
 class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=ABCMeta):
 
@@ -114,6 +118,10 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=ABCMeta):
 
     @abstractmethod
     def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0, limit=None):
+        pass
+
+    @abstractmethod
+    def clean_up_data_folder(self):
         pass
 
     @abstractmethod
@@ -212,7 +220,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
     @abstractmethod
     def __init__(self):
         super().__init__()
-        self._clean_up_data_folder()
+        self.clean_up_data_folder()
 
     @classmethod
     def _test_if_page_with_data_set_size_loaded(cls, web_driver):
@@ -242,7 +250,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
                                                     is_to_download_content, offset, limit)
         return search_result
 
-    def _clean_up_data_folder(self):
+    def clean_up_data_folder(self):
         for the_file in os.listdir(self.data_folder_path):
             file_path = os.path.join(self.data_folder_path, the_file)
             try:
@@ -684,6 +692,9 @@ class SolrCrawlerApi(AbsBaseCrawlerApi):
 
     def __init__(self):
         super().__init__()
+
+    def clean_up_data_folder(self):
+        pass
 
     @classmethod
     def get_data_set_size(cls):

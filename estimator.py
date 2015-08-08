@@ -134,6 +134,7 @@ class AbsBaseEstimator(AbsEstimator, metaclass=ABCMeta):
 
     @abstractmethod
     def estimate(self):
+        self.crawler_api.clean_up_data_folder()
         self.crawler_api.download_count = 0
 
     def _report_progress(self, progress, total):
