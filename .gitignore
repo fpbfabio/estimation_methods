@@ -4,3 +4,4 @@ Logs/
 node_modules/
 *.log
 all_solr_data_sets_experiment.py
+logger_test.py
