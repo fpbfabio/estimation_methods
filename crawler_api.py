@@ -1,8 +1,3 @@
-""""
-This is the module that provides an abstract interface for a class
-with the functions used in common in all estimators.
-"""
-
 from abc import ABCMeta, abstractmethod
 import json
 import os
@@ -21,9 +16,6 @@ from crawler_api_factory import CrawlerApiFactory
 
 
 class AbsCrawlerApi(metaclass=ABCMeta):
-    """
-    Contains common methods that are needed by all estimation algorithm classes.
-    """
 
     @property
     @abstractmethod
@@ -33,79 +25,48 @@ class AbsCrawlerApi(metaclass=ABCMeta):
     @property
     @abstractmethod
     def download_count(self):
-        """
-        Returns the number of downloads.
-        """
         pass
 
     @download_count.setter
     @abstractmethod
     def download_count(self, val):
-        """
-        Sets the number of downloads.
-        """
         pass
 
     @property
     @abstractmethod
     def factory(self):
-        """
-        Returns the instance of an AbsCommonApiFactory class.
-        """
         pass
 
     @factory.setter
     @abstractmethod
     def factory(self, val):
-        """
-        Sets the instance of an AbsCommonApiFactory class.
-        """
         pass
 
     @property
     @abstractmethod
     def terminator(self):
-        """
-        Returns the instance of an AbsTerminator class.
-        """
         pass
 
     @terminator.setter
     @abstractmethod
     def terminator(self, val):
-        """
-        Sets the instance of an AbsTerminator class.
-        """
         pass
 
     @abstractmethod
     def download_entire_data_set(self):
-        """
-        Returns a list with all the documents from the data set.
-        """
         pass
 
     @classmethod
     @abstractmethod
     def get_data_set_size(cls):
-        """
-        Returns the size of the data set.
-        """
         pass
 
     @abstractmethod
     def retrieve_number_matches(self, query):
-        """
-        Returns the number of matches in the search engine for the given query.
-        """
         pass
 
     @abstractmethod
     def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0, limit=None):
-        """
-        Returns the a list with documents retrieved by the given query with
-        the max size set by the given limit.
-        """
         pass
 
 

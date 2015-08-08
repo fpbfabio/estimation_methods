@@ -1,7 +1,3 @@
-""""
-Module with an abstract class for writing logs.
-"""
-
 from abc import ABCMeta, abstractmethod
 import math
 import os
@@ -9,52 +5,31 @@ import statistics
 
 
 class AbsLogger(metaclass=ABCMeta):
-    """"
-    Class for writing logs.
-    """
 
     @property
     @abstractmethod
     def data_set_size(self):
-        """
-        Returns the size of the data set.
-        """
         pass
 
     @data_set_size.setter
     @abstractmethod
     def data_set_size(self, val):
-        """
-        Sets the size of the data set..
-        """
         pass
 
     @abstractmethod
     def write_header(self):
-        """
-        Writes the header of the log.
-        """
         pass
 
     @abstractmethod
     def write_result_iteration(self, iteration_number, result, duration, cost):
-        """
-        Writes the result of an iteration of the experiment.
-        """
         pass
 
     @abstractmethod
     def write_final_result(self, result_list, total_duration, total_cost):
-        """
-        Writes the aggregate result of the many iterations of the experiment.
-        """
         pass
 
     @abstractmethod
     def write_experiment_details(self, additional_information=None):
-        """
-        Writes the values of parameters used in the experiment.
-        """
         pass
 
 

@@ -1,23 +1,11 @@
-""""
-This is the module that provides an abstract interface for a
-class used to execute code in multiple threads.
-"""
-
 from abc import ABCMeta, abstractmethod
 from threading import Thread
 
 
 class AbsParallelizer(metaclass=ABCMeta):
-    """
-    Helper class for executing code in multiple threads
-    """
 
     @abstractmethod
     def execute_in_parallel(self, thread_limit, collection, callback):
-        """
-        Executes a function in multiple threads, for each thread
-        the callback receives an item from the collection.
-        """
         pass
 
 

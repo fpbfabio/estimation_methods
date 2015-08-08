@@ -1,8 +1,3 @@
-""""
-This is the module that provides an abstract interface for a class used to obtain
-estimations of the size of a data set.
-"""
-
 from abc import ABCMeta, abstractmethod
 import random
 import math
@@ -12,111 +7,69 @@ from estimator_factory import EstimatorFactory
 
 
 class AbsEstimator(metaclass=ABCMeta):
-    """
-    Class used to estimate the size of a data set.
-    """
 
     @property
     @abstractmethod
     def query_pool_file_path(self):
-        """
-        Returns the path to the query pool file.
-        """
         pass
 
     @query_pool_file_path.setter
     @abstractmethod
     def query_pool_file_path(self, val):
-        """
-        Sets the path to the query pool file.
-        """
         pass
 
     @property
     @abstractmethod
     def factory(self):
-        """
-        Returns the instance of an AbsEstimatorFactory object.
-        """
         pass
 
     @factory.setter
     @abstractmethod
     def factory(self, val):
-        """
-        Sets the instance of an AbsEstimatorFactory object.
-        """
         pass
 
     @property
     @abstractmethod
     def word_extractor(self):
-        """
-        Returns the instance of an AbsWordExtractor object.
-        """
         pass
 
     @word_extractor.setter
     @abstractmethod
     def word_extractor(self, val):
-        """
-        Sets the instance of an AbsWordExtractor object.
-        """
         pass
 
     @property
     @abstractmethod
     def parallelizer(self):
-        """
-        Returns the instance of an AbsParallelizer object.
-        """
         pass
 
     @parallelizer.setter
     @abstractmethod
     def parallelizer(self, val):
-        """
-        Sets the instance of an AbsParallelizer object.
-        """
         pass
 
     @property
     @abstractmethod
     def crawler_api(self):
-        """
-        Returns the instance of an AbsCrawlerApi object.
-        """
         pass
 
     @crawler_api.setter
     @abstractmethod
     def crawler_api(self, val):
-        """
-        Sets the instance of an AbsCrawlerApi object.
-        """
         pass
 
     @abstractmethod
     def estimate(self):
-        """
-        Returns the estimation of the size of the data set.
-        """
         pass
 
     @property
     @abstractmethod
     def experiment_details(self):
-        """
-        Returns the parameters used in the experiment.
-        """
         pass
 
     @property
     @abstractmethod
     def download_count(self):
-        """
-        Returns the number of downloads in the estimation.
-        """
         pass
 
 

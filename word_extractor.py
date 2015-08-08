@@ -1,21 +1,11 @@
-""""
-This is the module that provides an abstract interface for a
-class used to extract the words of a text.
-"""
 from abc import ABCMeta, abstractmethod
 import re
 
 
 class AbsWordExtractor(metaclass=ABCMeta):
-    """
-    Helper class for extracting the words of a text.
-    """
 
     @abstractmethod
     def extract_words(self, text):
-        """
-        Returns the words in the text as a list.
-        """
         pass
 
 
