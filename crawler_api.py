@@ -136,23 +136,6 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=ABCMeta):
         with self.__lock:
             self.download_count += 1
 
-    def extract_words(self, text):
-        word = []
-        word_dictionary = {}
-        count = 0
-        letter_or_hyphen_pattern = re.compile(r"[a-z]|[A-Z]|-")
-        for character in text:
-            if letter_or_hyphen_pattern.match(character) is not None:
-                word.append(character)
-            else:
-                word = str.join("", word)
-                word = word.lower().strip("-").strip("-")
-                if len(word) > 0 and word not in word_dictionary:
-                    word_dictionary[word] = count
-                    count += 1
-                word = []
-        return list(word_dictionary.keys())
-
 
 class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
 
