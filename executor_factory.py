@@ -32,8 +32,10 @@ class AbsExecutorFactory(metaclass=ABCMeta):
 
 class SolrExecutorFactory(AbsExecutorFactory):
 
-    _EXPERIMENT_RESULTS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/Solr/ExperimentResults.csv"
-    _EXPERIMENT_DETAILS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/Solr/Log.txt"
+    _EXPERIMENT_RESULTS_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ProjetosGit\\EstimationMethods\\Logs\\" + \
+                                    "Solr\\ExperimentResults.csv"
+    _EXPERIMENT_DETAILS_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ProjetosGit\\EstimationMethods\\Logs\\" + \
+                                    "Solr\\Log.txt"
 
     def create_estimator(self):
         return Mhr(SolrCrawlerApi())
@@ -47,8 +49,10 @@ class SolrExecutorFactory(AbsExecutorFactory):
 
 class IEEEExecutorFactory(AbsExecutorFactory):
 
-    _EXPERIMENT_RESULTS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/IEEE/ExperimentResults.csv"
-    _EXPERIMENT_DETAILS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/IEEE/Log.txt"
+    _EXPERIMENT_RESULTS_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ProjetosGit\\EstimationMethods\\" + \
+                                    "Logs\\IEEE\\ExperimentResults.csv"
+    _EXPERIMENT_DETAILS_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ProjetosGit\\EstimationMethods\\" + \
+                                    "Logs\\IEEE\\Log.txt"
 
     def create_estimator(self):
         return Mhr(IEEECrawlerApi())
@@ -62,8 +66,10 @@ class IEEEExecutorFactory(AbsExecutorFactory):
 
 class IEEEOnlyTitleExecutorFactory(AbsExecutorFactory):
 
-    _EXPERIMENT_RESULTS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/IEEEOnlyTitle/ExperimentResults.csv"
-    _EXPERIMENT_DETAILS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/IEEEOnlyTitle/Log.txt"
+    _EXPERIMENT_RESULTS_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ProjetosGit\\EstimationMethods\\" + \
+                                    "Logs\\IEEEOnlyTitle\\ExperimentResults.csv"
+    _EXPERIMENT_DETAILS_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ProjetosGit\\EstimationMethods\\" + \
+                                    "Logs\\IEEEOnlyTitle\\Log.txt"
 
     def create_estimator(self):
         return Mhr(IEEEOnlyTitleCrawlerApi())
@@ -77,9 +83,10 @@ class IEEEOnlyTitleExecutorFactory(AbsExecutorFactory):
 
 class IEEEOnlyAbstractExecutorFactory(AbsExecutorFactory):
 
-    _EXPERIMENT_RESULTS_FILE_PATH = ("/home/fabio/GitProjects/EstimationMethods/Logs/"
-                                     + "IEEEOnlyAbstract/ExperimentResults.csv")
-    _EXPERIMENT_DETAILS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/IEEEOnlyAbstract/Log.txt"
+    _EXPERIMENT_RESULTS_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ProjetosGit\\EstimationMethods\\Logs\\" + \
+                                    "IEEEOnlyAbstract\\ExperimentResults.csv"
+    _EXPERIMENT_DETAILS_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ProjetosGit\\EstimationMethods\\Logs\\" + \
+                                    "IEEEOnlyAbstract\\Log.txt"
 
     def create_estimator(self):
         return Mhr(IEEEOnlyAbstractCrawlerApi())
@@ -93,8 +100,10 @@ class IEEEOnlyAbstractExecutorFactory(AbsExecutorFactory):
 
 class ACMExecutorFactory(AbsExecutorFactory):
 
-    _EXPERIMENT_RESULTS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/ACM/ExperimentResults.csv"
-    _EXPERIMENT_DETAILS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/ACM/Log.txt"
+    _EXPERIMENT_RESULTS_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ProjetosGit\\EstimationMethods\\Logs\\" + \
+                                    "ACM\\ExperimentResults.csv"
+    _EXPERIMENT_DETAILS_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ProjetosGit\\EstimationMethods\\Logs\\" + \
+                                    "ACM\\Log.txt"
 
     def create_estimator(self):
         return Mhr(ACMCrawlerApi())
@@ -108,8 +117,10 @@ class ACMExecutorFactory(AbsExecutorFactory):
 
 class ACMOnlyTitleExecutorFactory(AbsExecutorFactory):
 
-    _EXPERIMENT_RESULTS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/ACMOnlyTitle/ExperimentResults.csv"
-    _EXPERIMENT_DETAILS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/ACMOnlyTitle/Log.txt"
+    _EXPERIMENT_RESULTS_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ProjetosGit\\EstimationMethods\\Logs\\" + \
+                                    "ACMOnlyTitle\\ExperimentResults.csv"
+    _EXPERIMENT_DETAILS_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ProjetosGit\\EstimationMethods\\Logs\\" + \
+                                    "ACMOnlyTitle\\Log.txt"
 
     def create_estimator(self):
         return Mhr(ACMOnlyTitleCrawlerApi())
@@ -123,9 +134,10 @@ class ACMOnlyTitleExecutorFactory(AbsExecutorFactory):
 
 class ACMOnlyAbstractExecutorFactory(AbsExecutorFactory):
 
-    _EXPERIMENT_RESULTS_FILE_PATH = ("/home/fabio/GitProjects/EstimationMethods/Logs/ACMOnlyAbstract/"
-                                     + "ExperimentResults.csv")
-    _EXPERIMENT_DETAILS_FILE_PATH = "/home/fabio/GitProjects/EstimationMethods/Logs/ACMOnlyAbstract/Log.txt"
+    _EXPERIMENT_RESULTS_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ProjetosGit\\EstimationMethods\\Logs" + \
+                                    "\\ACMOnlyAbstract\\ExperimentResults.csv"
+    _EXPERIMENT_DETAILS_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ProjetosGit\\EstimationMethods\\Logs" + \
+                                    "\\ACMOnlyAbstract\\Log.txt"
 
     def create_estimator(self):
         return Mhr(ACMOnlyAbstractCrawlerApi())

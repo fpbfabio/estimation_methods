@@ -196,7 +196,7 @@ class AbsBaseEstimator(AbsEstimator, metaclass=ABCMeta):
 
 class Mhr(AbsBaseEstimator):
 
-    _DEFAULT_QUERY_POOL_FILE_PATH = "/home/fabio/SolrFiles/WordLists/new_shine.txt"
+    _DEFAULT_QUERY_POOL_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ArquivosSolr\\ListaPalavras\\new_shine.txt"
     _MAX_NUMBER_MATCHES_INFORMATION = "Máximo número de resultados"
     _MIN_NUMBER_MATCHES_INFORMATION = "Menor número de resultados"
     _NUMBER_QUERIES_INFORMATION = "Número de buscas"
@@ -292,7 +292,7 @@ class Mhr(AbsBaseEstimator):
 
 class RandomWalk(AbsBaseEstimator):
 
-    _DEFAULT_QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
+    _DEFAULT_QUERY_POOL_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ArquivosSolr\\ListaPalavras\\new_shine.txt"
     _MIN_NUMBER_MATCHES_FOR_SEED_QUERY_INFORMATION = "Número mínimo de resultados para busca semente"
     _MIN_NUMBER_MATCHES_FOR_SEED_QUERY = 2
     _MIN_NUMBER_WORDS_INFORMATION = "Número mínimo de palavras em um dcumento sorteado"
@@ -375,7 +375,7 @@ class RandomWalk(AbsBaseEstimator):
 
 class SumEst(AbsBaseEstimator):
 
-    _DEFAULT_QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
+    _DEFAULT_QUERY_POOL_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ArquivosSolr\\ListaPalavras\\new_shine.txt"
     _THREAD_LIMIT = 10
     _ITERATION_NUMBER = 100
     _POOL_SAMPLE_SIZE = 1000
@@ -501,7 +501,7 @@ class SumEst(AbsBaseEstimator):
 
 class BroderEtAl(AbsBaseEstimator):
 
-    _DEFAULT_QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
+    _DEFAULT_QUERY_POOL_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ArquivosSolr\\ListaPalavras\\new_shine.txt"
     _THREAD_LIMIT = 10
     _QUERY_RANDOM_SAMPLE_SIZE_INFORMATION = "Size of the random sample of queries"
     _DOCUMENT_RANDOM_SAMPLE_SIZE_INFORMATION = "Size of the random sample of documents"

@@ -470,7 +470,7 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
     _ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_TAG = "span"
     _ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE = "ng-if"
     _ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE_VALUE = "records.length === 1"
-    _DATA_FOLDER_PATH = "/media/fabio/FABIO/ieee"
+    _DATA_FOLDER_PATH = "E:\\ieee"
 
     def __init__(self):
         super().__init__()
@@ -597,7 +597,7 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
     _URL_WITH_DATA_SET_SIZE = "http://dl.acm.org/results.cfm?h=1&cfid=534239095&cftoken=62563351&query=test&dlr=GUIDE"
     _THREAD_LIMIT = 1
     _ELEMENT_WITH_NUMBER_MATCHES_TAG = "b"
-    _DATA_FOLDER_PATH = "/media/fabio/FABIO/acm"
+    _DATA_FOLDER_PATH = "E:\\acm"
     _MAX_RESULTS_PER_PAGE = 20
     _WEB_DOMAIN = "http://dl.acm.org/"
     _DATA_SET_SIZE_TAG_PARENT = "span"
@@ -700,7 +700,7 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
 class SolrCrawlerApi(AbsBaseCrawlerApi):
 
     LIMIT_RESULTS = 5000000
-    _QUERY_POOL_FILE_PATH = "/home/fabio/SolrCores/WordLists/new_shine.txt"
+    _QUERY_POOL_FILE_PATH = "C:\\Users\\Fabio\\Documents\\ArquivosSolr\\ListaPalavras\\new_shine.txt"
     _THREAD_LIMIT = 5
     _URL = ("http://localhost:8984/solr/experiment/select?"
             + "q=::FIELD:::::QUERY::&start=::OFFSET::&rows=::LIMIT::&fl=::FIELDS_TO_RETURN::&wt=json")
