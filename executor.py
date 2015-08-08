@@ -123,7 +123,7 @@ class AbsBaseExecutor(AbsExecutor, metaclass=ABCMeta):
         raise FatalFailure()
 
     def execute(self):
-        signal.signal(signal.SIGUSR1, self._on_fatal_failure)
+        signal.signal(signal.SIGTERM, self._on_fatal_failure)
         self.logger.write_header()
         self.logger.write_experiment_details(self.estimator.experiment_details)
         estimation_list = []

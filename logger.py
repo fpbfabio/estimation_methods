@@ -76,15 +76,15 @@ class Logger(AbsLogger):
 
     def write_header(self):
         with open(self.__experiment_results_file_path, "a+") as file:
-            file.write("Gabarito = " + str(self.__data_set_size) + "," + os.linesep)
-            file.write("Iteração,Estimativa,Erro,Duração,Conexões," + os.linesep)
+            file.write("Gabarito = " + str(self.__data_set_size) + "," + "\n")
+            file.write("Iteração,Estimativa,Erro,Duração,Conexões," + "\n")
 
     def write_result_iteration(self, iteration_number, result, duration, cost):
         error = "%.3f" % (math.fabs(self.__data_set_size - result) / self.__data_set_size)
         result = "%.3f" % result
         with open(self.__experiment_results_file_path, "a+") as file:
             file.write(str(iteration_number) + "," + result + "," + str(error) + "," + str(duration) + ","
-                       + str(cost) + "," + os.linesep)
+                       + str(cost) + "," + "\n")
 
     def write_final_result(self, result_list, total_duration, total_cost):
         average = "%.3f" % statistics.mean(result_list)
@@ -93,14 +93,14 @@ class Logger(AbsLogger):
         error = "%.3f" % (math.fabs(self.__data_set_size - statistics.mean(result_list)) / self.__data_set_size)
         with open(self.__experiment_results_file_path, "a+") as file:
             file.write("Coeficiente de Variação,Estimativa Média,Erro da Média,Duração Total,Total de Conexões,"
-                       + os.linesep)
+                       + "\n")
             file.write(coef_variation + "," + average + "," + error + "," + str(total_duration)
-                       + "," + str(total_cost) + "," + os.linesep)
+                       + "," + str(total_cost) + "," + "\n")
 
     def write_experiment_details(self, additional_information=None):
         with open(self.__experiment_details_file_path, "a+") as file:
-            file.write("Limite da máquina de busca: " + str(self.__limit_results) + os.linesep)
+            file.write("Limite da máquina de busca: " + str(self.__limit_results) + "\n")
             if additional_information is not None:
                 key_list = list(additional_information.keys())
                 for key in key_list:
-                    file.write(str(key) + ": " + str(additional_information[key]) + os.linesep)
+                    file.write(str(key) + ": " + str(additional_information[key]) + "\n")

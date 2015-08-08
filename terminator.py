@@ -24,7 +24,7 @@ class Terminator(AbsTerminator):
 
     def terminate(self, message):
         print(message)
-        os.kill(os.getpid(), signal.SIGUSR1)
+        os.kill(os.getpid(), signal.SIGTERM)
 
         class AbortedException(Exception):
             pass

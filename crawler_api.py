@@ -586,7 +586,7 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
 
     def _format_data_content(self, title, abstract):
         if abstract is not None:
-            return str(title) + os.linesep + os.linesep + str(abstract)
+            return str(title) + "\n" + "\n" + str(abstract)
         else:
             return str(title)
 
@@ -690,7 +690,7 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
     def _create_data(self, href, title, abstract_tag):
         identifier = AbsACMCrawlerApi._WEB_DOMAIN + href[0:href.find("&")]
         if abstract_tag is not None:
-            content = str(title) + os.linesep + str(abstract_tag.text)
+            content = str(title) + "\n" + str(abstract_tag.text)
         else:
             content = str(title)
         data = self.factory.create_data(identifier, content)
