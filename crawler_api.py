@@ -236,11 +236,12 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=abc.ABCMeta):
     def clean_up_data_folder(self):
         for the_file in os.listdir(self.data_folder_path):
             file_path = os.path.join(self.data_folder_path, the_file)
-            try:
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-            except:
-                pass
+            if ".gitignore" not in file_path:
+                try:
+                    if os.path.isfile(file_path):
+                        os.unlink(file_path)
+                except:
+                    pass
 
     def _download_more_results_if_needed(self, query, number_matches, data_list):
         number_downloaded_results = len(data_list)
