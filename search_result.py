@@ -1,15 +1,15 @@
-from abc import ABCMeta, abstractmethod
+import abc
 
 
-class AbsSearchResult(metaclass=ABCMeta):
+class AbsSearchResult(metaclass=abc.ABCMeta):
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def number_results(self):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def results(self):
         pass
 

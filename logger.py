@@ -1,34 +1,33 @@
-from abc import ABCMeta, abstractmethod
+import abc
 import math
-import os
 import statistics
 
 
-class AbsLogger(metaclass=ABCMeta):
+class AbsLogger(metaclass=abc.ABCMeta):
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def data_set_size(self):
         pass
 
     @data_set_size.setter
-    @abstractmethod
+    @abc.abstractmethod
     def data_set_size(self, val):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def write_header(self):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def write_result_iteration(self, iteration_number, result, duration, cost):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def write_final_result(self, result_list, total_duration, total_cost):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def write_experiment_details(self, additional_information=None):
         pass
 

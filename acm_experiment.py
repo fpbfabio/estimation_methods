@@ -1,5 +1,5 @@
-from executor import ACMExecutor
+import executor
 
 
-executor = ACMExecutor()
-executor.execute()
+executor_instance = executor.ACMExecutor()
+executor_instance.execute()

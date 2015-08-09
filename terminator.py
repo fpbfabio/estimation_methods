@@ -1,11 +1,11 @@
-from abc import ABCMeta, abstractmethod
+import abc
 import os
 import signal
 
 
-class AbsTerminator(metaclass=ABCMeta):
+class AbsTerminator(metaclass=abc.ABCMeta):
 
-    @abstractmethod
+    @abc.abstractmethod
     def terminate(self, message):
         pass
 

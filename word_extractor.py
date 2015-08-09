@@ -1,10 +1,10 @@
-from abc import ABCMeta, abstractmethod
+import abc
 import re
 
 
-class AbsWordExtractor(metaclass=ABCMeta):
+class AbsWordExtractor(metaclass=abc.ABCMeta):
 
-    @abstractmethod
+    @abc.abstractmethod
     def extract_words(self, text):
         pass
 

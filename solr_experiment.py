@@ -1,5 +1,5 @@
-from executor import SolrExecutor
+import executor
 
 
-executor = SolrExecutor()
-executor.execute()
+executor_instance = executor.SolrExecutor()
+executor_instance.execute()

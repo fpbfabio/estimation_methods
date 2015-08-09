@@ -1,9 +1,9 @@
-from abc import ABCMeta, abstractmethod
+import abc
 
 
-class AbsPathDictionary(metaclass=ABCMeta):
+class AbsPathDictionary(metaclass=abc.ABCMeta):
 
-    @abstractmethod
+    @abc.abstractmethod
     def get_path(self, key):
         pass
 

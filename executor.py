@@ -1,51 +1,50 @@
-from abc import ABCMeta, abstractmethod
+import abc
 import signal
-from datetime import timedelta, datetime
+import datetime
 
-from factory import IEEEExecutorFactory, ACMExecutorFactory, SolrExecutorFactory, IEEEOnlyTitleExecutorFactory, \
-    ACMOnlyTitleExecutorFactory, ACMOnlyAbstractExecutorFactory, IEEEOnlyAbstractExecutorFactory
+import factory
 
 
-class AbsExecutor(metaclass=ABCMeta):
+class AbsExecutor(metaclass=abc.ABCMeta):
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def logger(self):
         pass
 
     @logger.setter
-    @abstractmethod
+    @abc.abstractmethod
     def logger(self, val):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def factory(self):
         pass
 
     @factory.setter
-    @abstractmethod
+    @abc.abstractmethod
     def factory(self, val):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def estimator(self):
         pass
 
     @estimator.setter
-    @abstractmethod
+    @abc.abstractmethod
     def estimator(self, val):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def execute(self):
         pass
 
 
-class AbsBaseExecutor(AbsExecutor, metaclass=ABCMeta):
+class AbsBaseExecutor(AbsExecutor, metaclass=abc.ABCMeta):
 
-    @abstractmethod
+    @abc.abstractmethod
     def __init__(self):
         self.__factory = self._create_factory()
         self.__estimator = self.factory.create_estimator()
@@ -84,7 +83,7 @@ class AbsBaseExecutor(AbsExecutor, metaclass=ABCMeta):
     def number_iterations(self, val):
         self.__number_iterations = val
 
-    @abstractmethod
+    @abc.abstractmethod
     def _create_factory(self):
         pass
 
@@ -98,12 +97,12 @@ class AbsBaseExecutor(AbsExecutor, metaclass=ABCMeta):
         self.logger.write_header()
         self.logger.write_experiment_details(self.estimator.experiment_details)
         estimation_list = []
-        duration_sum = timedelta()
+        duration_sum = datetime.timedelta()
         connections_sum = 0
         for i in range(0, self.number_iterations):
-            start = datetime.now()
+            start = datetime.datetime.now()
             estimation = self.estimator.estimate()
-            end = datetime.now()
+            end = datetime.datetime.now()
             estimation_list.append(estimation)
             self.logger.write_result_iteration(i + 1, estimation, end - start, self.estimator.download_count)
             duration_sum += end - start
@@ -117,7 +116,7 @@ class SolrExecutor(AbsBaseExecutor):
     _NUMBER_ITERATIONS = 20
 
     def _create_factory(self):
-        return SolrExecutorFactory()
+        return factory.SolrExecutorFactory()
 
     def __init__(self):
         super().__init__()
@@ -129,7 +128,7 @@ class IEEEExecutor(AbsBaseExecutor):
     _NUMBER_ITERATIONS = 5
 
     def _create_factory(self):
-        return IEEEExecutorFactory()
+        return factory.IEEEExecutorFactory()
 
     def __init__(self):
         super().__init__()
@@ -141,7 +140,7 @@ class IEEEOnlyTitleExecutor(AbsBaseExecutor):
     _NUMBER_ITERATIONS = 5
 
     def _create_factory(self):
-        return IEEEOnlyTitleExecutorFactory()
+        return factory.IEEEOnlyTitleExecutorFactory()
 
     def __init__(self):
         super().__init__()
@@ -153,7 +152,7 @@ class IEEEOnlyAbstractExecutor(AbsBaseExecutor):
     _NUMBER_ITERATIONS = 5
 
     def _create_factory(self):
-        return IEEEOnlyAbstractExecutorFactory()
+        return factory.IEEEOnlyAbstractExecutorFactory()
 
     def __init__(self):
         super().__init__()
@@ -165,7 +164,7 @@ class ACMExecutor(AbsBaseExecutor):
     _NUMBER_ITERATIONS = 5
 
     def _create_factory(self):
-        return ACMExecutorFactory()
+        return factory.ACMExecutorFactory()
 
     def __init__(self):
         super().__init__()
@@ -177,7 +176,7 @@ class ACMOnlyTitleExecutor(AbsBaseExecutor):
     _NUMBER_ITERATIONS = 5
 
     def _create_factory(self):
-        return ACMOnlyTitleExecutorFactory()
+        return factory.ACMOnlyTitleExecutorFactory()
 
     def __init__(self):
         super().__init__()
@@ -189,7 +188,7 @@ class ACMOnlyAbstractExecutor(AbsBaseExecutor):
     _NUMBER_ITERATIONS = 5
 
     def _create_factory(self):
-        return ACMOnlyAbstractExecutorFactory()
+        return factory.ACMOnlyAbstractExecutorFactory()
 
     def __init__(self):
         super().__init__()

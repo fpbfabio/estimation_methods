@@ -1,5 +1,5 @@
-from executor import IEEEOnlyAbstractExecutor
+import executor
 
 
-executor = IEEEOnlyAbstractExecutor()
-executor.execute()
+executor_instance = executor.IEEEOnlyAbstractExecutor()
+executor_instance.execute()

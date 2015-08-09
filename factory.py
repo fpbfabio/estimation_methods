@@ -1,53 +1,52 @@
-from abc import ABCMeta, abstractmethod
+import abc
 
-from crawler_api import SolrCrawlerApi, ACMOnlyAbstractCrawlerApi, AbsACMCrawlerApi, ACMOnlyTitleCrawlerApi, \
-    ACMCrawlerApi, IEEEOnlyAbstractCrawlerApi, AbsIEEECrawlerApi, IEEEOnlyTitleCrawlerApi, IEEECrawlerApi
-from data import Data
-from estimator import Mhr
-from logger import Logger
-from parallelizer import Parallelizer
-from path_dictionary import WindowsPathDictionary
-from search_result import SearchResult
-from terminator import Terminator
-from word_extractor import WordExtractor
+import crawler_api
+import data
+import estimator
+import logger
+import parallelizer
+import path_dictionary
+import search_result
+import terminator
+import word_extractor
 
 
-class AbsFactory(metaclass=ABCMeta):
+class AbsFactory(metaclass=abc.ABCMeta):
 
-    @abstractmethod
+    @abc.abstractmethod
     def create_search_result(self, number_results, results):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def create_data(self, identifier, content):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def create_terminator(self):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def create_parallelizer(self):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def create_word_extractor(self):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def create_estimator(self):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def create_logger(self, query_pool_file_path):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def create_path_dictionary(self):
         pass
 
 
-class AbsExceptionFactory(AbsFactory, metaclass=ABCMeta):
+class AbsExceptionFactory(AbsFactory, metaclass=abc.ABCMeta):
 
     def create_search_result(self, number_results, results):
         raise NotImplementedError()
@@ -74,7 +73,7 @@ class AbsExceptionFactory(AbsFactory, metaclass=ABCMeta):
         raise NotImplementedError()
 
 
-class AbsBaseFactory(AbsExceptionFactory, metaclass=ABCMeta):
+class AbsBaseFactory(AbsExceptionFactory, metaclass=abc.ABCMeta):
 
     def create_search_result(self, number_results, results):
         return super().create_search_result(number_results, results)
@@ -98,7 +97,7 @@ class AbsBaseFactory(AbsExceptionFactory, metaclass=ABCMeta):
         return super().create_logger(query_pool_file_path)
 
     def create_path_dictionary(self):
-        return WindowsPathDictionary()
+        return path_dictionary.WindowsPathDictionary()
 
 
 class SolrExecutorFactory(AbsBaseFactory):
@@ -107,14 +106,14 @@ class SolrExecutorFactory(AbsBaseFactory):
     _EXPERIMENT_DETAILS_FILE_PATH = "SolrExecutorFactory__EXPERIMENT_DETAILS_FILE_PATH"
 
     def create_estimator(self):
-        return Mhr(SolrCrawlerApi())
+        return estimator.Mhr(crawler_api.SolrCrawlerApi())
 
     def create_logger(self, query_pool_file_path):
-        path_dictionary = self.create_path_dictionary()
-        return Logger(path_dictionary.get_path(SolrExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
-                      path_dictionary.get_path(SolrExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
-                      SolrCrawlerApi.get_data_set_size(),
-                      SolrCrawlerApi.LIMIT_RESULTS)
+        path_dict = self.create_path_dictionary()
+        return logger.Logger(path_dict.get_path(SolrExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
+                             path_dict.get_path(SolrExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
+                             crawler_api.SolrCrawlerApi.get_data_set_size(),
+                             crawler_api.SolrCrawlerApi.LIMIT_RESULTS)
 
 
 class IEEEExecutorFactory(AbsBaseFactory):
@@ -123,14 +122,14 @@ class IEEEExecutorFactory(AbsBaseFactory):
     _EXPERIMENT_DETAILS_FILE_PATH = "IEEEExecutorFactory__EXPERIMENT_DETAILS_FILE_PATH"
 
     def create_estimator(self):
-        return Mhr(IEEECrawlerApi())
+        return estimator.Mhr(crawler_api.IEEECrawlerApi())
 
     def create_logger(self, query_pool_file_path):
-        path_dictionary = self.create_path_dictionary()
-        return Logger(path_dictionary.get_path(IEEEExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
-                      path_dictionary.get_path(IEEEExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
-                      AbsIEEECrawlerApi.get_data_set_size(),
-                      AbsIEEECrawlerApi.LIMIT_RESULTS)
+        path_dict = self.create_path_dictionary()
+        return logger.Logger(path_dict.get_path(IEEEExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
+                             path_dict.get_path(IEEEExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
+                             crawler_api.AbsIEEECrawlerApi.get_data_set_size(),
+                             crawler_api.AbsIEEECrawlerApi.LIMIT_RESULTS)
 
 
 class IEEEOnlyTitleExecutorFactory(AbsBaseFactory):
@@ -139,14 +138,14 @@ class IEEEOnlyTitleExecutorFactory(AbsBaseFactory):
     _EXPERIMENT_DETAILS_FILE_PATH = "IEEEOnlyTitleExecutorFactory__EXPERIMENT_DETAILS_FILE_PATH"
 
     def create_estimator(self):
-        return Mhr(IEEEOnlyTitleCrawlerApi())
+        return estimator.Mhr(crawler_api.IEEEOnlyTitleCrawlerApi())
 
     def create_logger(self, query_pool_file_path):
-        path_dictionary = self.create_path_dictionary()
-        return Logger(path_dictionary.get_path(IEEEOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
-                      path_dictionary.get_path(IEEEOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
-                      AbsIEEECrawlerApi.get_data_set_size(),
-                      AbsIEEECrawlerApi.LIMIT_RESULTS)
+        path_dict = self.create_path_dictionary()
+        return logger.Logger(path_dict.get_path(IEEEOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
+                             path_dict.get_path(IEEEOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
+                             crawler_api.AbsIEEECrawlerApi.get_data_set_size(),
+                             crawler_api.AbsIEEECrawlerApi.LIMIT_RESULTS)
 
 
 class IEEEOnlyAbstractExecutorFactory(AbsBaseFactory):
@@ -155,14 +154,14 @@ class IEEEOnlyAbstractExecutorFactory(AbsBaseFactory):
     _EXPERIMENT_DETAILS_FILE_PATH = "IEEEOnlyAbstractExecutorFactory__EXPERIMENT_DETAILS_FILE_PATH"
 
     def create_estimator(self):
-        return Mhr(IEEEOnlyAbstractCrawlerApi())
+        return estimator.Mhr(crawler_api.IEEEOnlyAbstractCrawlerApi())
 
     def create_logger(self, query_pool_file_path):
-        path_dictionary = self.create_path_dictionary()
-        return Logger(path_dictionary.get_path(IEEEOnlyAbstractExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
-                      path_dictionary.get_path(IEEEOnlyAbstractExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
-                      AbsIEEECrawlerApi.get_data_set_size(),
-                      AbsIEEECrawlerApi.LIMIT_RESULTS)
+        path_dict = self.create_path_dictionary()
+        return logger.Logger(path_dict.get_path(IEEEOnlyAbstractExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
+                             path_dict.get_path(IEEEOnlyAbstractExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
+                             crawler_api.AbsIEEECrawlerApi.get_data_set_size(),
+                             crawler_api.AbsIEEECrawlerApi.LIMIT_RESULTS)
 
 
 class ACMExecutorFactory(AbsBaseFactory):
@@ -171,14 +170,14 @@ class ACMExecutorFactory(AbsBaseFactory):
     _EXPERIMENT_DETAILS_FILE_PATH = "ACMExecutorFactory__EXPERIMENT_DETAILS_FILE_PATH"
 
     def create_estimator(self):
-        return Mhr(ACMCrawlerApi())
+        return estimator.Mhr(crawler_api.ACMCrawlerApi())
 
     def create_logger(self, query_pool_file_path):
-        path_dictionary = self.create_path_dictionary()
-        return Logger(path_dictionary.get_path(ACMExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
-                      path_dictionary.get_path(ACMExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
-                      AbsACMCrawlerApi.get_data_set_size(),
-                      AbsACMCrawlerApi.LIMIT_RESULTS)
+        path_dict = self.create_path_dictionary()
+        return logger.Logger(path_dict.get_path(ACMExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
+                             path_dict.get_path(ACMExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
+                             crawler_api.AbsACMCrawlerApi.get_data_set_size(),
+                             crawler_api.AbsACMCrawlerApi.LIMIT_RESULTS)
 
 
 class ACMOnlyTitleExecutorFactory(AbsBaseFactory):
@@ -187,14 +186,14 @@ class ACMOnlyTitleExecutorFactory(AbsBaseFactory):
     _EXPERIMENT_DETAILS_FILE_PATH = "ACMOnlyTitleExecutorFactory__EXPERIMENT_DETAILS_FILE_PATH"
 
     def create_estimator(self):
-        return Mhr(ACMOnlyTitleCrawlerApi())
+        return estimator.Mhr(crawler_api.ACMOnlyTitleCrawlerApi())
 
     def create_logger(self, query_pool_file_path):
-        path_dictionary = self.create_path_dictionary()
-        return Logger(path_dictionary.get_path(ACMOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
-                      path_dictionary.get_path(ACMOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
-                      AbsACMCrawlerApi.get_data_set_size(),
-                      AbsACMCrawlerApi.LIMIT_RESULTS)
+        path_dict = self.create_path_dictionary()
+        return logger.Logger(path_dict.get_path(ACMOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
+                             path_dict.get_path(ACMOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
+                             crawler_api.AbsACMCrawlerApi.get_data_set_size(),
+                             crawler_api.AbsACMCrawlerApi.LIMIT_RESULTS)
 
 
 class ACMOnlyAbstractExecutorFactory(AbsBaseFactory):
@@ -203,32 +202,32 @@ class ACMOnlyAbstractExecutorFactory(AbsBaseFactory):
     _EXPERIMENT_DETAILS_FILE_PATH = "ACMOnlyAbstractExecutorFactory__EXPERIMENT_DETAILS_FILE_PATH"
 
     def create_estimator(self):
-        return Mhr(ACMOnlyAbstractCrawlerApi())
+        return estimator.Mhr(crawler_api.ACMOnlyAbstractCrawlerApi())
 
     def create_logger(self, query_pool_file_path):
-        path_dictionary = self.create_path_dictionary()
-        return Logger(path_dictionary.get_path(ACMOnlyAbstractExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
-                      path_dictionary.get_path(ACMOnlyAbstractExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
-                      AbsACMCrawlerApi.get_data_set_size(),
-                      AbsACMCrawlerApi.LIMIT_RESULTS)
+        path_dict = self.create_path_dictionary()
+        return logger.Logger(path_dict.get_path(ACMOnlyAbstractExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
+                             path_dict.get_path(ACMOnlyAbstractExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
+                             crawler_api.AbsACMCrawlerApi.get_data_set_size(),
+                             crawler_api.AbsACMCrawlerApi.LIMIT_RESULTS)
 
 
 class EstimatorFactory(AbsBaseFactory):
 
     def create_parallelizer(self):
-        return Parallelizer()
+        return parallelizer.Parallelizer()
 
     def create_word_extractor(self):
-        return WordExtractor()
+        return word_extractor.WordExtractor()
 
 
 class CrawlerApiFactory(AbsBaseFactory):
 
     def create_search_result(self, number_results, results):
-        return SearchResult(number_results, results)
+        return search_result.SearchResult(number_results, results)
 
     def create_data(self, identifier, content):
-        return Data(identifier, content)
+        return data.Data(identifier, content)
 
     def create_terminator(self):
-        return Terminator()
+        return terminator.Terminator()

@@ -1,83 +1,83 @@
-from abc import ABCMeta, abstractmethod
+import abc
 import json
 import os
 import re
-from threading import Lock
+import threading
 import itertools
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
+import urllib.request
+import bs4
 import pickle
 import math
-from selenium import webdriver
-from selenium.webdriver.support.wait import WebDriverWait
+import selenium
 import time
+from selenium.webdriver.support.wait import WebDriverWait
 
-from factory import CrawlerApiFactory
+import factory
 
 
-class AbsCrawlerApi(metaclass=ABCMeta):
+class AbsCrawlerApi(metaclass=abc.ABCMeta):
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def thread_limit(self):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def download_count(self):
         pass
 
     @download_count.setter
-    @abstractmethod
+    @abc.abstractmethod
     def download_count(self, val):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def factory(self):
         pass
 
     @factory.setter
-    @abstractmethod
+    @abc.abstractmethod
     def factory(self, val):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def terminator(self):
         pass
 
     @terminator.setter
-    @abstractmethod
+    @abc.abstractmethod
     def terminator(self, val):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def download_entire_data_set(self):
         pass
 
     @classmethod
-    @abstractmethod
+    @abc.abstractmethod
     def get_data_set_size(cls):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def retrieve_number_matches(self, query):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0, limit=None):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def clean_up_data_folder(self):
         pass
 
 
-class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=ABCMeta):
+class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=abc.ABCMeta):
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def thread_limit(self):
         pass
 
@@ -107,24 +107,24 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=ABCMeta):
 
     def __init__(self):
         self.__download_count = 0
-        self.__factory = CrawlerApiFactory()
-        self.__lock = Lock()
+        self.__factory = factory.CrawlerApiFactory()
+        self.__lock = threading.Lock()
         self.__terminator = self.__factory.create_terminator()
 
     @classmethod
-    @abstractmethod
+    @abc.abstractmethod
     def get_data_set_size(cls):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0, limit=None):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def clean_up_data_folder(self):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def download_entire_data_set(self):
         pass
 
@@ -137,7 +137,7 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=ABCMeta):
             self.download_count += 1
 
 
-class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
+class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=abc.ABCMeta):
 
     _NUMBER_ATTEMPTS_GET_EXPECTED_AMOUNT_OF_DATA = 5
     _DATA_FILE_EXTENSION = ".pkl"
@@ -150,57 +150,57 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
     _JAVASCRIPT_GET_PAGE_SOURCE_CODE = "return document.getElementsByTagName('html')[0].innerHTML"
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def _limit_results(self):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def thread_limit(self):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def base_url(self):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def max_results_per_page(self):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def data_folder_path(self):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def _extract_data_list_from_soup(self, soup):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def _extract_number_matches_from_soup(self, soup):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def _calculate_offset(self, offset):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def _handle_inconsistent_page(self, page_data_list):
         pass
 
     @classmethod
-    @abstractmethod
+    @abc.abstractmethod
     def _get_url_with_data_set_size(cls):
         pass
 
     @classmethod
-    @abstractmethod
+    @abc.abstractmethod
     def _extract_data_set_size(cls, soup):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def __init__(self):
         super().__init__()
         self.clean_up_data_folder()
@@ -208,17 +208,17 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
     @classmethod
     def _test_if_page_with_data_set_size_loaded(cls, web_driver):
         page_source = web_driver.execute_script(AbsWebsiteCrawlerApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)
-        soup = BeautifulSoup(page_source, AbsWebsiteCrawlerApi._HTML_PARSER)
+        soup = bs4.BeautifulSoup(page_source, AbsWebsiteCrawlerApi._HTML_PARSER)
         return cls._extract_data_set_size(soup) != -1
 
     @classmethod
     def get_data_set_size(cls):
-        web_driver = webdriver.PhantomJS()
+        web_driver = selenium.webdriver.PhantomJS()
         web_driver.get(cls._get_url_with_data_set_size())
         wait = WebDriverWait(web_driver, AbsWebsiteCrawlerApi._PAGE_LOAD_TIMEOUT)
         wait.until(cls._test_if_page_with_data_set_size_loaded)
         page_source = web_driver.execute_script(AbsWebsiteCrawlerApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)
-        soup = BeautifulSoup(page_source, AbsWebsiteCrawlerApi._HTML_PARSER)
+        soup = bs4.BeautifulSoup(page_source, AbsWebsiteCrawlerApi._HTML_PARSER)
         return cls._extract_data_set_size(soup)
 
     def download_entire_data_set(self):
@@ -263,7 +263,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
 
     def _download_completely_from_web(self, query, file_path):
         web_page = self._attempt_download(query, 0)
-        soup = BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
+        soup = bs4.BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
         number_matches = self._extract_number_matches_from_soup(soup)
         if number_matches == 0:
             search_result = self.factory.create_search_result(0, [])
@@ -300,7 +300,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         list_from_soup = []
         for i in range(0, AbsWebsiteCrawlerApi._NUMBER_ATTEMPTS_GET_EXPECTED_AMOUNT_OF_DATA):
             web_page = self._attempt_download(query, number_downloaded_results)
-            soup = BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
+            soup = bs4.BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
             list_from_soup = self._extract_data_list_from_soup(soup)
             if self._is_expected_amount_of_data(list_from_soup, number_matches, number_downloaded_results):
                 return list_from_soup
@@ -326,7 +326,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
 
     def _test_page_loaded(self, web_page):
         page_source = web_page.execute_script(AbsWebsiteCrawlerApi._JAVASCRIPT_GET_PAGE_SOURCE_CODE)
-        soup = BeautifulSoup(page_source, AbsWebsiteCrawlerApi._HTML_PARSER)
+        soup = bs4.BeautifulSoup(page_source, AbsWebsiteCrawlerApi._HTML_PARSER)
         return self._extract_number_matches_from_soup(soup) >= 0
 
     def _attempt_download(self, query, number_items_already_downloaded):
@@ -338,7 +338,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
             time.sleep(AbsWebsiteCrawlerApi._CRAWL_DELAY)
             web_page = None
             try:
-                web_page = webdriver.PhantomJS()
+                web_page = selenium.webdriver.PhantomJS()
                 web_page.get(url)
                 wait = WebDriverWait(web_page, AbsWebsiteCrawlerApi._PAGE_LOAD_TIMEOUT)
                 wait.until(self._test_page_loaded)
@@ -391,7 +391,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=ABCMeta):
         return self.factory.create_search_result(search_result.number_results, data_list)
 
 
-class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
+class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
 
     LIMIT_RESULTS = 5000000
     _DATA_SET_SIZE_TAG = "a"
@@ -428,7 +428,7 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
         super().__init__()
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def base_url(self):
         pass
 
@@ -544,7 +544,7 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
             return str(title)
 
 
-class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
+class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
 
     LIMIT_RESULTS = 5000000
     _URL_WITH_DATA_SET_SIZE = "http://dl.acm.org/results.cfm?h=1&query=test&dlr=GUIDE"
@@ -589,7 +589,7 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=ABCMeta):
         return path_dictionary.get_path(AbsACMCrawlerApi._DATA_FOLDER_PATH)
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def base_url(self):
         pass
 
@@ -686,7 +686,7 @@ class SolrCrawlerApi(AbsBaseCrawlerApi):
         url = url.replace(SolrCrawlerApi._FIELD_TO_SEARCH_MASK, "*")
         url = url.replace(SolrCrawlerApi._FIELDS_TO_RETURN_MASK, SolrCrawlerApi._ID_FIELD)
         url = url.replace(SolrCrawlerApi._OFFSET_MASK, str(0))
-        response = urlopen(str(url))
+        response = urllib.request.urlopen(str(url))
         data = response.read().decode(SolrCrawlerApi._ENCODING)
         dictionary = json.loads(data)
         data_set_size = int(dictionary[SolrCrawlerApi._RESPONSE_KEY][SolrCrawlerApi._NUMBER_MATCHES_KEY])
@@ -717,7 +717,7 @@ class SolrCrawlerApi(AbsBaseCrawlerApi):
             url = url.replace(SolrCrawlerApi._FIELDS_TO_RETURN_MASK, SolrCrawlerApi._FIELD_TO_SEARCH)
         else:
             url = url.replace(SolrCrawlerApi._FIELDS_TO_RETURN_MASK, SolrCrawlerApi._ID_FIELD)
-        response = urlopen(str(url))
+        response = urllib.request.urlopen(str(url))
         self.inc_download()
         data = response.read().decode(SolrCrawlerApi._ENCODING)
         dictionary = json.loads(data)

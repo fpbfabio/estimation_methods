@@ -1,5 +1,5 @@
-from executor import ACMOnlyAbstractExecutor
+import executor
 
 
-executor = ACMOnlyAbstractExecutor()
-executor.execute()
+executor_instance = executor.ACMOnlyAbstractExecutor()
+executor_instance.execute()

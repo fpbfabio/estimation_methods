@@ -1,90 +1,90 @@
-from abc import ABCMeta, abstractmethod
+import abc
 import random
 import math
-from threading import Lock
+import threading
 
-from factory import EstimatorFactory
+import factory
 
 
-class AbsEstimator(metaclass=ABCMeta):
+class AbsEstimator(metaclass=abc.ABCMeta):
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def query_pool_file_path(self):
         pass
 
     @query_pool_file_path.setter
-    @abstractmethod
+    @abc.abstractmethod
     def query_pool_file_path(self, val):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def factory(self):
         pass
 
     @factory.setter
-    @abstractmethod
+    @abc.abstractmethod
     def factory(self, val):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def word_extractor(self):
         pass
 
     @word_extractor.setter
-    @abstractmethod
+    @abc.abstractmethod
     def word_extractor(self, val):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def parallelizer(self):
         pass
 
     @parallelizer.setter
-    @abstractmethod
+    @abc.abstractmethod
     def parallelizer(self, val):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def crawler_api(self):
         pass
 
     @crawler_api.setter
-    @abstractmethod
+    @abc.abstractmethod
     def crawler_api(self, val):
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def estimate(self):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def experiment_details(self):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def download_count(self):
         pass
 
 
-class AbsBaseEstimator(AbsEstimator, metaclass=ABCMeta):
+class AbsBaseEstimator(AbsEstimator, metaclass=abc.ABCMeta):
     _QUERY_POOL_FILE_PATH_INFORMATION = "Lista de palavras"
 
     def __init__(self, crawler_api):
         self.__query_pool_file_path = None
         self.__crawler_api = crawler_api
-        self.__factory = EstimatorFactory()
+        self.__factory = factory.EstimatorFactory()
         self.__word_extractor = self.factory.create_word_extractor()
         self.__parallelizer = self.factory.create_parallelizer()
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def experiment_details(self):
         pass
 
@@ -132,7 +132,7 @@ class AbsBaseEstimator(AbsEstimator, metaclass=ABCMeta):
     def crawler_api(self, val):
         self.__crawler_api = val
 
-    @abstractmethod
+    @abc.abstractmethod
     def estimate(self):
         self.crawler_api.clean_up_data_folder()
         self.crawler_api.download_count = 0
@@ -169,8 +169,8 @@ class Mhr(AbsBaseEstimator):
     def __init__(self, crawler_api):
         super().__init__(crawler_api)
         self.query_pool_file_path = Mhr._DEFAULT_QUERY_POOL_FILE_PATH
-        self.__lock_accumulators = Lock()
-        self.__lock_query_list = Lock()
+        self.__lock_accumulators = threading.Lock()
+        self.__lock_query_list = threading.Lock()
         self.__query_count = 0
         self.__total_matches = 0
         self.__total_documents_returned = 0
@@ -391,7 +391,7 @@ class SumEst(AbsBaseEstimator):
                 return [random_query, random_document]
 
     def _get_matching_query_list(self, document, query_pool):
-        lock = Lock()
+        lock = threading.Lock()
         matching_query_list = []
 
         def iteration(query):
@@ -404,7 +404,7 @@ class SumEst(AbsBaseEstimator):
         return matching_query_list
 
     def _calculate_degree_query(self, query):
-        lock = Lock()
+        lock = threading.Lock()
         count = 0
 
         def iteration(document):
@@ -420,7 +420,7 @@ class SumEst(AbsBaseEstimator):
     def _estimate_pool_size(self, query_pool):
         count = 0
         query_pool_size = len(query_pool)
-        lock = Lock()
+        lock = threading.Lock()
 
         def iteration(iteration_number):
             nonlocal query_pool, query_pool_size, count, lock
@@ -501,7 +501,7 @@ class BroderEtAl(AbsBaseEstimator):
 
     def _calculate_average_query_weight(self, query_sample, query_pool):
         weight_sum = 0
-        lock = Lock()
+        lock = threading.Lock()
 
         def calc_iteration(query):
             nonlocal weight_sum, query_pool, lock
@@ -523,7 +523,7 @@ class BroderEtAl(AbsBaseEstimator):
 
     def _count_matches(self, document_sample, query_pool):
         count = 0
-        lock = Lock()
+        lock = threading.Lock()
 
         def iteration(document):
             nonlocal count, query_pool, lock

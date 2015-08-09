@@ -1,15 +1,15 @@
-from abc import ABCMeta, abstractmethod
+import abc
 
 
-class AbsData(metaclass=ABCMeta):
+class AbsData(metaclass=abc.ABCMeta):
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def identifier(self):
         pass
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def content(self):
         pass
 
