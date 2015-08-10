@@ -12,7 +12,7 @@ import selenium
 import time
 from selenium.webdriver.support.wait import WebDriverWait
 
-import factory
+import module_factory
 
 
 class AbsCrawlerApi(metaclass=abc.ABCMeta):
@@ -107,7 +107,7 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=abc.ABCMeta):
 
     def __init__(self):
         self.__download_count = 0
-        self.__factory = factory.CrawlerApiFactory()
+        self.__factory = module_factory.CrawlerApiFactory()
         self.__lock = threading.Lock()
         self.__terminator = self.__factory.create_terminator()
 

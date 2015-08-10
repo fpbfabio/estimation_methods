@@ -4,7 +4,7 @@ import math
 import threading
 import itertools
 
-import factory
+import module_factory
 
 
 class AbsEstimator(metaclass=abc.ABCMeta):
@@ -81,7 +81,7 @@ class AbsBaseEstimator(AbsEstimator, metaclass=abc.ABCMeta):
     def __init__(self, crawler_api):
         self.__query_pool_file_path = None
         self.__crawler_api = crawler_api
-        self.__factory = factory.EstimatorFactory()
+        self.__factory = module_factory.EstimatorFactory()
         self.__word_extractor = self.factory.create_word_extractor()
         self.__parallelizer = self.factory.create_parallelizer()
 
