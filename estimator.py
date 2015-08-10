@@ -2,6 +2,7 @@ import abc
 import random
 import math
 import threading
+import itertools
 
 import factory
 
@@ -540,3 +541,105 @@ class BroderEtAl(AbsBaseEstimator):
 
         self.parallelizer.execute_in_parallel(BroderEtAl._THREAD_LIMIT, document_sample, iteration)
         return count
+
+
+class AbsShokouhi(AbsBaseEstimator, metaclass=abc.ABCMeta):
+
+    _MIN_NUMBER_MATCHES = 20
+    _FACTOR_N = 10
+    _FACTOR_T = 5000
+    _MIN_NUMBER_MATCHES_INFORMATION = "Min number of matches for queries to be in the sample"
+    _FACTOR_N_INFORMATION = "Factor N"
+    _FACTOR_T_INFORMATION = "Factor T"
+
+    @property
+    def experiment_details(self):
+        additional_information = {AbsShokouhi._FACTOR_T_INFORMATION: AbsShokouhi._FACTOR_T,
+                                  AbsShokouhi._FACTOR_N_INFORMATION: AbsShokouhi._FACTOR_N,
+                                  AbsShokouhi._MIN_NUMBER_MATCHES_INFORMATION: AbsShokouhi._MIN_NUMBER_MATCHES,
+                                  AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
+        return additional_information
+
+    @abc.abstractmethod
+    def estimate(self):
+        super().estimate()
+
+    def _build_query_sample(self):
+        count = 0
+        query_pool = self._read_query_pool()
+        size = len(query_pool)
+        query_sample = []
+        while count < AbsShokouhi._FACTOR_T:
+            index = random.randrange(0, size)
+            query = random.sample(query_pool, 1)
+            del(query_pool[index])
+            size -= 1
+            if self.crawler_api.retrieve_number_matches(query) > AbsShokouhi._MIN_NUMBER_MATCHES:
+                query_sample.append(query)
+                count += 1
+        return query_sample
+
+
+class AbsMCR(AbsShokouhi, metaclass=abc.ABCMeta):
+
+    def _count_duplicates(self, data_list_1, data_list_2):
+        id_list_1 = [x.identifier for x in data_list_1]
+        id_list_2 = [x.identifier for x in data_list_2]
+        duplicates = [x for x in id_list_1 if x in id_list_2]
+        return len(duplicates)
+
+    @abc.abstractmethod
+    def estimate(self):
+        super().estimate()
+        query_sample = self._build_query_sample()
+        result_list = [self.crawler_api.download(x, True, False, 0, 10) for x in query_sample]
+        factor_d = sum([self._count_duplicates(result_list[x - 1], result_list[x]) for x in range(1, AbsMCR._FACTOR_T)])
+        estimation = AbsMCR._FACTOR_T * (AbsMCR._FACTOR_T - 1) * AbsMCR._FACTOR_N ** 2 / factor_d
+        return estimation
+
+
+class AbsCH(AbsShokouhi, metaclass=abc.ABCMeta):
+
+    @abc.abstractmethod
+    def estimate(self):
+        super().estimate()
+        query_sample = self._build_query_sample(self._read_query_pool(), AbsCH._FACTOR_T,
+                                                         AbsCH._MIN_NUMBER_MATCHES, self.crawler_api)
+        marked_list = []
+        numerator = 0
+        denominator = 0
+        for i in range(0, AbsCH._FACTOR_T):
+            result = self.crawler_api.download(query_sample[i], True, False, 0, 10)
+            numerator += AbsCH._FACTOR_N * len(marked_list) ** 2
+            id_list = [x.identifier for x in result.results]
+            denominator += len([x for x in id_list if x in marked_list]) * len(marked_list)
+            marked_list = list(itertools.chain(id_list, marked_list))
+        estimation = numerator / denominator
+        return estimation
+
+
+class MCR(AbsMCR):
+
+    def estimate(self):
+        return super().estimate()
+
+
+class MCRReg(AbsMCR):
+
+    def estimate(self):
+        estimation = super().estimate()
+        return 10 ** (math.log10(estimation) -  1.5767) / 0.5911
+
+
+class CH(AbsCH):
+
+    def estimate(self):
+        return super().estimate()
+
+
+class CHReg(AbsCH):
+
+    def estimate(self):
+        estimation = super().estimate()
+        return 10 ** (math.log10(estimation) -  1.4208) / 0.6429
+
