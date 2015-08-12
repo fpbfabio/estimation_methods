@@ -4,7 +4,7 @@
 import abc
 
 import module_crawler_api
-import data
+import module_data
 import module_estimator
 import module_logger
 import module_parallelizer
@@ -600,7 +600,7 @@ class CrawlerApiFactory(AbsBaseFactory):
         return module_search_result.SearchResult(number_results, results)
 
     def create_data(self, identifier, content):
-        return data.Data(identifier, content)
+        return module_data.Data(identifier, content)
 
     def create_terminator(self):
         return module_terminator.Terminator()

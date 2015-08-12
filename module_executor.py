@@ -1,14 +1,11 @@
-# region imports
-
-
 import abc
 import signal
+import time
 import datetime
+import subprocess
 
 import module_factory
 
-
-# endregion
 
 # region AbsExecutor
 
@@ -130,15 +127,44 @@ class AbsBaseExecutor(AbsExecutor, metaclass=abc.ABCMeta):
 
 class AbsSolrExecutor(AbsBaseExecutor):
 
+    _CREATE_CORE_COMMAND = "AbsSolrExecutor__CREATE_CORE_COMMAND"
+    _UNLOAD_CORE_COMMAND = "AbsSolrExecutor__UNLOAD_CORE_COMMAND"
+    _START_SOLR_COMMAND = "AbsSolrExecutor__START_SOLR_COMMAND"
+    _STOP_SOLR_COMMAND = "AbsSolrExecutor__STOP_SOLR_COMMAND"
+    _QUERY_POOL_PATH_LIST = "AbsSolrExecutor__QUERY_POOL_PATH_LIST"
+    _CORE_PATH_LIST = "AbsSolrExecutor__CORE_PATH_LIST"
     _NUMBER_ITERATIONS = 20
+
+    # noinspection PyMissingConstructor
+    def __init__(self):
+        self.factory = self._create_factory()
+        path_dict = self.factory.create_path_dictionary()
+        subprocess.call(path_dict.get_path(AbsSolrExecutor._STOP_SOLR_COMMAND), shell=True)
+        time.sleep(2)
+        subprocess.call(path_dict.get_path(AbsSolrExecutor._START_SOLR_COMMAND), shell=True)
+        time.sleep(10)
+        self.estimator = self.factory.create_estimator()
+        self.number_iterations = AbsSolrExecutor._NUMBER_ITERATIONS
 
     @abc.abstractmethod
     def _create_factory(self):
         pass
 
-    def __init__(self):
-        super().__init__()
-        self.number_iterations = AbsSolrExecutor._NUMBER_ITERATIONS
+    def execute(self):
+        path_dict = self.factory.create_path_dictionary()
+        solr_core_path_list = path_dict.get_path(AbsSolrExecutor._CORE_PATH_LIST)
+        query_pool_path_list = path_dict.get_path(AbsSolrExecutor._QUERY_POOL_PATH_LIST)
+        count = 0
+        for core_path, query_pool_path in zip(solr_core_path_list, query_pool_path_list):
+            subprocess.call(path_dict.get_path(AbsSolrExecutor._UNLOAD_CORE_COMMAND), shell=True)
+            time.sleep(5)
+            subprocess.call(path_dict.get_path(AbsSolrExecutor._CREATE_CORE_COMMAND) + core_path, shell=True)
+            time.sleep(5)
+            self.estimator.query_pool_file_path = query_pool_path
+            self.logger = self.factory.create_logger(self.estimator.query_pool_file_path)
+            super().execute()
+            count += 1
+            print("Experiment " + str(count) + " complete.")
 
 
 class MhrSolrExecutor(AbsSolrExecutor):

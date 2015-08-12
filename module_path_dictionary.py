@@ -2,14 +2,12 @@ import abc
 
 
 class AbsPathDictionary(metaclass=abc.ABCMeta):
-
     @abc.abstractmethod
     def get_path(self, key):
         pass
 
 
 class WindowsPathDictionary(AbsPathDictionary):
-
     _PATH_DICTIONARY = {
         "MhrSolrExecutorFactory__EXPERIMENT_RESULTS_FILE_PATH":
             "Logs\\MhrSolr\\ExperimentResults.csv",
@@ -123,6 +121,19 @@ class WindowsPathDictionary(AbsPathDictionary):
             "Logs\\BroderEtAlACMOnlyAbstract\\ExperimentResults.csv",
         "BroderEtAlACMOnlyAbstractExecutorFactory__EXPERIMENT_DETAILS_FILE_PATH":
             "Logs\\BroderEtAlACMOnlyAbstract\\Log.txt",
+        "Mhr__DEFAULT_QUERY_POOL_FILE_PATH": "WordLists\\new_shine.txt",
+        "AbsSolrExecutor__QUERY_POOL_PATH_LIST": ["WordLists\\new_shine.txt",
+                                                  "WordLists\\new_shine.txt",
+                                                  "WordLists\\new_shine.txt",
+                                                  "WordLists\\new_shine.txt"],
+        "AbsSolrExecutor__CORE_PATH_LIST": ["Cores\\newsgroups",
+                                            "Cores\\dbcomp_en",
+                                            "Cores\\dblp",
+                                            "Cores\\artigos0313_en"],
+        "AbsSolrExecutor__CREATE_CORE_COMMAND": "Commands\\CreateCore.bat experiment ",
+        "AbsSolrExecutor__UNLOAD_CORE_COMMAND": "Commands\\UnloadCore.bat experiment ",
+        "AbsSolrExecutor__START_SOLR_COMMAND": "Commands\\StartSolr.bat experiment ",
+        "AbsSolrExecutor__STOP_SOLR_COMMAND": "Commands\\StopSolr.bat experiment "
     }
 
     def get_path(self, key):
@@ -130,7 +141,6 @@ class WindowsPathDictionary(AbsPathDictionary):
 
 
 class LinuxPathDictionary(AbsPathDictionary):
-
     _PATH_DICTIONARY = {
         "MhrSolrExecutorFactory__EXPERIMENT_RESULTS_FILE_PATH":
             "Logs/MhrSolr/ExperimentResults.csv",
@@ -248,4 +258,3 @@ class LinuxPathDictionary(AbsPathDictionary):
 
     def get_path(self, key):
         return LinuxPathDictionary._PATH_DICTIONARY[key]
-
