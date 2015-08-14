@@ -7,9 +7,6 @@ import subprocess
 import module_factory
 
 
-# region AbsExecutor
-
-
 class AbsExecutor(metaclass=abc.ABCMeta):
 
     @property
@@ -45,10 +42,6 @@ class AbsExecutor(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def execute(self):
         pass
-
-# endregion
-
-# region AbsBaseExecutor
 
 
 class AbsBaseExecutor(AbsExecutor, metaclass=abc.ABCMeta):
@@ -120,11 +113,6 @@ class AbsBaseExecutor(AbsExecutor, metaclass=abc.ABCMeta):
             self.logger.write_final_result(estimation_list, duration_sum, connections_sum)
 
 
-# endregion
-
-# region SolrExecutor
-
-
 class AbsSolrExecutor(AbsBaseExecutor):
 
     _CREATE_CORE_COMMAND = "AbsSolrExecutor__CREATE_CORE_COMMAND"
@@ -191,11 +179,6 @@ class BroderEtAlSolrExecutor(AbsSolrExecutor):
         return module_factory.BroderEtAlSolrExecutorFactory()
 
 
-# endregion
-
-# region IEEEExecutor
-
-
 class AbsIEEEExecutor(AbsBaseExecutor):
 
     _NUMBER_ITERATIONS = 20
@@ -231,11 +214,6 @@ class BroderEtAlIEEEExecutor(AbsIEEEExecutor):
 
     def _create_factory(self):
         return module_factory.BroderEtAlIEEEExecutorFactory()
-
-
-# endregion
-
-# region IEEEOnlyTitleExecutor
 
 
 class AbsIEEEOnlyTitleExecutor(AbsBaseExecutor):
@@ -275,11 +253,6 @@ class BroderEtAlIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
         return module_factory.BroderEtAlIEEEOnlyTitleExecutorFactory()
 
 
-# endregion
-
-# region IEEEOnlyAbstractExecutor
-
-
 class AbsIEEEOnlyAbstractExecutor(AbsBaseExecutor):
 
     _NUMBER_ITERATIONS = 20
@@ -315,11 +288,6 @@ class BroderEtAlIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
 
     def _create_factory(self):
         return module_factory.BroderEtAlIEEEOnlyAbstractExecutorFactory()
-
-
-# endregion
-
-# region ACMExecutor
 
 
 class AbsACMExecutor(AbsBaseExecutor):
@@ -359,11 +327,6 @@ class BroderEtAlACMExecutor(AbsACMExecutor):
         return module_factory.BroderEtAlACMExecutorFactory()
 
 
-# endregion
-
-# region ACMOnlyTitleExecutor
-
-
 class AbsACMOnlyTitleExecutor(AbsBaseExecutor):
 
     _NUMBER_ITERATIONS = 20
@@ -401,11 +364,6 @@ class BroderEtAlACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
         return module_factory.BroderEtAlACMOnlyTitleExecutorFactory()
 
 
-# endregion
-
-# region ACMOnlyAbstractExecutor
-
-
 class AbsACMOnlyAbstractExecutor(AbsBaseExecutor):
 
     _NUMBER_ITERATIONS = 20
@@ -441,6 +399,3 @@ class BroderEtAlACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
 
     def _create_factory(self):
         return module_factory.BroderEtAlACMOnlyAbstractExecutorFactory()
-
-
-# endregion

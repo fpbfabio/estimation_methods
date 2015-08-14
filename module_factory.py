@@ -1,6 +1,3 @@
-# region imports
-
-
 import abc
 
 import module_crawler_api
@@ -12,11 +9,6 @@ import module_path_dictionary
 import module_search_result
 import module_terminator
 import module_word_extractor
-
-# endregion
-
-# region AbsFactory
-
 
 class AbsFactory(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -51,10 +43,6 @@ class AbsFactory(metaclass=abc.ABCMeta):
     def create_path_dictionary(self):
         pass
 
-# endregion
-
-# region AbsExceptionFactory
-
 
 class AbsExceptionFactory(AbsFactory, metaclass=abc.ABCMeta):
     def create_search_result(self, number_results, results):
@@ -81,10 +69,6 @@ class AbsExceptionFactory(AbsFactory, metaclass=abc.ABCMeta):
     def create_path_dictionary(self):
         raise NotImplementedError()
 
-# endregion
-
-# region AbsBaseFactory
-
 
 class AbsBaseFactory(AbsExceptionFactory, metaclass=abc.ABCMeta):
     def create_search_result(self, number_results, results):
@@ -110,10 +94,6 @@ class AbsBaseFactory(AbsExceptionFactory, metaclass=abc.ABCMeta):
 
     def create_path_dictionary(self):
         return module_path_dictionary.WindowsPathDictionary()
-
-# endregion
-
-# region SolrExecutorFactory
 
 
 class MhrSolrExecutorFactory(AbsBaseFactory):
@@ -176,11 +156,6 @@ class SumEstSolrExecutorFactory(AbsBaseFactory):
                                     module_crawler_api.SolrCrawlerApi.LIMIT_RESULTS)
 
 
-# endregion
-
-# region IEEEExecutorFactory
-
-
 class MhrIEEEExecutorFactory(AbsBaseFactory):
     _EXPERIMENT_RESULTS_FILE_PATH = "MhrIEEEExecutorFactory__EXPERIMENT_RESULTS_FILE_PATH"
     _EXPERIMENT_DETAILS_FILE_PATH = "MhrIEEEExecutorFactory__EXPERIMENT_DETAILS_FILE_PATH"
@@ -239,11 +214,6 @@ class SumEstIEEEExecutorFactory(AbsBaseFactory):
                                     path_dict.get_path(SumEstIEEEExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.IEEECrawlerApi.get_data_set_size(),
                                     module_crawler_api.IEEECrawlerApi.LIMIT_RESULTS)
-
-
-# endregion
-
-# region IEEEOnlyTitleExecutorFactory
 
 
 class MhrIEEEOnlyTitleExecutorFactory(AbsBaseFactory):
@@ -307,11 +277,6 @@ class SumEstIEEEOnlyTitleExecutorFactory(AbsBaseFactory):
             path_dict.get_path(SumEstIEEEOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
             module_crawler_api.IEEEOnlyTitleCrawlerApi.get_data_set_size(),
             module_crawler_api.IEEEOnlyTitleCrawlerApi.LIMIT_RESULTS)
-
-
-# endregion
-
-# region IEEEOnlyAbstractExecutorFactory
 
 
 class MhrIEEEOnlyAbstractExecutorFactory(AbsBaseFactory):
@@ -378,11 +343,6 @@ class SumEstIEEEOnlyAbstractExecutorFactory(AbsBaseFactory):
             module_crawler_api.IEEEOnlyAbstractCrawlerApi.LIMIT_RESULTS)
 
 
-# endregion
-
-# region ACMExecutorFactory
-
-
 class MhrACMExecutorFactory(AbsBaseFactory):
     _EXPERIMENT_RESULTS_FILE_PATH = "MhrACMExecutorFactory__EXPERIMENT_RESULTS_FILE_PATH"
     _EXPERIMENT_DETAILS_FILE_PATH = "MhrACMExecutorFactory__EXPERIMENT_DETAILS_FILE_PATH"
@@ -441,11 +401,6 @@ class SumEstACMExecutorFactory(AbsBaseFactory):
                                     path_dict.get_path(SumEstACMExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.ACMCrawlerApi.get_data_set_size(),
                                     module_crawler_api.ACMCrawlerApi.LIMIT_RESULTS)
-
-
-# endregion
-
-# region ACMOnlyTitleExecutorFactory
 
 
 class MhrACMOnlyTitleExecutorFactory(AbsBaseFactory):
@@ -508,11 +463,6 @@ class SumEstACMOnlyTitleExecutorFactory(AbsBaseFactory):
                                     path_dict.get_path(SumEstACMOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.ACMOnlyTitleCrawlerApi.get_data_set_size(),
                                     module_crawler_api.ACMOnlyTitleCrawlerApi.LIMIT_RESULTS)
-
-
-# endregion
-
-# region ACMOnlyAbstractExecutorFactory
 
 
 class MhrACMOnlyAbstractExecutorFactory(AbsBaseFactory):
@@ -578,21 +528,12 @@ class SumEstACMOnlyAbstractExecutorFactory(AbsBaseFactory):
             module_crawler_api.ACMOnlyAbstractCrawlerApi.LIMIT_RESULTS)
 
 
-# endregion
-
-# region EstimatorFactory
-
-
 class EstimatorFactory(AbsBaseFactory):
     def create_parallelizer(self):
         return module_parallelizer.Parallelizer()
 
     def create_word_extractor(self):
         return module_word_extractor.WordExtractor()
-
-# endregion
-
-# region CrawlerApiFactory
 
 
 class CrawlerApiFactory(AbsBaseFactory):
@@ -604,5 +545,3 @@ class CrawlerApiFactory(AbsBaseFactory):
 
     def create_terminator(self):
         return module_terminator.Terminator()
-
-# endregion
