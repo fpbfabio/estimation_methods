@@ -273,12 +273,22 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=abc.ABCMeta):
         number_downloaded_results = len(data_list)
         if number_downloaded_results > number_matches:
             return self.factory.create_search_result(number_matches, data_list)
-        number_additional_downloads = self._calculate_number_additional_downloads(number_matches,
-                                                                                  number_downloaded_results)
+        if self.limit_results_per_query < number_matches:
+            number_additional_downloads = self._calculate_number_additional_downloads(self.limit_results_per_query,
+                                                                                      number_downloaded_results)
+        else:
+            number_additional_downloads = self._calculate_number_additional_downloads(number_matches,
+                                                                                      number_downloaded_results)
         if number_additional_downloads > 0:
             additional_data_list = self._do_additional_downloads(query, number_downloaded_results,
                                                                  number_additional_downloads, number_matches)
             data_list = list(itertools.chain(data_list, additional_data_list))
+        data_list_size = len(data_list)
+        if self.limit_results_per_query < number_matches and data_list_size > self.limit_results_per_query:
+            if data_list_size - self.limit_results_per_query >= self.max_results_per_page:
+                print("DOWNLOADED UNECESSARY PAGES, TOTAL OF " + str(data_list_size - self.limit_results_per_query) +
+                      " MORE ITEMS")
+            data_list = data_list[0:self.limit_results_per_query]
         search_result = self.factory.create_search_result(number_matches, data_list)
         return search_result
 
@@ -300,9 +310,15 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=abc.ABCMeta):
         if not self._is_expected_amount_of_data(data_list, number_matches, 0):
             data_list = self._download_until_expected_amount_of_data_is_extracted(query, number_matches, 0)
         search_result = self._download_more_results_if_needed(query, number_matches, data_list)
-        if len(search_result.results) != number_matches:
-            print("ERROR - NUMBER OF DATA ITEMS != NUMBER OF MATCHES IN QUERY =  " + query)
-            print("ERROR IGNORED")
+        number_results = len(search_result.results)
+        if self.limit_results_per_query < number_matches:
+            if number_results != self.limit_results_per_query:
+                print("ERROR - NUMBER OF DATA ITEMS != LIMIT OF RESULTS =  " + query)
+                print("ERROR IGNORED")
+        else:
+            if number_results != number_matches:
+                print("ERROR - NUMBER OF DATA ITEMS != NUMBER OF MATCHES IN QUERY =  " + query)
+                print("ERROR IGNORED")
         self._save_result(file_path, search_result)
         return search_result
 
