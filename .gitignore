@@ -1,6 +1,4 @@
 __pycache__/
 Cores/
 .idea/
-node_modules/
 *.log
-all_solr_data_sets_experiment.py

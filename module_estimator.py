@@ -546,7 +546,7 @@ class BroderEtAl(AbsBaseEstimator):
 class AbsShokouhi(AbsBaseEstimator, metaclass=abc.ABCMeta):
 
     _MIN_NUMBER_MATCHES = 20
-    _FACTOR_N = 10
+    FACTOR_N = 10
     _FACTOR_T = 5000
     _MIN_NUMBER_MATCHES_INFORMATION = "Min number of matches for queries to be in the sample"
     _FACTOR_N_INFORMATION = "Factor N"
@@ -555,7 +555,7 @@ class AbsShokouhi(AbsBaseEstimator, metaclass=abc.ABCMeta):
     @property
     def experiment_details(self):
         additional_information = {AbsShokouhi._FACTOR_T_INFORMATION: AbsShokouhi._FACTOR_T,
-                                  AbsShokouhi._FACTOR_N_INFORMATION: AbsShokouhi._FACTOR_N,
+                                  AbsShokouhi._FACTOR_N_INFORMATION: AbsShokouhi.FACTOR_N,
                                   AbsShokouhi._MIN_NUMBER_MATCHES_INFORMATION: AbsShokouhi._MIN_NUMBER_MATCHES,
                                   AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
         return additional_information
@@ -563,6 +563,7 @@ class AbsShokouhi(AbsBaseEstimator, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def estimate(self):
         super().estimate()
+        self.crawler_api.limit_results_per_query = AbsShokouhi.FACTOR_N
 
     def _build_query_sample(self):
         count = 0
@@ -594,7 +595,7 @@ class AbsMCR(AbsShokouhi, metaclass=abc.ABCMeta):
         query_sample = self._build_query_sample()
         result_list = [self.crawler_api.download(x, True, False) for x in query_sample]
         factor_d = sum([self._count_duplicates(result_list[x - 1], result_list[x]) for x in range(1, AbsMCR._FACTOR_T)])
-        estimation = AbsMCR._FACTOR_T * (AbsMCR._FACTOR_T - 1) * AbsMCR._FACTOR_N ** 2 / factor_d
+        estimation = AbsMCR._FACTOR_T * (AbsMCR._FACTOR_T - 1) * AbsMCR.FACTOR_N ** 2 / factor_d
         return estimation
 
 
@@ -609,7 +610,7 @@ class AbsCH(AbsShokouhi, metaclass=abc.ABCMeta):
         denominator = 0
         for i in range(0, AbsCH._FACTOR_T):
             result = self.crawler_api.download(query_sample[i], True, False)
-            numerator += AbsCH._FACTOR_N * len(marked_list) ** 2
+            numerator += AbsCH.FACTOR_N * len(marked_list) ** 2
             id_list = [x.identifier for x in result.results]
             denominator += len([x for x in id_list if x in marked_list]) * len(marked_list)
             marked_list = list(itertools.chain(id_list, marked_list))

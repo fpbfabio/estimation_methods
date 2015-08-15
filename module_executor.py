@@ -179,6 +179,30 @@ class BroderEtAlSolrExecutor(AbsSolrExecutor):
         return module_factory.BroderEtAlSolrExecutorFactory()
 
 
+class MCRSolrExecutor(AbsSolrExecutor):
+
+    def _create_factory(self):
+        return module_factory.MCRSolrExecutorFactory()
+
+
+class MCRRegSolrExecutor(AbsSolrExecutor):
+
+    def _create_factory(self):
+        return module_factory.MCRRegSolrExecutorFactory()
+
+
+class CHSolrExecutor(AbsSolrExecutor):
+
+    def _create_factory(self):
+        return module_factory.CHSolrExecutorFactory()
+
+
+class CHRegSolrExecutor(AbsSolrExecutor):
+
+    def _create_factory(self):
+        return module_factory.CHRegSolrExecutorFactory()
+
+
 class AbsIEEEExecutor(AbsBaseExecutor):
 
     _NUMBER_ITERATIONS = 3
@@ -214,6 +238,30 @@ class BroderEtAlIEEEExecutor(AbsIEEEExecutor):
 
     def _create_factory(self):
         return module_factory.BroderEtAlIEEEExecutorFactory()
+
+
+class MCRIEEEExecutor(AbsIEEEExecutor):
+
+    def _create_factory(self):
+        return module_factory.MCRIEEEExecutorFactory()
+
+
+class MCRRegIEEEExecutor(AbsIEEEExecutor):
+
+    def _create_factory(self):
+        return module_factory.MCRRegIEEEExecutorFactory()
+
+
+class CHIEEEExecutor(AbsIEEEExecutor):
+
+    def _create_factory(self):
+        return module_factory.CHIEEEExecutorFactory()
+
+
+class CHRegIEEEExecutor(AbsIEEEExecutor):
+
+    def _create_factory(self):
+        return module_factory.CHRegIEEEExecutorFactory()
 
 
 class AbsIEEEOnlyTitleExecutor(AbsBaseExecutor):
@@ -253,6 +301,30 @@ class BroderEtAlIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
         return module_factory.BroderEtAlIEEEOnlyTitleExecutorFactory()
 
 
+class MCRIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
+
+    def _create_factory(self):
+        return module_factory.MCRIEEEOnlyTitleExecutorFactory()
+
+
+class MCRRegIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
+
+    def _create_factory(self):
+        return module_factory.MCRRegIEEEOnlyTitleExecutorFactory()
+
+
+class CHIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
+
+    def _create_factory(self):
+        return module_factory.CHIEEEOnlyTitleExecutorFactory()
+
+
+class CHRegIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
+
+    def _create_factory(self):
+        return module_factory.CHRegIEEEOnlyTitleExecutorFactory()
+
+
 class AbsIEEEOnlyAbstractExecutor(AbsBaseExecutor):
 
     _NUMBER_ITERATIONS = 3
@@ -288,6 +360,30 @@ class BroderEtAlIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
 
     def _create_factory(self):
         return module_factory.BroderEtAlIEEEOnlyAbstractExecutorFactory()
+
+
+class MCRIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
+
+    def _create_factory(self):
+        return module_factory.MCRIEEEOnlyAbstractExecutorFactory()
+
+
+class MCRRegIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
+
+    def _create_factory(self):
+        return module_factory.MCRRegIEEEOnlyAbstractExecutorFactory()
+
+
+class CHIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
+
+    def _create_factory(self):
+        return module_factory.CHIEEEOnlyAbstractExecutorFactory()
+
+
+class CHRegIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
+
+    def _create_factory(self):
+        return module_factory.CHRegIEEEOnlyAbstractExecutorFactory()
 
 
 class AbsACMExecutor(AbsBaseExecutor):
@@ -327,6 +423,30 @@ class BroderEtAlACMExecutor(AbsACMExecutor):
         return module_factory.BroderEtAlACMExecutorFactory()
 
 
+class MCRACMExecutor(AbsACMExecutor):
+
+    def _create_factory(self):
+        return module_factory.MCRACMExecutorFactory()
+
+
+class MCRRegACMExecutor(AbsACMExecutor):
+
+    def _create_factory(self):
+        return module_factory.MCRRegACMExecutorFactory()
+
+
+class CHACMExecutor(AbsACMExecutor):
+
+    def _create_factory(self):
+        return module_factory.CHACMExecutorFactory()
+
+
+class CHRegACMExecutor(AbsACMExecutor):
+
+    def _create_factory(self):
+        return module_factory.CHRegACMExecutorFactory()
+
+
 class AbsACMOnlyTitleExecutor(AbsBaseExecutor):
 
     _NUMBER_ITERATIONS = 3
@@ -364,6 +484,30 @@ class BroderEtAlACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
         return module_factory.BroderEtAlACMOnlyTitleExecutorFactory()
 
 
+class MCRACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
+
+    def _create_factory(self):
+        return module_factory.MCRACMOnlyTitleExecutorFactory()
+
+
+class MCRRegACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
+
+    def _create_factory(self):
+        return module_factory.MCRRegACMOnlyTitleExecutorFactory()
+
+
+class CHACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
+
+    def _create_factory(self):
+        return module_factory.CHACMOnlyTitleExecutorFactory()
+
+
+class CHRegACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
+
+    def _create_factory(self):
+        return module_factory.CHRegACMOnlyTitleExecutorFactory()
+
+
 class AbsACMOnlyAbstractExecutor(AbsBaseExecutor):
 
     _NUMBER_ITERATIONS = 3
@@ -399,3 +543,27 @@ class BroderEtAlACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
 
     def _create_factory(self):
         return module_factory.BroderEtAlACMOnlyAbstractExecutorFactory()
+
+
+class MCRACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
+
+    def _create_factory(self):
+        return module_factory.MCRACMOnlyAbstractExecutorFactory()
+
+
+class MCRRegACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
+
+    def _create_factory(self):
+        return module_factory.MCRRegACMOnlyAbstractExecutorFactory()
+
+
+class CHACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
+
+    def _create_factory(self):
+        return module_factory.CHACMOnlyAbstractExecutorFactory()
+
+
+class CHRegACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
+
+    def _create_factory(self):
+        return module_factory.CHRegACMOnlyAbstractExecutorFactory()

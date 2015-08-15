@@ -774,9 +774,6 @@ class IEEECrawlerApi(AbsIEEECrawlerApi):
     _BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
                  + "queryText=<<query>>&rowsPerPage=100&pageNumber=<<offset>>&resultAction=ROWS_PER_PAGE")
 
-    def __init__(self):
-        super().__init__()
-
     @property
     def base_url(self):
         return IEEECrawlerApi._BASE_URL
@@ -789,9 +786,6 @@ class IEEEOnlyTitleCrawlerApi(AbsIEEECrawlerApi):
                  + "queryText=(\"Document%20Title\":<<query>>)&"
                  + "rowsPerPage=100&pageNumber=<<offset>>&resultAction=ROWS_PER_PAGE")
 
-    def __init__(self):
-        super().__init__()
-
     @property
     def base_url(self):
         return IEEEOnlyTitleCrawlerApi._BASE_URL
@@ -803,9 +797,6 @@ class IEEEOnlyAbstractCrawlerApi(AbsIEEECrawlerApi):
                  + "action=search&sortType=&searchField=Search_All&matchBoolean=true&"
                  + "queryText=(\"Abstract\":<<query>>)&"
                  + "rowsPerPage=100&pageNumber=<<offset>>&resultAction=ROWS_PER_PAGE")
-
-    def __init__(self):
-        super().__init__()
 
     @property
     def base_url(self):
