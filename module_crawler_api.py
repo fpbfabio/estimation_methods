@@ -34,22 +34,22 @@ class AbsCrawlerApi(metaclass=abc.ABCMeta):
 
     @property
     @abc.abstractmethod
+    def limit_results_per_query(self):
+        pass
+
+    @limit_results_per_query.setter
+    @abc.abstractmethod
+    def limit_results_per_query(self, val):
+        pass
+
+    @property
+    @abc.abstractmethod
     def factory(self):
         pass
 
     @factory.setter
     @abc.abstractmethod
     def factory(self, val):
-        pass
-
-    @property
-    @abc.abstractmethod
-    def terminator(self):
-        pass
-
-    @terminator.setter
-    @abc.abstractmethod
-    def terminator(self, val):
         pass
 
     @abc.abstractmethod
@@ -62,11 +62,11 @@ class AbsCrawlerApi(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def retrieve_number_matches(self, query):
+    def download_item(self, query, index):
         pass
 
     @abc.abstractmethod
-    def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0, limit=None):
+    def download(self, query, is_to_download_id=True, is_to_download_content=True):
         pass
 
     @abc.abstractmethod
@@ -98,18 +98,27 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=abc.ABCMeta):
         self.__factory = val
 
     @property
-    def terminator(self):
+    def limit_results_per_query(self):
+        return self.__limit_results_per_query
+
+    @limit_results_per_query.setter
+    def limit_results_per_query(self, val):
+        self.__limit_results_per_query = val
+
+    @property
+    def _terminator(self):
         return self.__terminator
 
-    @terminator.setter
-    def terminator(self, val):
+    @_terminator.setter
+    def _terminator(self, val):
         self.__terminator = val
 
-    def __init__(self):
+    def __init__(self, limit_results_per_query):
         self.__download_count = 0
         self.__factory = module_factory.CrawlerApiFactory()
         self.__lock = threading.Lock()
         self.__terminator = self.__factory.create_terminator()
+        self.__limit_results_per_query = limit_results_per_query
 
     @classmethod
     @abc.abstractmethod
@@ -117,7 +126,11 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0, limit=None):
+    def download_item(self, query, index):
+        pass
+
+    @abc.abstractmethod
+    def download(self, query, is_to_download_id=True, is_to_download_content=True):
         pass
 
     @abc.abstractmethod
@@ -127,10 +140,6 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def download_entire_data_set(self):
         pass
-
-    def retrieve_number_matches(self, query):
-        search_result = self.download(query, True, False, 0, 1)
-        return search_result.number_results
 
     def inc_download(self):
         with self.__lock:
@@ -201,8 +210,8 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def __init__(self):
-        super().__init__()
+    def __init__(self, limit_number_results):
+        super().__init__(limit_number_results)
         self.clean_up_data_folder()
 
     @classmethod
@@ -222,15 +231,32 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=abc.ABCMeta):
         return cls._extract_data_set_size(soup)
 
     def download_entire_data_set(self):
-        self.terminator.terminate("ERROR - INVALID OPERATION")
+        self._terminator.terminate("ERROR - INVALID OPERATION")
 
-    def download(self, query, is_to_download_id=True, is_to_download_content=True, offset=0, limit=None):
+    def download_item(self, query, index):
+        web_page = self._attempt_download(query, index)
+        soup = bs4.BeautifulSoup(web_page, AbsWebsiteCrawlerApi._HTML_PARSER)
+        number_matches = self._extract_number_matches_from_soup(soup)
+        if number_matches > 0:
+            if index >= number_matches:
+                self._terminator.terminate("ERROR - INDEX OUT OF RANGE")
+            data_list = self._extract_data_list_from_soup(soup)
+            list_index = index % self.max_results_per_page
+            if list_index >= len(data_list):
+                return None
+            data = data_list[list_index]
+            search_result = self.factory.create_search_result(number_matches, [data])
+        else:
+            search_result = self.factory.create_search_result(number_matches, [])
+        return search_result
+
+    def download(self, query, is_to_download_id=True, is_to_download_content=True):
         file_path = self._build_file_path(query)
         search_result = self._download_based_on_stored_file(query, file_path)
         if search_result is None:
             search_result = self._download_completely_from_web(query, file_path)
         search_result = self._filter_result_content(search_result, is_to_download_id,
-                                                    is_to_download_content, offset, limit)
+                                                    is_to_download_content)
         return search_result
 
     def clean_up_data_folder(self):
@@ -355,7 +381,7 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=abc.ABCMeta):
             self.inc_download()
             break
         if page_source is None:
-            self.terminator.terminate("ERROR - INTERNET CONNECTION FAILURE")
+            self._terminator.terminate("ERROR - INTERNET CONNECTION FAILURE")
         return page_source
 
     def _multiple_replace(self, dictionary, string):
@@ -373,28 +399,19 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=abc.ABCMeta):
         with open(file_path, "wb") as archive:
             pickle.dump(search_result, archive)
 
-    def _filter_result_content(self, search_result, is_to_have_id, is_to_have_content, offset=None, limit=None):
+    def _filter_result_content(self, search_result, is_to_have_id, is_to_have_content):
         if is_to_have_content and not is_to_have_id:
             data_list = [self.factory.create_data(None, x.content) for x in search_result.results]
         elif is_to_have_id and not is_to_have_content:
             data_list = [self.factory.create_data(x.identifier, None) for x in search_result.results]
         else:
             data_list = search_result.results
-        if search_result.number_results != 0:
-            if limit is not None and limit >= search_result.number_results:
-                limit = None
-            if offset is not None and limit is not None:
-                data_list = data_list[offset:limit]
-            elif offset is not None and limit is None:
-                data_list = data_list[offset:]
-            elif offset is None and limit is not None:
-                data_list = data_list[0:limit]
         return self.factory.create_search_result(search_result.number_results, data_list)
 
 
 class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
 
-    LIMIT_RESULTS = 5000000
+    DEFAULT_LIMIT_RESULTS = 5000000
     _DATA_SET_SIZE_TAG = "a"
     _DATA_SET_SIZE_TAG_ATTRIBUTE = "href"
     _DATA_SET_SIZE_TAG_ATTRIBUTE_VALUE = "/search/searchresult.jsp?sortType=desc_p_Publication_Year&newsearch=true"
@@ -425,8 +442,10 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
     _ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE_VALUE = "records.length === 1"
     _DATA_FOLDER_PATH = "AbsIEEECrawlerApi__DATA_FOLDER_PATH"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, limit_number_results=None):
+        if limit_number_results is None:
+            limit_number_results = AbsIEEECrawlerApi.DEFAULT_LIMIT_RESULTS
+        super().__init__(limit_number_results)
 
     @property
     @abc.abstractmethod
@@ -435,7 +454,7 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
 
     @property
     def _limit_results(self):
-        return AbsIEEECrawlerApi.LIMIT_RESULTS
+        return AbsIEEECrawlerApi.DEFAULT_LIMIT_RESULTS
 
     @property
     def thread_limit(self):
@@ -524,7 +543,7 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
                                              title_tag.text)
                 return data
             else:
-                self.terminator.terminate("ERROR - Data extraction failure - " + str(item))
+                self._terminator.terminate("ERROR - Data extraction failure - " + str(item))
 
         data_list = [extract_data(x) for x in item_tag_list]
         return data_list
@@ -547,7 +566,7 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
 
 class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
 
-    LIMIT_RESULTS = 5000000
+    DEFAULT_LIMIT_RESULTS = 5000000
     _URL_WITH_DATA_SET_SIZE = "http://dl.acm.org/results.cfm?h=1&query=test&dlr=GUIDE"
     _THREAD_LIMIT = 1
     _ELEMENT_WITH_NUMBER_MATCHES_TAG = "b"
@@ -569,12 +588,14 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
     _ABSTRACT_TAG_ATTRIBUTE = "class"
     _ABSTRACT_TAG_ATTRIBUTE_VALUE = "abstract2"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, limit_number_results=None):
+        if limit_number_results is None:
+            limit_number_results = AbsACMCrawlerApi.DEFAULT_LIMIT_RESULTS
+        super().__init__(limit_number_results)
 
     @property
     def _limit_results(self):
-        return AbsACMCrawlerApi.LIMIT_RESULTS
+        return AbsACMCrawlerApi.DEFAULT_LIMIT_RESULTS
 
     @property
     def thread_limit(self):
@@ -654,7 +675,7 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
 
 class SolrCrawlerApi(AbsBaseCrawlerApi):
 
-    LIMIT_RESULTS = 5000000
+    DEFAULT_LIMIT_RESULTS = 5000000
     _THREAD_LIMIT = 5
     _URL = ("http://localhost:8984/solr/experiment/select?"
             + "q=::FIELD:::::QUERY::&start=::OFFSET::&rows=::LIMIT::&fl=::FIELDS_TO_RETURN::&wt=json")
@@ -674,8 +695,10 @@ class SolrCrawlerApi(AbsBaseCrawlerApi):
     def thread_limit(self):
         return SolrCrawlerApi._THREAD_LIMIT
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, limit_number_results=None):
+        if limit_number_results is None:
+            limit_number_results = SolrCrawlerApi.DEFAULT_LIMIT_RESULTS
+        super().__init__(limit_number_results)
 
     def clean_up_data_folder(self):
         pass
@@ -693,17 +716,15 @@ class SolrCrawlerApi(AbsBaseCrawlerApi):
         data_set_size = int(dictionary[SolrCrawlerApi._RESPONSE_KEY][SolrCrawlerApi._NUMBER_MATCHES_KEY])
         return data_set_size
 
+    def download_item(self, query, index):
+        return self._download(query, True, True, index, 1, SolrCrawlerApi._FIELD_TO_SEARCH)
+
     def download_entire_data_set(self):
         return self._download("*", True, True, 0, 1000000, "*")
 
-    def download(self, query, is_to_download_id=True, is_to_download_content=True,
-                 offset=0, limit=None):
-        if limit is not None:
-            result = self._download(query, is_to_download_id, is_to_download_content, offset, limit,
-                                    SolrCrawlerApi._FIELD_TO_SEARCH)
-        else:
-            result = self._download(query, is_to_download_id, is_to_download_content, offset,
-                                    SolrCrawlerApi.LIMIT_RESULTS, SolrCrawlerApi._FIELD_TO_SEARCH)
+    def download(self, query, is_to_download_id=True, is_to_download_content=True):
+        result = self._download(query, is_to_download_id, is_to_download_content, 0,
+                                self.limit_results_per_query, SolrCrawlerApi._FIELD_TO_SEARCH)
         return result
 
     def _download(self, query, is_to_download_id, is_to_download_content, offset, limit, field_to_search):
@@ -726,8 +747,7 @@ class SolrCrawlerApi(AbsBaseCrawlerApi):
         result_list = [
             self.factory.create_data(x.get(SolrCrawlerApi._ID_FIELD, None),
                                      x.get(SolrCrawlerApi._FIELD_TO_SEARCH, None))
-            for x
-            in dictionary[SolrCrawlerApi._DOCUMENT_LIST_KEY]]
+            for x in dictionary[SolrCrawlerApi._DOCUMENT_LIST_KEY]]
         search_result = self.factory.create_search_result(int(dictionary[SolrCrawlerApi._NUMBER_MATCHES_KEY]),
                                                           result_list)
         return search_result

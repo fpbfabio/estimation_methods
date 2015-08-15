@@ -10,6 +10,7 @@ import module_search_result
 import module_terminator
 import module_word_extractor
 
+
 class AbsFactory(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def create_search_result(self, number_results, results):
@@ -108,7 +109,7 @@ class MhrSolrExecutorFactory(AbsBaseFactory):
         return module_logger.Logger(path_dict.get_path(MhrSolrExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
                                     path_dict.get_path(MhrSolrExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.SolrCrawlerApi.get_data_set_size(),
-                                    module_crawler_api.SolrCrawlerApi.LIMIT_RESULTS)
+                                    module_crawler_api.SolrCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class RandomWalkSolrExecutorFactory(AbsBaseFactory):
@@ -123,7 +124,7 @@ class RandomWalkSolrExecutorFactory(AbsBaseFactory):
         return module_logger.Logger(path_dict.get_path(RandomWalkSolrExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
                                     path_dict.get_path(RandomWalkSolrExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.SolrCrawlerApi.get_data_set_size(),
-                                    module_crawler_api.SolrCrawlerApi.LIMIT_RESULTS)
+                                    module_crawler_api.SolrCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class BroderEtAlSolrExecutorFactory(AbsBaseFactory):
@@ -138,7 +139,7 @@ class BroderEtAlSolrExecutorFactory(AbsBaseFactory):
         return module_logger.Logger(path_dict.get_path(BroderEtAlSolrExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
                                     path_dict.get_path(BroderEtAlSolrExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.SolrCrawlerApi.get_data_set_size(),
-                                    module_crawler_api.SolrCrawlerApi.LIMIT_RESULTS)
+                                    module_crawler_api.SolrCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class SumEstSolrExecutorFactory(AbsBaseFactory):
@@ -153,7 +154,7 @@ class SumEstSolrExecutorFactory(AbsBaseFactory):
         return module_logger.Logger(path_dict.get_path(SumEstSolrExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
                                     path_dict.get_path(SumEstSolrExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.SolrCrawlerApi.get_data_set_size(),
-                                    module_crawler_api.SolrCrawlerApi.LIMIT_RESULTS)
+                                    module_crawler_api.SolrCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class MhrIEEEExecutorFactory(AbsBaseFactory):
@@ -168,7 +169,7 @@ class MhrIEEEExecutorFactory(AbsBaseFactory):
         return module_logger.Logger(path_dict.get_path(MhrIEEEExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
                                     path_dict.get_path(MhrIEEEExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.IEEECrawlerApi.get_data_set_size(),
-                                    module_crawler_api.IEEECrawlerApi.LIMIT_RESULTS)
+                                    module_crawler_api.IEEECrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class RandomWalkIEEEExecutorFactory(AbsBaseFactory):
@@ -183,7 +184,7 @@ class RandomWalkIEEEExecutorFactory(AbsBaseFactory):
         return module_logger.Logger(path_dict.get_path(RandomWalkIEEEExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
                                     path_dict.get_path(RandomWalkIEEEExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.IEEECrawlerApi.get_data_set_size(),
-                                    module_crawler_api.IEEECrawlerApi.LIMIT_RESULTS)
+                                    module_crawler_api.IEEECrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class BroderEtAlIEEEExecutorFactory(AbsBaseFactory):
@@ -198,7 +199,7 @@ class BroderEtAlIEEEExecutorFactory(AbsBaseFactory):
         return module_logger.Logger(path_dict.get_path(BroderEtAlIEEEExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
                                     path_dict.get_path(BroderEtAlIEEEExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.IEEECrawlerApi.get_data_set_size(),
-                                    module_crawler_api.IEEECrawlerApi.LIMIT_RESULTS)
+                                    module_crawler_api.IEEECrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class SumEstIEEEExecutorFactory(AbsBaseFactory):
@@ -213,7 +214,7 @@ class SumEstIEEEExecutorFactory(AbsBaseFactory):
         return module_logger.Logger(path_dict.get_path(SumEstIEEEExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
                                     path_dict.get_path(SumEstIEEEExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.IEEECrawlerApi.get_data_set_size(),
-                                    module_crawler_api.IEEECrawlerApi.LIMIT_RESULTS)
+                                    module_crawler_api.IEEECrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class MhrIEEEOnlyTitleExecutorFactory(AbsBaseFactory):
@@ -228,7 +229,7 @@ class MhrIEEEOnlyTitleExecutorFactory(AbsBaseFactory):
         return module_logger.Logger(path_dict.get_path(MhrIEEEOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
                                     path_dict.get_path(MhrIEEEOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.IEEEOnlyTitleCrawlerApi.get_data_set_size(),
-                                    module_crawler_api.IEEEOnlyTitleCrawlerApi.LIMIT_RESULTS)
+                                    module_crawler_api.IEEEOnlyTitleCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class RandomWalkIEEEOnlyTitleExecutorFactory(AbsBaseFactory):
@@ -244,7 +245,7 @@ class RandomWalkIEEEOnlyTitleExecutorFactory(AbsBaseFactory):
             path_dict.get_path(RandomWalkIEEEOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
             path_dict.get_path(RandomWalkIEEEOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
             module_crawler_api.IEEEOnlyTitleCrawlerApi.get_data_set_size(),
-            module_crawler_api.IEEEOnlyTitleCrawlerApi.LIMIT_RESULTS)
+            module_crawler_api.IEEEOnlyTitleCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class BroderEtAlIEEEOnlyTitleExecutorFactory(AbsBaseFactory):
@@ -260,7 +261,7 @@ class BroderEtAlIEEEOnlyTitleExecutorFactory(AbsBaseFactory):
             path_dict.get_path(BroderEtAlIEEEOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
             path_dict.get_path(BroderEtAlIEEEOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
             module_crawler_api.IEEEOnlyTitleCrawlerApi.get_data_set_size(),
-            module_crawler_api.IEEEOnlyTitleCrawlerApi.LIMIT_RESULTS)
+            module_crawler_api.IEEEOnlyTitleCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class SumEstIEEEOnlyTitleExecutorFactory(AbsBaseFactory):
@@ -276,7 +277,7 @@ class SumEstIEEEOnlyTitleExecutorFactory(AbsBaseFactory):
             path_dict.get_path(SumEstIEEEOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
             path_dict.get_path(SumEstIEEEOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
             module_crawler_api.IEEEOnlyTitleCrawlerApi.get_data_set_size(),
-            module_crawler_api.IEEEOnlyTitleCrawlerApi.LIMIT_RESULTS)
+            module_crawler_api.IEEEOnlyTitleCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class MhrIEEEOnlyAbstractExecutorFactory(AbsBaseFactory):
@@ -292,7 +293,7 @@ class MhrIEEEOnlyAbstractExecutorFactory(AbsBaseFactory):
             path_dict.get_path(MhrIEEEOnlyAbstractExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
             path_dict.get_path(MhrIEEEOnlyAbstractExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
             module_crawler_api.IEEEOnlyAbstractCrawlerApi.get_data_set_size(),
-            module_crawler_api.IEEEOnlyAbstractCrawlerApi.LIMIT_RESULTS)
+            module_crawler_api.IEEEOnlyAbstractCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class RandomWalkIEEEOnlyAbstractExecutorFactory(AbsBaseFactory):
@@ -308,7 +309,7 @@ class RandomWalkIEEEOnlyAbstractExecutorFactory(AbsBaseFactory):
             path_dict.get_path(RandomWalkIEEEOnlyAbstractExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
             path_dict.get_path(RandomWalkIEEEOnlyAbstractExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
             module_crawler_api.IEEEOnlyAbstractCrawlerApi.get_data_set_size(),
-            module_crawler_api.IEEEOnlyAbstractCrawlerApi.LIMIT_RESULTS)
+            module_crawler_api.IEEEOnlyAbstractCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class BroderEtAlIEEEOnlyAbstractExecutorFactory(AbsBaseFactory):
@@ -324,7 +325,7 @@ class BroderEtAlIEEEOnlyAbstractExecutorFactory(AbsBaseFactory):
             path_dict.get_path(BroderEtAlIEEEOnlyAbstractExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
             path_dict.get_path(BroderEtAlIEEEOnlyAbstractExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
             module_crawler_api.IEEEOnlyAbstractCrawlerApi.get_data_set_size(),
-            module_crawler_api.IEEEOnlyAbstractCrawlerApi.LIMIT_RESULTS)
+            module_crawler_api.IEEEOnlyAbstractCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class SumEstIEEEOnlyAbstractExecutorFactory(AbsBaseFactory):
@@ -340,7 +341,7 @@ class SumEstIEEEOnlyAbstractExecutorFactory(AbsBaseFactory):
             path_dict.get_path(SumEstIEEEOnlyAbstractExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
             path_dict.get_path(SumEstIEEEOnlyAbstractExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
             module_crawler_api.IEEEOnlyAbstractCrawlerApi.get_data_set_size(),
-            module_crawler_api.IEEEOnlyAbstractCrawlerApi.LIMIT_RESULTS)
+            module_crawler_api.IEEEOnlyAbstractCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class MhrACMExecutorFactory(AbsBaseFactory):
@@ -355,7 +356,7 @@ class MhrACMExecutorFactory(AbsBaseFactory):
         return module_logger.Logger(path_dict.get_path(MhrACMExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
                                     path_dict.get_path(MhrACMExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.ACMCrawlerApi.get_data_set_size(),
-                                    module_crawler_api.ACMCrawlerApi.LIMIT_RESULTS)
+                                    module_crawler_api.ACMCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class RandomWalkACMExecutorFactory(AbsBaseFactory):
@@ -370,7 +371,7 @@ class RandomWalkACMExecutorFactory(AbsBaseFactory):
         return module_logger.Logger(path_dict.get_path(RandomWalkACMExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
                                     path_dict.get_path(RandomWalkACMExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.ACMCrawlerApi.get_data_set_size(),
-                                    module_crawler_api.ACMCrawlerApi.LIMIT_RESULTS)
+                                    module_crawler_api.ACMCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class BroderEtAlACMExecutorFactory(AbsBaseFactory):
@@ -385,7 +386,7 @@ class BroderEtAlACMExecutorFactory(AbsBaseFactory):
         return module_logger.Logger(path_dict.get_path(BroderEtAlACMExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
                                     path_dict.get_path(BroderEtAlACMExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.ACMCrawlerApi.get_data_set_size(),
-                                    module_crawler_api.ACMCrawlerApi.LIMIT_RESULTS)
+                                    module_crawler_api.ACMCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class SumEstACMExecutorFactory(AbsBaseFactory):
@@ -400,7 +401,7 @@ class SumEstACMExecutorFactory(AbsBaseFactory):
         return module_logger.Logger(path_dict.get_path(SumEstACMExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
                                     path_dict.get_path(SumEstACMExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.ACMCrawlerApi.get_data_set_size(),
-                                    module_crawler_api.ACMCrawlerApi.LIMIT_RESULTS)
+                                    module_crawler_api.ACMCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class MhrACMOnlyTitleExecutorFactory(AbsBaseFactory):
@@ -415,7 +416,7 @@ class MhrACMOnlyTitleExecutorFactory(AbsBaseFactory):
         return module_logger.Logger(path_dict.get_path(MhrACMOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
                                     path_dict.get_path(MhrACMOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.ACMOnlyTitleCrawlerApi.get_data_set_size(),
-                                    module_crawler_api.ACMOnlyTitleCrawlerApi.LIMIT_RESULTS)
+                                    module_crawler_api.ACMOnlyTitleCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class RandomWalkACMOnlyTitleExecutorFactory(AbsBaseFactory):
@@ -431,7 +432,7 @@ class RandomWalkACMOnlyTitleExecutorFactory(AbsBaseFactory):
             path_dict.get_path(RandomWalkACMOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
             path_dict.get_path(RandomWalkACMOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
             module_crawler_api.ACMOnlyTitleCrawlerApi.get_data_set_size(),
-            module_crawler_api.ACMOnlyTitleCrawlerApi.LIMIT_RESULTS)
+            module_crawler_api.ACMOnlyTitleCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class BroderEtAlACMOnlyTitleExecutorFactory(AbsBaseFactory):
@@ -447,7 +448,7 @@ class BroderEtAlACMOnlyTitleExecutorFactory(AbsBaseFactory):
             path_dict.get_path(BroderEtAlACMOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
             path_dict.get_path(BroderEtAlACMOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
             module_crawler_api.ACMOnlyTitleCrawlerApi.get_data_set_size(),
-            module_crawler_api.ACMOnlyTitleCrawlerApi.LIMIT_RESULTS)
+            module_crawler_api.ACMOnlyTitleCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class SumEstACMOnlyTitleExecutorFactory(AbsBaseFactory):
@@ -462,7 +463,7 @@ class SumEstACMOnlyTitleExecutorFactory(AbsBaseFactory):
         return module_logger.Logger(path_dict.get_path(SumEstACMOnlyTitleExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
                                     path_dict.get_path(SumEstACMOnlyTitleExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.ACMOnlyTitleCrawlerApi.get_data_set_size(),
-                                    module_crawler_api.ACMOnlyTitleCrawlerApi.LIMIT_RESULTS)
+                                    module_crawler_api.ACMOnlyTitleCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class MhrACMOnlyAbstractExecutorFactory(AbsBaseFactory):
@@ -477,7 +478,7 @@ class MhrACMOnlyAbstractExecutorFactory(AbsBaseFactory):
         return module_logger.Logger(path_dict.get_path(MhrACMOnlyAbstractExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
                                     path_dict.get_path(MhrACMOnlyAbstractExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
                                     module_crawler_api.ACMOnlyAbstractCrawlerApi.get_data_set_size(),
-                                    module_crawler_api.ACMOnlyAbstractCrawlerApi.LIMIT_RESULTS)
+                                    module_crawler_api.ACMOnlyAbstractCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class RandomWalkACMOnlyAbstractExecutorFactory(AbsBaseFactory):
@@ -493,7 +494,7 @@ class RandomWalkACMOnlyAbstractExecutorFactory(AbsBaseFactory):
             path_dict.get_path(RandomWalkACMOnlyAbstractExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
             path_dict.get_path(RandomWalkACMOnlyAbstractExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
             module_crawler_api.ACMOnlyAbstractCrawlerApi.get_data_set_size(),
-            module_crawler_api.ACMOnlyAbstractCrawlerApi.LIMIT_RESULTS)
+            module_crawler_api.ACMOnlyAbstractCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class BroderEtAlACMOnlyAbstractExecutorFactory(AbsBaseFactory):
@@ -509,7 +510,7 @@ class BroderEtAlACMOnlyAbstractExecutorFactory(AbsBaseFactory):
             path_dict.get_path(BroderEtAlACMOnlyAbstractExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
             path_dict.get_path(BroderEtAlACMOnlyAbstractExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
             module_crawler_api.ACMOnlyAbstractCrawlerApi.get_data_set_size(),
-            module_crawler_api.ACMOnlyAbstractCrawlerApi.LIMIT_RESULTS)
+            module_crawler_api.ACMOnlyAbstractCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class SumEstACMOnlyAbstractExecutorFactory(AbsBaseFactory):
@@ -525,7 +526,7 @@ class SumEstACMOnlyAbstractExecutorFactory(AbsBaseFactory):
             path_dict.get_path(SumEstACMOnlyAbstractExecutorFactory._EXPERIMENT_DETAILS_FILE_PATH),
             path_dict.get_path(SumEstACMOnlyAbstractExecutorFactory._EXPERIMENT_RESULTS_FILE_PATH),
             module_crawler_api.ACMOnlyAbstractCrawlerApi.get_data_set_size(),
-            module_crawler_api.ACMOnlyAbstractCrawlerApi.LIMIT_RESULTS)
+            module_crawler_api.ACMOnlyAbstractCrawlerApi.DEFAULT_LIMIT_RESULTS)
 
 
 class EstimatorFactory(AbsBaseFactory):

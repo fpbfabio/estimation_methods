@@ -204,9 +204,10 @@ class Mhr(AbsBaseEstimator):
     def _collect_data_for_estimation(self, number):
         query = self._take_query()
         while query is not None:
-            number_matches = self.crawler_api.retrieve_number_matches(query)
+            search_result = self.crawler_api.download(query, True, False)
+            number_matches = search_result.number_results
             if Mhr._MIN_NUMBER_MATCHES <= number_matches <= Mhr._MAX_NUMBER_MATCHES:
-                document_list = self.crawler_api.download(query, True, False).results
+                document_list = search_result.results
                 id_list = []
                 number_documents_returned = 0
                 for document in document_list:
@@ -290,10 +291,10 @@ class RandomWalk(AbsBaseEstimator):
         query_pool = self._read_query_pool()
         size = len(query_pool)
         query = query_pool[random.randrange(0, size)]
-        number_matches = self.crawler_api.retrieve_number_matches(query)
+        number_matches = self.crawler_api.download_item(query, 0).number_results
         while number_matches < RandomWalk._MIN_NUMBER_MATCHES_FOR_SEED_QUERY:
             query = query_pool[random.randrange(0, size)]
-            number_matches = self.crawler_api.retrieve_number_matches(query)
+            number_matches = self.crawler_api.download_item(query, 0).number_results
         words = []
         count = 0
         number_words = 0
@@ -301,18 +302,17 @@ class RandomWalk(AbsBaseEstimator):
         while count < RandomWalk._RANDOM_WALK_SAMPLE_SIZE:
             if number_matches > 0:
                 random_index = random.randrange(0, number_matches)
-                try:
-                    results = self.crawler_api.download(query, True, True, random_index, 1).results
-                except:
+                results = self.crawler_api.download_item(query, random_index).results
+                if results is None:
                     query = words[random.randrange(0, number_words)]
-                    number_matches = self.crawler_api.retrieve_number_matches(query)
+                    number_matches = self.crawler_api.download_item(query, 0).number_results
                     continue
                 document = results[0]
                 words_buffer = self.word_extractor.extract_words(document.content)
                 number_words_buffer = len(words_buffer)
                 if number_words_buffer < RandomWalk._MIN_NUMBER_WORDS:
                     query = words[random.randrange(0, number_words)]
-                    number_matches = self.crawler_api.retrieve_number_matches(query)
+                    number_matches = self.crawler_api.download_item(query, 0).number_results
                     continue
                 words = words_buffer
                 number_words = number_words_buffer
@@ -322,7 +322,7 @@ class RandomWalk(AbsBaseEstimator):
                 count += 1
                 self._report_progress(count, RandomWalk._RANDOM_WALK_SAMPLE_SIZE)
             query = words[random.randrange(0, number_words)]
-            number_matches = self.crawler_api.retrieve_number_matches(query)
+            number_matches = self.crawler_api.download_item(query, 0).number_results
         frequency_node_dict = {}
         for key in node_frequency_dict.keys():
             frequency_node_dict[node_frequency_dict[key]] = frequency_node_dict.get(node_frequency_dict[key], [])
@@ -574,7 +574,7 @@ class AbsShokouhi(AbsBaseEstimator, metaclass=abc.ABCMeta):
             query = random.sample(query_pool, 1)
             del(query_pool[index])
             size -= 1
-            if self.crawler_api.retrieve_number_matches(query) > AbsShokouhi._MIN_NUMBER_MATCHES:
+            if self.crawler_api.download(query, True, False).number_results > AbsShokouhi._MIN_NUMBER_MATCHES:
                 query_sample.append(query)
                 count += 1
         return query_sample
@@ -592,7 +592,7 @@ class AbsMCR(AbsShokouhi, metaclass=abc.ABCMeta):
     def estimate(self):
         super().estimate()
         query_sample = self._build_query_sample()
-        result_list = [self.crawler_api.download(x, True, False, 0, 10) for x in query_sample]
+        result_list = [self.crawler_api.download(x, True, False) for x in query_sample]
         factor_d = sum([self._count_duplicates(result_list[x - 1], result_list[x]) for x in range(1, AbsMCR._FACTOR_T)])
         estimation = AbsMCR._FACTOR_T * (AbsMCR._FACTOR_T - 1) * AbsMCR._FACTOR_N ** 2 / factor_d
         return estimation
@@ -603,13 +603,12 @@ class AbsCH(AbsShokouhi, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def estimate(self):
         super().estimate()
-        query_sample = self._build_query_sample(self._read_query_pool(), AbsCH._FACTOR_T,
-                                                         AbsCH._MIN_NUMBER_MATCHES, self.crawler_api)
+        query_sample = self._build_query_sample()
         marked_list = []
         numerator = 0
         denominator = 0
         for i in range(0, AbsCH._FACTOR_T):
-            result = self.crawler_api.download(query_sample[i], True, False, 0, 10)
+            result = self.crawler_api.download(query_sample[i], True, False)
             numerator += AbsCH._FACTOR_N * len(marked_list) ** 2
             id_list = [x.identifier for x in result.results]
             denominator += len([x for x in id_list if x in marked_list]) * len(marked_list)
@@ -628,7 +627,7 @@ class MCRReg(AbsMCR):
 
     def estimate(self):
         estimation = super().estimate()
-        return 10 ** (math.log10(estimation) -  1.5767) / 0.5911
+        return 10 ** (math.log10(estimation) - 1.5767) / 0.5911
 
 
 class CH(AbsCH):
@@ -641,5 +640,4 @@ class CHReg(AbsCH):
 
     def estimate(self):
         estimation = super().estimate()
-        return 10 ** (math.log10(estimation) -  1.4208) / 0.6429
-
+        return 10 ** (math.log10(estimation) - 1.4208) / 0.6429
