@@ -181,7 +181,7 @@ class BroderEtAlSolrExecutor(AbsSolrExecutor):
 
 class AbsIEEEExecutor(AbsBaseExecutor):
 
-    _NUMBER_ITERATIONS = 20
+    _NUMBER_ITERATIONS = 3
 
     @abc.abstractmethod
     def _create_factory(self):
@@ -218,7 +218,7 @@ class BroderEtAlIEEEExecutor(AbsIEEEExecutor):
 
 class AbsIEEEOnlyTitleExecutor(AbsBaseExecutor):
 
-    _NUMBER_ITERATIONS = 20
+    _NUMBER_ITERATIONS = 3
 
     @abc.abstractmethod
     def _create_factory(self):
@@ -255,7 +255,7 @@ class BroderEtAlIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
 
 class AbsIEEEOnlyAbstractExecutor(AbsBaseExecutor):
 
-    _NUMBER_ITERATIONS = 20
+    _NUMBER_ITERATIONS = 3
 
     @abc.abstractmethod
     def _create_factory(self):
@@ -292,7 +292,7 @@ class BroderEtAlIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
 
 class AbsACMExecutor(AbsBaseExecutor):
 
-    _NUMBER_ITERATIONS = 20
+    _NUMBER_ITERATIONS = 3
 
     @abc.abstractmethod
     def _create_factory(self):
@@ -329,7 +329,7 @@ class BroderEtAlACMExecutor(AbsACMExecutor):
 
 class AbsACMOnlyTitleExecutor(AbsBaseExecutor):
 
-    _NUMBER_ITERATIONS = 20
+    _NUMBER_ITERATIONS = 3
 
     @abc.abstractmethod
     def _create_factory(self):
@@ -366,7 +366,7 @@ class BroderEtAlACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
 
 class AbsACMOnlyAbstractExecutor(AbsBaseExecutor):
 
-    _NUMBER_ITERATIONS = 20
+    _NUMBER_ITERATIONS = 3
 
     @abc.abstractmethod
     def _create_factory(self):
