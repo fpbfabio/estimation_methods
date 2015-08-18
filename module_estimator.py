@@ -553,7 +553,7 @@ class AbsShokouhi(AbsBaseEstimator, metaclass=abc.ABCMeta):
         query_sample = []
         while count < AbsShokouhi._FACTOR_T:
             index = random.randrange(0, size)
-            query = random.sample(query_pool, 1)
+            query = query_pool[index]
             del(query_pool[index])
             size -= 1
             if self.crawler_api.download(query, True, False).number_results > AbsShokouhi._MIN_NUMBER_MATCHES:
