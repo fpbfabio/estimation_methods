@@ -76,12 +76,14 @@ class AbsEstimator(metaclass=abc.ABCMeta):
 
 class AbsBaseEstimator(AbsEstimator, metaclass=abc.ABCMeta):
 
+    _DEFAULT_QUERY_POOL_FILE_PATH = "AbsBaseEstimator__DEFAULT_QUERY_POOL_FILE_PATH"
     _QUERY_POOL_FILE_PATH_INFORMATION = "Lista de palavras"
 
     def __init__(self, crawler_api):
-        self.__query_pool_file_path = None
-        self.__crawler_api = crawler_api
         self.__factory = module_factory.EstimatorFactory()
+        path_dict = self.factory.create_path_dictionary()
+        self.__query_pool_file_path = path_dict.get_path(AbsBaseEstimator._DEFAULT_QUERY_POOL_FILE_PATH)
+        self.__crawler_api = crawler_api
         self.__word_extractor = self.factory.create_word_extractor()
         self.__parallelizer = self.factory.create_parallelizer()
 
@@ -152,7 +154,6 @@ class AbsBaseEstimator(AbsEstimator, metaclass=abc.ABCMeta):
 
 class Mhr(AbsBaseEstimator):
 
-    _DEFAULT_QUERY_POOL_FILE_PATH = "Mhr__DEFAULT_QUERY_POOL_FILE_PATH"
     _MAX_NUMBER_MATCHES_INFORMATION = "Máximo número de resultados"
     _MIN_NUMBER_MATCHES_INFORMATION = "Menor número de resultados"
     _NUMBER_QUERIES_INFORMATION = "Número de buscas"
@@ -170,8 +171,6 @@ class Mhr(AbsBaseEstimator):
 
     def __init__(self, crawler_api):
         super().__init__(crawler_api)
-        path_dict = self.factory.create_path_dictionary()
-        self.query_pool_file_path = path_dict.get_path(Mhr._DEFAULT_QUERY_POOL_FILE_PATH)
         self.__lock_accumulators = threading.Lock()
         self.__lock_query_list = threading.Lock()
         self.__query_count = 0
@@ -250,7 +249,6 @@ class Mhr(AbsBaseEstimator):
 
 class RandomWalk(AbsBaseEstimator):
 
-    _DEFAULT_QUERY_POOL_FILE_PATH = "RandomWalk__DEFAULT_QUERY_POOL_FILE_PATH"
     _MIN_NUMBER_MATCHES_FOR_SEED_QUERY_INFORMATION = "Número mínimo de resultados para busca semente"
     _MIN_NUMBER_MATCHES_FOR_SEED_QUERY = 2
     _MIN_NUMBER_WORDS_INFORMATION = "Número mínimo de palavras em um dcumento sorteado"
@@ -268,11 +266,6 @@ class RandomWalk(AbsBaseEstimator):
                                   RandomWalk._RANDOM_WALK_SAMPLE_SIZE,
                                   AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
         return additional_information
-
-    def __init__(self, crawler_api):
-        super().__init__(crawler_api)
-        path_dict = self.factory.create_path_dictionary()
-        self.query_pool_file_path = path_dict.get_path(RandomWalk._DEFAULT_QUERY_POOL_FILE_PATH)
 
     def estimate(self):
         super().estimate()
@@ -333,7 +326,6 @@ class RandomWalk(AbsBaseEstimator):
 
 class SumEst(AbsBaseEstimator):
 
-    _DEFAULT_QUERY_POOL_FILE_PATH = "SumEst__DEFAULT_QUERY_POOL_FILE_PATH"
     _THREAD_LIMIT = 10
     _ITERATION_NUMBER = 100
     _POOL_SAMPLE_SIZE = 1000
@@ -348,11 +340,6 @@ class SumEst(AbsBaseEstimator):
                                   SumEst._POOL_SAMPLE_SIZE_INFORMATION: SumEst._POOL_SAMPLE_SIZE,
                                   AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
         return additional_information
-
-    def __init__(self, crawler_api):
-        super().__init__(crawler_api)
-        path_dict = self.factory.create_path_dictionary()
-        self.query_pool_file_path = path_dict.get_path(SumEst._DEFAULT_QUERY_POOL_FILE_PATH)
 
     def estimate(self):
         super().estimate()
@@ -460,7 +447,6 @@ class SumEst(AbsBaseEstimator):
 
 class BroderEtAl(AbsBaseEstimator):
 
-    _DEFAULT_QUERY_POOL_FILE_PATH = "BroderEtAl__DEFAULT_QUERY_POOL_FILE_PATH"
     _THREAD_LIMIT = 10
     _QUERY_RANDOM_SAMPLE_SIZE_INFORMATION = "Size of the random sample of queries"
     _DOCUMENT_RANDOM_SAMPLE_SIZE_INFORMATION = "Size of the random sample of documents"
@@ -475,11 +461,6 @@ class BroderEtAl(AbsBaseEstimator):
                                   BroderEtAl._DOCUMENT_RANDOM_SAMPLE_SIZE,
                                   AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
         return additional_information
-
-    def __init__(self, crawler_api):
-        super().__init__(crawler_api)
-        path_dict = self.factory.create_path_dictionary()
-        self.query_pool_file_path = path_dict.get_path(BroderEtAl._DEFAULT_QUERY_POOL_FILE_PATH)
 
     def estimate(self):
         super().estimate()

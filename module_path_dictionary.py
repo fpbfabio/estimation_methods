@@ -233,7 +233,7 @@ class WindowsPathDictionary(AbsPathDictionary):
             "Logs\\CHRegACMOnlyAbstract\\ExperimentResults.csv",
         "CHRegACMOnlyAbstractExecutorFactory__EXPERIMENT_DETAILS_FILE_PATH":
             "Logs\\CHRegACMOnlyAbstract\\Log.txt",
-        "Mhr__DEFAULT_QUERY_POOL_FILE_PATH": "WordLists\\new_shine.txt",
+        "AbsBaseEstimator__DEFAULT_QUERY_POOL_FILE_PATH": "WordLists\\new_shine.txt",
         "AbsSolrExecutor__QUERY_POOL_PATH_LIST": ["WordLists\\new_shine.txt",
                                                   "WordLists\\new_shine.txt",
                                                   "WordLists\\new_shine.txt",
