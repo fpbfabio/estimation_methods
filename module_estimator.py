@@ -528,14 +528,14 @@ class AbsShokouhi(AbsBaseEstimator, metaclass=abc.ABCMeta):
 
     _MIN_NUMBER_MATCHES = 20
     FACTOR_N = 10
-    _FACTOR_T = 5000
+    _QUERY_SAMPLE_SIZE = 5000
     _MIN_NUMBER_MATCHES_INFORMATION = "Min number of matches for queries to be in the sample"
     _FACTOR_N_INFORMATION = "Factor N"
-    _FACTOR_T_INFORMATION = "Factor T"
+    _QUERY_SAMPLE_SIZE_INFORMATION = "QUERY_SAMPLE_SIZE"
 
     @property
     def experiment_details(self):
-        additional_information = {AbsShokouhi._FACTOR_T_INFORMATION: AbsShokouhi._FACTOR_T,
+        additional_information = {AbsShokouhi._QUERY_SAMPLE_SIZE_INFORMATION: AbsShokouhi._QUERY_SAMPLE_SIZE,
                                   AbsShokouhi._FACTOR_N_INFORMATION: AbsShokouhi.FACTOR_N,
                                   AbsShokouhi._MIN_NUMBER_MATCHES_INFORMATION: AbsShokouhi._MIN_NUMBER_MATCHES,
                                   AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
@@ -551,7 +551,7 @@ class AbsShokouhi(AbsBaseEstimator, metaclass=abc.ABCMeta):
         query_pool = self._read_query_pool()
         size = len(query_pool)
         query_sample = []
-        while count < AbsShokouhi._FACTOR_T:
+        while count < AbsShokouhi._QUERY_SAMPLE_SIZE:
             index = random.randrange(0, size)
             query = query_pool[index]
             del(query_pool[index])
@@ -573,10 +573,14 @@ class AbsMCR(AbsShokouhi, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def estimate(self):
         super().estimate()
-        query_sample = self._build_query_sample()
-        result_list = [self.crawler_api.download(x, True, False) for x in query_sample]
-        factor_d = sum([self._count_duplicates(result_list[x - 1], result_list[x]) for x in range(1, AbsMCR._FACTOR_T)])
-        estimation = AbsMCR._FACTOR_T * (AbsMCR._FACTOR_T - 1) * AbsMCR.FACTOR_N ** 2 / factor_d
+        query_pool = self._read_query_pool()
+        query_sample =  random.sample(query_pool, AbsShokouhi._QUERY_SAMPLE_SIZE)
+        random_sample_list = [self.crawler_api.download(x, True, False) for x in query_sample]
+        random_sample_list = [x.results for x in random_sample_list if
+                              x.number_results > AbsShokouhi._MIN_NUMBER_MATCHES]
+        factor_t = len(random_sample_list)
+        factor_d = sum([self._count_duplicates(x, y) for x, y in itertools.combinations(random_sample_list, 2)])
+        estimation = factor_t * (factor_t - 1) * AbsShokouhi.FACTOR_N ** 2 / (2 * factor_d)
         return estimation
 
 
@@ -589,7 +593,7 @@ class AbsCH(AbsShokouhi, metaclass=abc.ABCMeta):
         marked_list = []
         numerator = 0
         denominator = 0
-        for i in range(0, AbsCH._FACTOR_T):
+        for i in range(0, AbsCH._QUERY_SAMPLE_SIZE):
             result = self.crawler_api.download(query_sample[i], True, False)
             numerator += AbsCH.FACTOR_N * len(marked_list) ** 2
             id_list = [x.identifier for x in result.results]
