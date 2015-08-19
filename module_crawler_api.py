@@ -726,7 +726,11 @@ class SolrCrawlerApi(AbsBaseCrawlerApi):
         url = url.replace(SolrCrawlerApi._FIELD_TO_SEARCH_MASK, "*")
         url = url.replace(SolrCrawlerApi._FIELDS_TO_RETURN_MASK, SolrCrawlerApi._ID_FIELD)
         url = url.replace(SolrCrawlerApi._OFFSET_MASK, str(0))
-        response = urllib.request.urlopen(url)
+        try:
+            response = urllib.request.urlopen(url)
+        except Exception as exception:
+            print(url)
+            raise exception
         data = response.read().decode(SolrCrawlerApi._ENCODING)
         dictionary = json.loads(data)
         data_set_size = int(dictionary[SolrCrawlerApi._RESPONSE_KEY][SolrCrawlerApi._NUMBER_MATCHES_KEY])
@@ -755,7 +759,11 @@ class SolrCrawlerApi(AbsBaseCrawlerApi):
             url = url.replace(SolrCrawlerApi._FIELDS_TO_RETURN_MASK, SolrCrawlerApi._FIELD_TO_SEARCH)
         else:
             url = url.replace(SolrCrawlerApi._FIELDS_TO_RETURN_MASK, SolrCrawlerApi._ID_FIELD)
-        response = urllib.request.urlopen(str(url))
+        try:
+            response = urllib.request.urlopen(url)
+        except Exception as exception:
+            print(url)
+            raise exception
         self.inc_download()
         data = response.read().decode(SolrCrawlerApi._ENCODING)
         dictionary = json.loads(data)
