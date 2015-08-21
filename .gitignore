@@ -2,3 +2,4 @@ __pycache__/
 Cores/
 .idea/
 *.log
+experiment_set.py

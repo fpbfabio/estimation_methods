@@ -546,21 +546,6 @@ class AbsShokouhi(AbsBaseEstimator, metaclass=abc.ABCMeta):
         super().estimate()
         self.crawler_api.limit_results_per_query = AbsShokouhi.FACTOR_N
 
-    def _build_query_sample(self):
-        count = 0
-        query_pool = self._read_query_pool()
-        size = len(query_pool)
-        query_sample = []
-        while count < AbsShokouhi._QUERY_SAMPLE_SIZE:
-            index = random.randrange(0, size)
-            query = query_pool[index]
-            del(query_pool[index])
-            size -= 1
-            if self.crawler_api.download(query, True, False).number_results > AbsShokouhi._MIN_NUMBER_MATCHES:
-                query_sample.append(query)
-                count += 1
-        return query_sample
-
 
 class AbsMCR(AbsShokouhi, metaclass=abc.ABCMeta):
 
@@ -589,14 +574,17 @@ class AbsCH(AbsShokouhi, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def estimate(self):
         super().estimate()
-        query_sample = self._build_query_sample()
+        query_pool = self._read_query_pool()
+        query_sample =  random.sample(query_pool, AbsShokouhi._QUERY_SAMPLE_SIZE)
+        random_sample_list = [self.crawler_api.download(x, True, False) for x in query_sample]
+        random_sample_list = [x.results for x in random_sample_list if
+                              x.number_results > AbsShokouhi._MIN_NUMBER_MATCHES]
         marked_list = []
         numerator = 0
         denominator = 0
-        for i in range(0, AbsCH._QUERY_SAMPLE_SIZE):
-            result = self.crawler_api.download(query_sample[i], True, False)
+        for data_list in random_sample_list:
             numerator += AbsCH.FACTOR_N * len(marked_list) ** 2
-            id_list = [x.identifier for x in result.results]
+            id_list = [x.identifier for x in data_list]
             denominator += len([x for x in id_list if x in marked_list]) * len(marked_list)
             marked_list = list(itertools.chain(id_list, marked_list))
         estimation = numerator / denominator
@@ -613,7 +601,7 @@ class MCRReg(AbsMCR):
 
     def estimate(self):
         estimation = super().estimate()
-        return 10 ** (math.log10(estimation) - 1.5767) / 0.5911
+        return 10 ** ((math.log10(estimation) - 1.5767) / 0.5911)
 
 
 class CH(AbsCH):
@@ -626,4 +614,4 @@ class CHReg(AbsCH):
 
     def estimate(self):
         estimation = super().estimate()
-        return 10 ** (math.log10(estimation) - 1.4208) / 0.6429
+        return 10 ** ((math.log10(estimation) - 1.4208) / 0.6429)
