@@ -123,7 +123,6 @@ class AbsSolrExecutor(AbsBaseExecutor):
     _CORE_PATH_LIST = "AbsSolrExecutor__CORE_PATH_LIST"
     _NUMBER_ITERATIONS = 20
 
-    # noinspection PyMissingConstructor
     def __init__(self):
         self.factory = self._create_factory()
         path_dict = self.factory.create_path_dictionary()
@@ -159,6 +158,18 @@ class MhrSolrExecutor(AbsSolrExecutor):
 
     def _create_factory(self):
         return module_factory.MhrSolrExecutorFactory()
+
+
+class ExactMhrSolrExecutor(AbsSolrExecutor):
+
+    def _create_factory(self):
+        return module_factory.ExactMhrSolrExecutorFactory()
+
+
+class TeacherMhrSolrExecutor(AbsSolrExecutor):
+
+    def _create_factory(self):
+        return module_factory.TeacherMhrSolrExecutorFactory()
 
 
 class SumEstSolrExecutor(AbsSolrExecutor):
@@ -222,6 +233,18 @@ class MhrIEEEExecutor(AbsIEEEExecutor):
         return module_factory.MhrIEEEExecutorFactory()
 
 
+class ExactMhrIEEEExecutor(AbsIEEEExecutor):
+
+    def _create_factory(self):
+        return module_factory.ExactMhrIEEEExecutorFactory()
+
+
+class TeacherMhrIEEEExecutor(AbsIEEEExecutor):
+
+    def _create_factory(self):
+        return module_factory.TeacherMhrIEEEExecutorFactory()
+
+
 class SumEstIEEEExecutor(AbsIEEEExecutor):
 
     def _create_factory(self):
@@ -281,6 +304,18 @@ class MhrIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
 
     def _create_factory(self):
         return module_factory.MhrIEEEOnlyTitleExecutorFactory()
+
+
+class ExactMhrIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
+
+    def _create_factory(self):
+        return module_factory.ExactMhrIEEEOnlyTitleExecutorFactory()
+
+
+class TeacherMhrIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
+
+    def _create_factory(self):
+        return module_factory.TeacherMhrIEEEOnlyTitleExecutorFactory()
 
 
 class SumEstIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
@@ -344,6 +379,18 @@ class MhrIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
         return module_factory.MhrIEEEOnlyAbstractExecutorFactory()
 
 
+class ExactMhrIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
+
+    def _create_factory(self):
+        return module_factory.ExactMhrIEEEOnlyAbstractExecutorFactory()
+
+
+class TeacherMhrIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
+
+    def _create_factory(self):
+        return module_factory.TeacherMhrIEEEOnlyAbstractExecutorFactory()
+
+
 class SumEstIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
 
     def _create_factory(self):
@@ -403,6 +450,18 @@ class MhrACMExecutor(AbsACMExecutor):
 
     def _create_factory(self):
         return module_factory.MhrACMExecutorFactory()
+
+
+class ExactMhrACMExecutor(AbsACMExecutor):
+
+    def _create_factory(self):
+        return module_factory.ExactMhrACMExecutorFactory()
+
+
+class TeacherMhrACMExecutor(AbsACMExecutor):
+
+    def _create_factory(self):
+        return module_factory.TeacherMhrACMExecutorFactory()
 
 
 class SumEstACMExecutor(AbsACMExecutor):
@@ -466,6 +525,18 @@ class MhrACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
         return module_factory.MhrACMOnlyTitleExecutorFactory()
 
 
+class ExactMhrACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
+
+    def _create_factory(self):
+        return module_factory.ExactMhrACMOnlyTitleExecutorFactory()
+
+
+class TeacherMhrACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
+
+    def _create_factory(self):
+        return module_factory.TeacherMhrACMOnlyTitleExecutorFactory()
+
+
 class SumEstACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
 
     def _create_factory(self):
@@ -525,6 +596,18 @@ class MhrACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
 
     def _create_factory(self):
         return module_factory.MhrACMOnlyAbstractExecutorFactory()
+
+
+class ExactMhrACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
+
+    def _create_factory(self):
+        return module_factory.ExactMhrACMOnlyAbstractExecutorFactory()
+
+
+class TeacherMhrACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
+
+    def _create_factory(self):
+        return module_factory.TeacherMhrACMOnlyAbstractExecutorFactory()
 
 
 class SumEstACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):

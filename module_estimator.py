@@ -152,7 +152,7 @@ class AbsBaseEstimator(AbsEstimator, metaclass=abc.ABCMeta):
         return query_pool
 
 
-class Mhr(AbsBaseEstimator):
+class AbsMhr(AbsBaseEstimator, metaclass=abc.ABCMeta):
 
     _MAX_NUMBER_MATCHES_INFORMATION = "Máximo número de resultados"
     _MIN_NUMBER_MATCHES_INFORMATION = "Menor número de resultados"
@@ -163,77 +163,76 @@ class Mhr(AbsBaseEstimator):
 
     @property
     def experiment_details(self):
-        additional_information = {Mhr._NUMBER_QUERIES_INFORMATION: Mhr._NUMBER_QUERIES,
-                                  Mhr._MAX_NUMBER_MATCHES_INFORMATION: Mhr._MAX_NUMBER_MATCHES,
-                                  Mhr._MIN_NUMBER_MATCHES_INFORMATION: Mhr._MIN_NUMBER_MATCHES,
+        additional_information = {type(self)._NUMBER_QUERIES_INFORMATION: type(self)._NUMBER_QUERIES,
+                                  type(self)._MAX_NUMBER_MATCHES_INFORMATION: type(self)._MAX_NUMBER_MATCHES,
+                                  type(self)._MIN_NUMBER_MATCHES_INFORMATION: type(self)._MIN_NUMBER_MATCHES,
                                   AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
         return additional_information
 
     def __init__(self, crawler_api):
         super().__init__(crawler_api)
-        self.__lock_accumulators = threading.Lock()
-        self.__lock_query_list = threading.Lock()
-        self.__query_count = 0
-        self.__total_matches = 0
-        self.__total_documents_returned = 0
-        self.__document_id_dict = {}
-        self.__query_pool = None
-        self.__query_pool_size = None
-        self.__progress_count = 0
+        self.lock_accumulators = threading.Lock()
+        self.lock_query_list = threading.Lock()
+        self.query_count = 0
+        self.total_matches = 0
+        self.total_documents_returned = 0
+        self.document_id_dict = {}
+        self.query_pool = None
+        self.query_pool_size = None
+        self.progress_count = 0
 
     def _reset(self):
-        self.__query_count = 0
-        self.__total_matches = 0
-        self.__total_documents_returned = 0
-        self.__document_id_dict = {}
-        self.__query_pool = self._read_query_pool()
-        self.__query_pool_size = len(self.__query_pool)
-        self.__progress_count = 0
+        self.query_count = 0
+        self.total_matches = 0
+        self.total_documents_returned = 0
+        self.document_id_dict = {}
+        self.query_pool = self._read_query_pool()
+        self.query_pool_size = len(self.query_pool)
+        self.progress_count = 0
 
     def _take_query(self):
         query = None
-        with self.__lock_query_list:
-            if self.__query_pool_size > 0:
-                random_index = random.randrange(self.__query_pool_size)
-                query = self.__query_pool[random_index]
-                del (self.__query_pool[random_index])
-                self.__query_pool_size -= 1
+        with self.lock_query_list:
+            if self.query_pool_size > 0:
+                random_index = random.randrange(self.query_pool_size)
+                query = self.query_pool[random_index]
+                del (self.query_pool[random_index])
+                self.query_pool_size -= 1
         return query
 
     def _collect_data_for_estimation(self, number):
         query = self._take_query()
-        while query is not None:
-            search_result = self.crawler_api.download(query, True, False)
-            number_matches = search_result.number_results
-            if Mhr._MIN_NUMBER_MATCHES <= number_matches <= Mhr._MAX_NUMBER_MATCHES:
-                document_list = search_result.results
-                id_list = []
-                number_documents_returned = 0
-                for document in document_list:
-                    id_list.append(document.identifier)
-                    number_documents_returned += 1
-                with self.__lock_accumulators:
-                    self.__query_count += 1
-                    self.__total_matches += number_matches
-                    self.__total_documents_returned += number_documents_returned
-                    for id_item in id_list:
-                        self.__document_id_dict[id_item] = self.__document_id_dict.get(id_item, 0) + 1
-                    self.__progress_count += 1
-                    self._report_progress(self.__progress_count, Mhr._NUMBER_QUERIES)
-                return
-            query = self._take_query()
+        search_result = self.crawler_api.download(query, True, False)
+        number_matches = search_result.number_results
+        if type(self)._MIN_NUMBER_MATCHES <= number_matches <= type(self)._MAX_NUMBER_MATCHES:
+            document_list = search_result.results
+            id_list = []
+            number_documents_returned = 0
+            for document in document_list:
+                id_list.append(document.identifier)
+                number_documents_returned += 1
+            with self.lock_accumulators:
+                self.query_count += 1
+                self.total_matches += number_matches
+                self.total_documents_returned += number_documents_returned
+                for id_item in id_list:
+                    self.document_id_dict[id_item] = self.document_id_dict.get(id_item, 0) + 1
+                self.progress_count += 1
+                self._report_progress(self.progress_count, type(self)._NUMBER_QUERIES)
+            return True
+        return False
 
     def _calculate_estimation(self):
         estimation = -1
         overlapping_rate = -1
-        number_unique_documents_returned = len(list(self.__document_id_dict.keys()))
-        if self.__total_documents_returned != 0 and number_unique_documents_returned != 0:
-            overflow_rate = self.__total_matches / self.__total_documents_returned
-            overlapping_rate = self.__total_documents_returned / number_unique_documents_returned
+        number_unique_documents_returned = len(list(self.document_id_dict.keys()))
+        if self.total_documents_returned != 0 and number_unique_documents_returned != 0:
+            overflow_rate = self.total_matches / self.total_documents_returned
+            overlapping_rate = self.total_documents_returned / number_unique_documents_returned
             if overlapping_rate != 1:
                 estimation = overflow_rate * number_unique_documents_returned / (1 - overlapping_rate ** (-1.1))
         if estimation == -1:
-            print("total_documents_returned = " + str(self.__total_documents_returned))
+            print("total_documents_returned = " + str(self.total_documents_returned))
             print("number_unique_documents_returned = " + str(number_unique_documents_returned))
             print("overlapping_rate = " + str(overlapping_rate))
         return estimation
@@ -241,11 +240,122 @@ class Mhr(AbsBaseEstimator):
     def estimate(self):
         super().estimate()
         self._reset()
-        self.parallelizer.execute_in_parallel(self.crawler_api.thread_limit, range(0, Mhr._NUMBER_QUERIES),
+        self.parallelizer.execute_in_parallel(self.crawler_api.thread_limit, range(0, type(self)._NUMBER_QUERIES),
                                               self._collect_data_for_estimation)
         estimation = self._calculate_estimation()
         return estimation
 
+
+class Mhr(AbsMhr):
+
+    def _calculate_estimation(self):
+        success = False
+        while not success:
+            success = super()._collect_data_for_estimation()
+
+
+class ExactMhr(AbsMhr):
+
+    _MAX_NUMBER_MATCHES = 4500
+    _MIN_NUMBER_MATCHES = 3500
+    _NUMBER_QUERIES = 5000
+
+
+class TeacherMhr(AbsBaseEstimator):
+
+    _THREAD_LIMIT = 1
+    _MAX_NUMBER_MATCHES_INFORMATION = "Máximo número de resultados"
+    _MIN_NUMBER_MATCHES_INFORMATION = "Menor número de resultados"
+    _NUMBER_QUERIES_INFORMATION = "Número de buscas"
+    _MAX_NUMBER_MATCHES = 5000000
+    _MIN_NUMBER_MATCHES = 1
+    _NUMBER_QUERIES = 100
+
+    @property
+    def experiment_details(self):
+        additional_information = {type(self)._NUMBER_QUERIES_INFORMATION: type(self)._NUMBER_QUERIES,
+                                  type(self)._MAX_NUMBER_MATCHES_INFORMATION: type(self)._MAX_NUMBER_MATCHES,
+                                  type(self)._MIN_NUMBER_MATCHES_INFORMATION: type(self)._MIN_NUMBER_MATCHES,
+                                  AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
+        return additional_information
+
+    def __init__(self, crawler_api):
+        super().__init__(crawler_api)
+        self.lock_accumulators = threading.Lock()
+        self.lock_query_list = threading.Lock()
+        self.document_id_list_last_iteration = []
+        self.query_count = 0
+        self.total_matches = 0
+        self.total_documents_returned = 0
+        self.query_pool = None
+        self.query_pool_size = None
+        self.progress_count = 0
+        self.total_unique_documents_returned = 0
+
+    def _reset(self):
+        self.query_count = 0
+        self.total_matches = 0
+        self.document_id_list_last_iteration = []
+        self.total_documents_returned = 0
+        self.query_pool = self._read_query_pool()
+        self.query_pool_size = len(self.query_pool)
+        self.progress_count = 0
+        self.total_unique_documents_returned = 0
+
+    def _take_query(self):
+        query = None
+        with self.lock_query_list:
+            if self.query_pool_size > 0:
+                random_index = random.randrange(self.query_pool_size)
+                query = self.query_pool[random_index]
+                del (self.query_pool[random_index])
+                self.query_pool_size -= 1
+        return query
+
+    def _collect_data_for_estimation(self, number):
+        query = self._take_query()
+        search_result = self.crawler_api.download(query, True, False)
+        number_matches = search_result.number_results
+        if type(self)._MIN_NUMBER_MATCHES <= number_matches <= type(self)._MAX_NUMBER_MATCHES:
+            document_list = search_result.results
+            id_list = []
+            number_documents_returned = 0
+            for document in document_list:
+                id_list.append(document.identifier)
+                number_documents_returned += 1
+            with self.lock_accumulators:
+                self.query_count += 1
+                self.total_matches += number_matches
+                self.total_documents_returned += number_documents_returned
+                new_document_list = [x for x in id_list if x not in self.document_id_list_last_iteration]
+                self.total_unique_documents_returned += len(new_document_list)
+                self.document_id_list_last_iteration = new_document_list
+                self.progress_count += 1
+                self._report_progress(self.progress_count, type(self)._NUMBER_QUERIES)
+            return True
+        return False
+
+    def _calculate_estimation(self):
+        estimation = -1
+        overlapping_rate = -1
+        if self.total_documents_returned != 0 and self.total_unique_documents_returned != 0:
+            overflow_rate = self.total_matches / self.total_documents_returned
+            overlapping_rate = self.total_documents_returned / self.total_unique_documents_returned
+            if overlapping_rate != 1:
+                estimation = overflow_rate * self.total_unique_documents_returned / (1 - overlapping_rate ** (-1.1))
+        if estimation == -1:
+            print("total_documents_returned = " + str(self.total_documents_returned))
+            print("total_unique_documents_returned = " + str(self.total_unique_documents_returned))
+            print("overlapping_rate = " + str(overlapping_rate))
+        return estimation
+
+    def estimate(self):
+        super().estimate()
+        self._reset()
+        self.parallelizer.execute_in_parallel(type(self)._THREAD_LIMIT, range(0, type(self)._NUMBER_QUERIES),
+                                              self._collect_data_for_estimation)
+        estimation = self._calculate_estimation()
+        return estimation
 
 class RandomWalk(AbsBaseEstimator):
 
