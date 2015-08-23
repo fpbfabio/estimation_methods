@@ -16,7 +16,6 @@ import module_factory
 
 
 class AbsCrawlerApi(metaclass=abc.ABCMeta):
-
     @property
     @abc.abstractmethod
     def thread_limit(self):
@@ -75,7 +74,6 @@ class AbsCrawlerApi(metaclass=abc.ABCMeta):
 
 
 class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=abc.ABCMeta):
-
     @property
     @abc.abstractmethod
     def thread_limit(self):
@@ -147,7 +145,6 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=abc.ABCMeta):
 
 
 class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=abc.ABCMeta):
-
     NUMBER_ATTEMPTS_GET_EXPECTED_AMOUNT_OF_DATA = 5
     DATA_FILE_EXTENSION = ".pkl"
     PAGE_LOAD_TIMEOUT = 30
@@ -426,7 +423,6 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=abc.ABCMeta):
 
 
 class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
-
     DEFAULT_LIMIT_RESULTS = 5000000
     DATA_SET_SIZE_TAG = "a"
     DATA_SET_SIZE_TAG_ATTRIBUTE = "href"
@@ -581,7 +577,6 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
 
 
 class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
-
     DEFAULT_LIMIT_RESULTS = 5000000
     URL_WITH_DATA_SET_SIZE = "http://dl.acm.org/results.cfm?h=1&query=test&dlr=GUIDE"
     THREAD_LIMIT = 1
@@ -690,7 +685,6 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
 
 
 class SolrCrawlerApi(AbsBaseCrawlerApi):
-
     DEFAULT_LIMIT_RESULTS = 5000000
     THREAD_LIMIT = 5
     URL = ("http://localhost:8984/solr/experiment/select?"
@@ -778,7 +772,6 @@ class SolrCrawlerApi(AbsBaseCrawlerApi):
 
 
 class IEEECrawlerApi(AbsIEEECrawlerApi):
-
     BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
                  + "queryText=<<query>>&rowsPerPage=100&pageNumber=<<offset>>&resultAction=ROWS_PER_PAGE")
 
@@ -788,7 +781,6 @@ class IEEECrawlerApi(AbsIEEECrawlerApi):
 
 
 class IEEEOnlyTitleCrawlerApi(AbsIEEECrawlerApi):
-
     BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
                  + "action=search&sortType=&searchField=Search_All&matchBoolean=true&"
                  + "queryText=(\"Document%20Title\":<<query>>)&"
@@ -800,7 +792,6 @@ class IEEEOnlyTitleCrawlerApi(AbsIEEECrawlerApi):
 
 
 class IEEEOnlyAbstractCrawlerApi(AbsIEEECrawlerApi):
-
     BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
                  + "action=search&sortType=&searchField=Search_All&matchBoolean=true&"
                  + "queryText=(\"Abstract\":<<query>>)&"
@@ -812,7 +803,6 @@ class IEEEOnlyAbstractCrawlerApi(AbsIEEECrawlerApi):
 
 
 class ACMCrawlerApi(AbsACMCrawlerApi):
-
     BASE_URL = "http://dl.acm.org/results.cfm?query=<<query>>&start=<<offset>>1&dlr=ACM"
 
     @property
@@ -821,7 +811,6 @@ class ACMCrawlerApi(AbsACMCrawlerApi):
 
 
 class ACMOnlyTitleCrawlerApi(AbsACMCrawlerApi):
-
     BASE_URL = ("http://dl.acm.org/results.cfm?query=%28Title%3A<<query>>%29&"
                  + "querydisp=%28Title%3A<<query>>%29&source_query=Owner%3AACM&"
                  + "start=<<offset>>1&srt=score%20dsc&short=0&source_disp=&since_month=&"
@@ -834,7 +823,6 @@ class ACMOnlyTitleCrawlerApi(AbsACMCrawlerApi):
 
 
 class ACMOnlyAbstractCrawlerApi(AbsACMCrawlerApi):
-
     BASE_URL = ("http://dl.acm.org/results.cfm?query=%28Abstract%3A<<query>>%29&"
                  + "querydisp=%28Abstract%3A<<query>>%29&source_query=Owner%3AACM&"
                  + "start=<<offset>>1&srt=score%20dsc&short=0&source_disp=&since_month=&"

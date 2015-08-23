@@ -5,7 +5,6 @@ import os
 
 
 class AbsLogger(metaclass=abc.ABCMeta):
-
     @property
     @abc.abstractmethod
     def data_set_size(self):
@@ -34,7 +33,6 @@ class AbsLogger(metaclass=abc.ABCMeta):
 
 
 class Logger(AbsLogger):
-
     @property
     def data_set_size(self):
         return self.__data_set_size

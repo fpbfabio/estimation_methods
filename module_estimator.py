@@ -8,7 +8,6 @@ import module_factory
 
 
 class AbsEstimator(metaclass=abc.ABCMeta):
-
     @property
     @abc.abstractmethod
     def query_pool_file_path(self):
@@ -75,7 +74,6 @@ class AbsEstimator(metaclass=abc.ABCMeta):
 
 
 class AbsBaseEstimator(AbsEstimator, metaclass=abc.ABCMeta):
-
     DEFAULT_QUERY_POOL_FILE_PATH = "AbsBaseEstimator__DEFAULT_QUERY_POOL_FILE_PATH"
     QUERY_POOL_FILE_PATH_INFORMATION = "Lista de palavras"
 
@@ -153,7 +151,6 @@ class AbsBaseEstimator(AbsEstimator, metaclass=abc.ABCMeta):
 
 
 class AbsMhr(AbsBaseEstimator, metaclass=abc.ABCMeta):
-
     MAX_NUMBER_MATCHES_INFORMATION = "Máximo número de resultados"
     MIN_NUMBER_MATCHES_INFORMATION = "Menor número de resultados"
     NUMBER_QUERIES_INFORMATION = "Número de buscas"
@@ -247,7 +244,6 @@ class AbsMhr(AbsBaseEstimator, metaclass=abc.ABCMeta):
 
 
 class Mhr(AbsMhr):
-
     def calculate_estimation(self):
         success = False
         while not success:
@@ -255,14 +251,12 @@ class Mhr(AbsMhr):
 
 
 class ExactMhr(AbsMhr):
-
     MAX_NUMBER_MATCHES = 4500
     MIN_NUMBER_MATCHES = 3500
     NUMBER_QUERIES = 5000
 
 
 class TeacherMhr(AbsBaseEstimator):
-
     THREAD_LIMIT = 1
     MAX_NUMBER_MATCHES_INFORMATION = "Máximo número de resultados"
     MIN_NUMBER_MATCHES_INFORMATION = "Menor número de resultados"
@@ -358,7 +352,6 @@ class TeacherMhr(AbsBaseEstimator):
         return estimation
 
 class RandomWalk(AbsBaseEstimator):
-
     MIN_NUMBER_MATCHES_FOR_SEED_QUERY_INFORMATION = "Número mínimo de resultados para busca semente"
     MIN_NUMBER_MATCHES_FOR_SEED_QUERY = 2
     MIN_NUMBER_WORDS_INFORMATION = "Número mínimo de palavras em um dcumento sorteado"
@@ -435,7 +428,6 @@ class RandomWalk(AbsBaseEstimator):
 
 
 class SumEst(AbsBaseEstimator):
-
     THREAD_LIMIT = 10
     ITERATION_NUMBER = 100
     POOL_SAMPLE_SIZE = 1000
@@ -556,7 +548,6 @@ class SumEst(AbsBaseEstimator):
 
 
 class BroderEtAl(AbsBaseEstimator):
-
     THREAD_LIMIT = 10
     QUERY_RANDOM_SAMPLE_SIZE_INFORMATION = "Size of the random sample of queries"
     DOCUMENT_RANDOM_SAMPLE_SIZE_INFORMATION = "Size of the random sample of documents"
@@ -635,7 +626,6 @@ class BroderEtAl(AbsBaseEstimator):
 
 
 class AbsShokouhi(AbsBaseEstimator, metaclass=abc.ABCMeta):
-
     MIN_NUMBER_MATCHES = 20
     FACTOR_N = 10
     QUERY_SAMPLE_SIZE = 5000
@@ -658,7 +648,6 @@ class AbsShokouhi(AbsBaseEstimator, metaclass=abc.ABCMeta):
 
 
 class AbsMCR(AbsShokouhi, metaclass=abc.ABCMeta):
-
     def count_duplicates(self, data_list_1, data_list_2):
         id_list_1 = [x.identifier for x in data_list_1]
         id_list_2 = [x.identifier for x in data_list_2]
@@ -680,7 +669,6 @@ class AbsMCR(AbsShokouhi, metaclass=abc.ABCMeta):
 
 
 class AbsCH(AbsShokouhi, metaclass=abc.ABCMeta):
-
     @abc.abstractmethod
     def estimate(self):
         super().estimate()
@@ -702,26 +690,22 @@ class AbsCH(AbsShokouhi, metaclass=abc.ABCMeta):
 
 
 class MCR(AbsMCR):
-
     def estimate(self):
         return super().estimate()
 
 
 class MCRReg(AbsMCR):
-
     def estimate(self):
         estimation = super().estimate()
         return 10 ** ((math.log10(estimation) - 1.5767) / 0.5911)
 
 
 class CH(AbsCH):
-
     def estimate(self):
         return super().estimate()
 
 
 class CHReg(AbsCH):
-
     def estimate(self):
         estimation = super().estimate()
         return 10 ** ((math.log10(estimation) - 1.4208) / 0.6429)

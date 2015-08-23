@@ -2,7 +2,6 @@ import abc
 
 
 class AbsSearchResult(metaclass=abc.ABCMeta):
-
     @property
     @abc.abstractmethod
     def number_results(self):
@@ -15,7 +14,6 @@ class AbsSearchResult(metaclass=abc.ABCMeta):
 
 
 class SearchResult(AbsSearchResult):
-
     def __init__(self, number_results, results):
         self.__number_results = number_results
         self.__results = results

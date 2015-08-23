@@ -8,7 +8,6 @@ import module_factory
 
 
 class AbsExecutor(metaclass=abc.ABCMeta):
-
     @property
     @abc.abstractmethod
     def logger(self):
@@ -45,7 +44,6 @@ class AbsExecutor(metaclass=abc.ABCMeta):
 
 
 class AbsBaseExecutor(AbsExecutor, metaclass=abc.ABCMeta):
-
     @abc.abstractmethod
     def __init__(self):
         self.__factory = self._create_factory()
@@ -114,7 +112,6 @@ class AbsBaseExecutor(AbsExecutor, metaclass=abc.ABCMeta):
 
 
 class AbsSolrExecutor(AbsBaseExecutor):
-
     _CREATE_CORE_COMMAND = "AbsSolrExecutor__CREATE_CORE_COMMAND"
     _UNLOAD_CORE_COMMAND = "AbsSolrExecutor__UNLOAD_CORE_COMMAND"
     _START_SOLR_COMMAND = "AbsSolrExecutor__START_SOLR_COMMAND"
@@ -155,67 +152,56 @@ class AbsSolrExecutor(AbsBaseExecutor):
 
 
 class MhrSolrExecutor(AbsSolrExecutor):
-
     def _create_factory(self):
         return module_factory.MhrSolrExecutorFactory()
 
 
 class ExactMhrSolrExecutor(AbsSolrExecutor):
-
     def _create_factory(self):
         return module_factory.ExactMhrSolrExecutorFactory()
 
 
 class TeacherMhrSolrExecutor(AbsSolrExecutor):
-
     def _create_factory(self):
         return module_factory.TeacherMhrSolrExecutorFactory()
 
 
 class SumEstSolrExecutor(AbsSolrExecutor):
-
     def _create_factory(self):
         return module_factory.SumEstSolrExecutorFactory()
 
 
 class RandomWalkSolrExecutor(AbsSolrExecutor):
-
     def _create_factory(self):
         return module_factory.RandomWalkSolrExecutorFactory()
 
 
 class BroderEtAlSolrExecutor(AbsSolrExecutor):
-
     def _create_factory(self):
         return module_factory.BroderEtAlSolrExecutorFactory()
 
 
 class MCRSolrExecutor(AbsSolrExecutor):
-
     def _create_factory(self):
         return module_factory.MCRSolrExecutorFactory()
 
 
 class MCRRegSolrExecutor(AbsSolrExecutor):
-
     def _create_factory(self):
         return module_factory.MCRRegSolrExecutorFactory()
 
 
 class CHSolrExecutor(AbsSolrExecutor):
-
     def _create_factory(self):
         return module_factory.CHSolrExecutorFactory()
 
 
 class CHRegSolrExecutor(AbsSolrExecutor):
-
     def _create_factory(self):
         return module_factory.CHRegSolrExecutorFactory()
 
 
 class AbsIEEEExecutor(AbsBaseExecutor):
-
     _NUMBER_ITERATIONS = 3
 
     @abc.abstractmethod
@@ -228,67 +214,56 @@ class AbsIEEEExecutor(AbsBaseExecutor):
 
 
 class MhrIEEEExecutor(AbsIEEEExecutor):
-
     def _create_factory(self):
         return module_factory.MhrIEEEExecutorFactory()
 
 
 class ExactMhrIEEEExecutor(AbsIEEEExecutor):
-
     def _create_factory(self):
         return module_factory.ExactMhrIEEEExecutorFactory()
 
 
 class TeacherMhrIEEEExecutor(AbsIEEEExecutor):
-
     def _create_factory(self):
         return module_factory.TeacherMhrIEEEExecutorFactory()
 
 
 class SumEstIEEEExecutor(AbsIEEEExecutor):
-
     def _create_factory(self):
         return module_factory.SumEstIEEEExecutorFactory()
 
 
 class RandomWalkIEEEExecutor(AbsIEEEExecutor):
-
     def _create_factory(self):
         return module_factory.RandomWalkIEEEExecutorFactory()
 
 
 class BroderEtAlIEEEExecutor(AbsIEEEExecutor):
-
     def _create_factory(self):
         return module_factory.BroderEtAlIEEEExecutorFactory()
 
 
 class MCRIEEEExecutor(AbsIEEEExecutor):
-
     def _create_factory(self):
         return module_factory.MCRIEEEExecutorFactory()
 
 
 class MCRRegIEEEExecutor(AbsIEEEExecutor):
-
     def _create_factory(self):
         return module_factory.MCRRegIEEEExecutorFactory()
 
 
 class CHIEEEExecutor(AbsIEEEExecutor):
-
     def _create_factory(self):
         return module_factory.CHIEEEExecutorFactory()
 
 
 class CHRegIEEEExecutor(AbsIEEEExecutor):
-
     def _create_factory(self):
         return module_factory.CHRegIEEEExecutorFactory()
 
 
 class AbsIEEEOnlyTitleExecutor(AbsBaseExecutor):
-
     _NUMBER_ITERATIONS = 3
 
     @abc.abstractmethod
@@ -301,67 +276,56 @@ class AbsIEEEOnlyTitleExecutor(AbsBaseExecutor):
 
 
 class MhrIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.MhrIEEEOnlyTitleExecutorFactory()
 
 
 class ExactMhrIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.ExactMhrIEEEOnlyTitleExecutorFactory()
 
 
 class TeacherMhrIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.TeacherMhrIEEEOnlyTitleExecutorFactory()
 
 
 class SumEstIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.SumEstIEEEOnlyTitleExecutorFactory()
 
 
 class RandomWalkIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.RandomWalkIEEEOnlyTitleExecutorFactory()
 
 
 class BroderEtAlIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.BroderEtAlIEEEOnlyTitleExecutorFactory()
 
 
 class MCRIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.MCRIEEEOnlyTitleExecutorFactory()
 
 
 class MCRRegIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.MCRRegIEEEOnlyTitleExecutorFactory()
 
 
 class CHIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.CHIEEEOnlyTitleExecutorFactory()
 
 
 class CHRegIEEEOnlyTitleExecutor(AbsIEEEOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.CHRegIEEEOnlyTitleExecutorFactory()
 
 
 class AbsIEEEOnlyAbstractExecutor(AbsBaseExecutor):
-
     _NUMBER_ITERATIONS = 3
 
     @abc.abstractmethod
@@ -374,67 +338,56 @@ class AbsIEEEOnlyAbstractExecutor(AbsBaseExecutor):
 
 
 class MhrIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.MhrIEEEOnlyAbstractExecutorFactory()
 
 
 class ExactMhrIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.ExactMhrIEEEOnlyAbstractExecutorFactory()
 
 
 class TeacherMhrIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.TeacherMhrIEEEOnlyAbstractExecutorFactory()
 
 
 class SumEstIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.SumEstIEEEOnlyAbstractExecutorFactory()
 
 
 class RandomWalkIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.RandomWalkIEEEOnlyAbstractExecutorFactory()
 
 
 class BroderEtAlIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.BroderEtAlIEEEOnlyAbstractExecutorFactory()
 
 
 class MCRIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.MCRIEEEOnlyAbstractExecutorFactory()
 
 
 class MCRRegIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.MCRRegIEEEOnlyAbstractExecutorFactory()
 
 
 class CHIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.CHIEEEOnlyAbstractExecutorFactory()
 
 
 class CHRegIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.CHRegIEEEOnlyAbstractExecutorFactory()
 
 
 class AbsACMExecutor(AbsBaseExecutor):
-
     _NUMBER_ITERATIONS = 3
 
     @abc.abstractmethod
@@ -447,67 +400,56 @@ class AbsACMExecutor(AbsBaseExecutor):
 
 
 class MhrACMExecutor(AbsACMExecutor):
-
     def _create_factory(self):
         return module_factory.MhrACMExecutorFactory()
 
 
 class ExactMhrACMExecutor(AbsACMExecutor):
-
     def _create_factory(self):
         return module_factory.ExactMhrACMExecutorFactory()
 
 
 class TeacherMhrACMExecutor(AbsACMExecutor):
-
     def _create_factory(self):
         return module_factory.TeacherMhrACMExecutorFactory()
 
 
 class SumEstACMExecutor(AbsACMExecutor):
-
     def _create_factory(self):
         return module_factory.SumEstACMExecutorFactory()
 
 
 class RandomWalkACMExecutor(AbsACMExecutor):
-
     def _create_factory(self):
         return module_factory.RandomWalkACMExecutorFactory()
 
 
 class BroderEtAlACMExecutor(AbsACMExecutor):
-
     def _create_factory(self):
         return module_factory.BroderEtAlACMExecutorFactory()
 
 
 class MCRACMExecutor(AbsACMExecutor):
-
     def _create_factory(self):
         return module_factory.MCRACMExecutorFactory()
 
 
 class MCRRegACMExecutor(AbsACMExecutor):
-
     def _create_factory(self):
         return module_factory.MCRRegACMExecutorFactory()
 
 
 class CHACMExecutor(AbsACMExecutor):
-
     def _create_factory(self):
         return module_factory.CHACMExecutorFactory()
 
 
 class CHRegACMExecutor(AbsACMExecutor):
-
     def _create_factory(self):
         return module_factory.CHRegACMExecutorFactory()
 
 
 class AbsACMOnlyTitleExecutor(AbsBaseExecutor):
-
     _NUMBER_ITERATIONS = 3
 
     @abc.abstractmethod
@@ -520,67 +462,56 @@ class AbsACMOnlyTitleExecutor(AbsBaseExecutor):
 
 
 class MhrACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.MhrACMOnlyTitleExecutorFactory()
 
 
 class ExactMhrACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.ExactMhrACMOnlyTitleExecutorFactory()
 
 
 class TeacherMhrACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.TeacherMhrACMOnlyTitleExecutorFactory()
 
 
 class SumEstACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.SumEstACMOnlyTitleExecutorFactory()
 
 
 class RandomWalkACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.RandomWalkACMOnlyTitleExecutorFactory()
 
 
 class BroderEtAlACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.BroderEtAlACMOnlyTitleExecutorFactory()
 
 
 class MCRACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.MCRACMOnlyTitleExecutorFactory()
 
 
 class MCRRegACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.MCRRegACMOnlyTitleExecutorFactory()
 
 
 class CHACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.CHACMOnlyTitleExecutorFactory()
 
 
 class CHRegACMOnlyTitleExecutor(AbsACMOnlyTitleExecutor):
-
     def _create_factory(self):
         return module_factory.CHRegACMOnlyTitleExecutorFactory()
 
 
 class AbsACMOnlyAbstractExecutor(AbsBaseExecutor):
-
     _NUMBER_ITERATIONS = 3
 
     @abc.abstractmethod
@@ -593,60 +524,50 @@ class AbsACMOnlyAbstractExecutor(AbsBaseExecutor):
 
 
 class MhrACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.MhrACMOnlyAbstractExecutorFactory()
 
 
 class ExactMhrACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.ExactMhrACMOnlyAbstractExecutorFactory()
 
 
 class TeacherMhrACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.TeacherMhrACMOnlyAbstractExecutorFactory()
 
 
 class SumEstACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.SumEstACMOnlyAbstractExecutorFactory()
 
 
 class RandomWalkACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.RandomWalkACMOnlyAbstractExecutorFactory()
 
 
 class BroderEtAlACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.BroderEtAlACMOnlyAbstractExecutorFactory()
 
 
 class MCRACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.MCRACMOnlyAbstractExecutorFactory()
 
 
 class MCRRegACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.MCRRegACMOnlyAbstractExecutorFactory()
 
 
 class CHACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.CHACMOnlyAbstractExecutorFactory()
 
 
 class CHRegACMOnlyAbstractExecutor(AbsACMOnlyAbstractExecutor):
-
     def _create_factory(self):
         return module_factory.CHRegACMOnlyAbstractExecutorFactory()

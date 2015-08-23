@@ -3,14 +3,12 @@ import threading
 
 
 class AbsParallelizer(metaclass=abc.ABCMeta):
-
     @abc.abstractmethod
     def execute_in_parallel(self, thread_limit, collection, callback):
         pass
 
 
 class Parallelizer(AbsParallelizer):
-
     def execute_in_parallel(self, thread_limit, collection, callback):
         thread_list = []
         for item in collection:

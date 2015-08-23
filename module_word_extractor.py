@@ -3,14 +3,12 @@ import re
 
 
 class AbsWordExtractor(metaclass=abc.ABCMeta):
-
     @abc.abstractmethod
     def extract_words(self, text):
         pass
 
 
 class WordExtractor(AbsWordExtractor):
-
     def extract_words(self, text):
         word = []
         word_dictionary = {}

@@ -2,7 +2,6 @@ import abc
 
 
 class AbsData(metaclass=abc.ABCMeta):
-
     @property
     @abc.abstractmethod
     def identifier(self):
@@ -15,7 +14,6 @@ class AbsData(metaclass=abc.ABCMeta):
 
 
 class Data(AbsData):
-
     def __init__(self, identifier, content):
         self.__identifier = identifier
         self.__content = content
