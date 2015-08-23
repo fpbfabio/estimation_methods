@@ -154,9 +154,6 @@ class AbsMhr(AbsBaseEstimator, metaclass=abc.ABCMeta):
     MAX_NUMBER_MATCHES_INFORMATION = "Máximo número de resultados"
     MIN_NUMBER_MATCHES_INFORMATION = "Menor número de resultados"
     NUMBER_QUERIES_INFORMATION = "Número de buscas"
-    MAX_NUMBER_MATCHES = 5000000
-    MIN_NUMBER_MATCHES = 1
-    NUMBER_QUERIES = 100
 
     @property
     def experiment_details(self):
@@ -197,11 +194,17 @@ class AbsMhr(AbsBaseEstimator, metaclass=abc.ABCMeta):
                 self.query_pool_size -= 1
         return query
 
-    def collect_data_for_estimation(self, number):
+    def collect_data_for_estimation(self, number, always_download_all=False):
         query = self.take_query()
-        search_result = self.crawler_api.download(query, True, False)
+        if always_download_all:
+            search_result = self.crawler_api.download(query, True, False)
+        else:
+            search_result = self.crawler_api.download_item(query)
         number_matches = search_result.number_results
         if type(self).MIN_NUMBER_MATCHES <= number_matches <= type(self).MAX_NUMBER_MATCHES:
+            if not always_download_all:
+                search_result = self.crawler_api.download(query, True, False)
+                number_matches = search_result.number_results
             document_list = search_result.results
             id_list = []
             number_documents_returned = 0
@@ -244,10 +247,14 @@ class AbsMhr(AbsBaseEstimator, metaclass=abc.ABCMeta):
 
 
 class Mhr(AbsMhr):
-    def calculate_estimation(self):
+    MAX_NUMBER_MATCHES = 5000000
+    MIN_NUMBER_MATCHES = 1
+    NUMBER_QUERIES = 100
+
+    def collect_data_for_estimation(self, number, always_download_all=False):
         success = False
         while not success:
-            success = super().collect_data_for_estimation()
+            success = super().collect_data_for_estimation(number, True)
 
 
 class ExactMhr(AbsMhr):

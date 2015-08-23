@@ -107,7 +107,7 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=abc.ABCMeta):
     def terminator(self):
         return self.__terminator
 
-    @_terminator.setter
+    @terminator.setter
     def terminator(self, val):
         self.__terminator = val
 
