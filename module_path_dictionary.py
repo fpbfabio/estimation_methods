@@ -9,9 +9,9 @@ class AbsPathDictionary(metaclass=abc.ABCMeta):
 
 
 class WindowsPathDictionary(AbsPathDictionary):
-    _RESULTS_FILE_PATH_REGEX = re.compile("([a-zA-z]+)ExecutorFactory__EXPERIMENT_RESULTS_FILE_PATH")
-    _DETAILS_FILE_PATH_REGEX = re.compile("([a-zA-z]+)ExecutorFactory__EXPERIMENT_DETAILS_FILE_PATH")
-    _PATH_DICTIONARY = {
+    RESULTS_FILE_PATH_REGEX = re.compile("([a-zA-z]+)ExecutorFactory__EXPERIMENT_RESULTS_FILE_PATH")
+    DETAILS_FILE_PATH_REGEX = re.compile("([a-zA-z]+)ExecutorFactory__EXPERIMENT_DETAILS_FILE_PATH")
+    PATH_DICTIONARY = {
         "AbsBaseEstimator__DEFAULT_QUERY_POOL_FILE_PATH": "WordLists\\new_shine.txt",
         "AbsSolrExecutor__QUERY_POOL_PATH_LIST": ["WordLists\\new_shine.txt",
                                                   "WordLists\\new_shine.txt",
@@ -34,10 +34,10 @@ class WindowsPathDictionary(AbsPathDictionary):
     }
 
     def get_path(self, key):
-        regex_search_result = type(self)._RESULTS_FILE_PATH_REGEX.match(key)
+        regex_search_result = type(self).RESULTS_FILE_PATH_REGEX.match(key)
         if regex_search_result is not None:
             return "Logs\\" + regex_search_result.group(1) + "\\ExperimentResults.csv"
-        regex_search_result = type(self)._DETAILS_FILE_PATH_REGEX.match(key)
+        regex_search_result = type(self).DETAILS_FILE_PATH_REGEX.match(key)
         if regex_search_result is not None:
             return "Logs\\" + regex_search_result.group(1) + "\\Log.txt"
-        return WindowsPathDictionary._PATH_DICTIONARY[key]
+        return WindowsPathDictionary.PATH_DICTIONARY[key]

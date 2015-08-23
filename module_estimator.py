@@ -76,13 +76,13 @@ class AbsEstimator(metaclass=abc.ABCMeta):
 
 class AbsBaseEstimator(AbsEstimator, metaclass=abc.ABCMeta):
 
-    _DEFAULT_QUERY_POOL_FILE_PATH = "AbsBaseEstimator__DEFAULT_QUERY_POOL_FILE_PATH"
-    _QUERY_POOL_FILE_PATH_INFORMATION = "Lista de palavras"
+    DEFAULT_QUERY_POOL_FILE_PATH = "AbsBaseEstimator__DEFAULT_QUERY_POOL_FILE_PATH"
+    QUERY_POOL_FILE_PATH_INFORMATION = "Lista de palavras"
 
     def __init__(self, crawler_api):
         self.__factory = module_factory.EstimatorFactory()
         path_dict = self.factory.create_path_dictionary()
-        self.__query_pool_file_path = path_dict.get_path(AbsBaseEstimator._DEFAULT_QUERY_POOL_FILE_PATH)
+        self.__query_pool_file_path = path_dict.get_path(AbsBaseEstimator.DEFAULT_QUERY_POOL_FILE_PATH)
         self.__crawler_api = crawler_api
         self.__word_extractor = self.factory.create_word_extractor()
         self.__parallelizer = self.factory.create_parallelizer()
@@ -141,10 +141,10 @@ class AbsBaseEstimator(AbsEstimator, metaclass=abc.ABCMeta):
         self.crawler_api.clean_up_data_folder()
         self.crawler_api.download_count = 0
 
-    def _report_progress(self, progress, total):
+    def report_progress(self, progress, total):
         print("Progress: " + str(progress) + "/" + str(total))
 
-    def _read_query_pool(self):
+    def read_query_pool(self):
         query_pool = []
         with open(self.query_pool_file_path) as archive:
             for line in archive:
@@ -154,19 +154,19 @@ class AbsBaseEstimator(AbsEstimator, metaclass=abc.ABCMeta):
 
 class AbsMhr(AbsBaseEstimator, metaclass=abc.ABCMeta):
 
-    _MAX_NUMBER_MATCHES_INFORMATION = "Máximo número de resultados"
-    _MIN_NUMBER_MATCHES_INFORMATION = "Menor número de resultados"
-    _NUMBER_QUERIES_INFORMATION = "Número de buscas"
-    _MAX_NUMBER_MATCHES = 5000000
-    _MIN_NUMBER_MATCHES = 1
-    _NUMBER_QUERIES = 100
+    MAX_NUMBER_MATCHES_INFORMATION = "Máximo número de resultados"
+    MIN_NUMBER_MATCHES_INFORMATION = "Menor número de resultados"
+    NUMBER_QUERIES_INFORMATION = "Número de buscas"
+    MAX_NUMBER_MATCHES = 5000000
+    MIN_NUMBER_MATCHES = 1
+    NUMBER_QUERIES = 100
 
     @property
     def experiment_details(self):
-        additional_information = {type(self)._NUMBER_QUERIES_INFORMATION: type(self)._NUMBER_QUERIES,
-                                  type(self)._MAX_NUMBER_MATCHES_INFORMATION: type(self)._MAX_NUMBER_MATCHES,
-                                  type(self)._MIN_NUMBER_MATCHES_INFORMATION: type(self)._MIN_NUMBER_MATCHES,
-                                  AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
+        additional_information = {type(self).NUMBER_QUERIES_INFORMATION: type(self).NUMBER_QUERIES,
+                                  type(self).MAX_NUMBER_MATCHES_INFORMATION: type(self).MAX_NUMBER_MATCHES,
+                                  type(self).MIN_NUMBER_MATCHES_INFORMATION: type(self).MIN_NUMBER_MATCHES,
+                                  AbsBaseEstimator.QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
         return additional_information
 
     def __init__(self, crawler_api):
@@ -181,16 +181,16 @@ class AbsMhr(AbsBaseEstimator, metaclass=abc.ABCMeta):
         self.query_pool_size = None
         self.progress_count = 0
 
-    def _reset(self):
+    def reset(self):
         self.query_count = 0
         self.total_matches = 0
         self.total_documents_returned = 0
         self.document_id_dict = {}
-        self.query_pool = self._read_query_pool()
+        self.query_pool = self.read_query_pool()
         self.query_pool_size = len(self.query_pool)
         self.progress_count = 0
 
-    def _take_query(self):
+    def take_query(self):
         query = None
         with self.lock_query_list:
             if self.query_pool_size > 0:
@@ -200,11 +200,11 @@ class AbsMhr(AbsBaseEstimator, metaclass=abc.ABCMeta):
                 self.query_pool_size -= 1
         return query
 
-    def _collect_data_for_estimation(self, number):
-        query = self._take_query()
+    def collect_data_for_estimation(self, number):
+        query = self.take_query()
         search_result = self.crawler_api.download(query, True, False)
         number_matches = search_result.number_results
-        if type(self)._MIN_NUMBER_MATCHES <= number_matches <= type(self)._MAX_NUMBER_MATCHES:
+        if type(self).MIN_NUMBER_MATCHES <= number_matches <= type(self).MAX_NUMBER_MATCHES:
             document_list = search_result.results
             id_list = []
             number_documents_returned = 0
@@ -218,11 +218,11 @@ class AbsMhr(AbsBaseEstimator, metaclass=abc.ABCMeta):
                 for id_item in id_list:
                     self.document_id_dict[id_item] = self.document_id_dict.get(id_item, 0) + 1
                 self.progress_count += 1
-                self._report_progress(self.progress_count, type(self)._NUMBER_QUERIES)
+                self.report_progress(self.progress_count, type(self).NUMBER_QUERIES)
             return True
         return False
 
-    def _calculate_estimation(self):
+    def calculate_estimation(self):
         estimation = -1
         overlapping_rate = -1
         number_unique_documents_returned = len(list(self.document_id_dict.keys()))
@@ -239,44 +239,44 @@ class AbsMhr(AbsBaseEstimator, metaclass=abc.ABCMeta):
 
     def estimate(self):
         super().estimate()
-        self._reset()
-        self.parallelizer.execute_in_parallel(self.crawler_api.thread_limit, range(0, type(self)._NUMBER_QUERIES),
-                                              self._collect_data_for_estimation)
-        estimation = self._calculate_estimation()
+        self.reset()
+        self.parallelizer.execute_in_parallel(self.crawler_api.thread_limit, range(0, type(self).NUMBER_QUERIES),
+                                              self.collect_data_for_estimation)
+        estimation = self.calculate_estimation()
         return estimation
 
 
 class Mhr(AbsMhr):
 
-    def _calculate_estimation(self):
+    def calculate_estimation(self):
         success = False
         while not success:
-            success = super()._collect_data_for_estimation()
+            success = super().collect_data_for_estimation()
 
 
 class ExactMhr(AbsMhr):
 
-    _MAX_NUMBER_MATCHES = 4500
-    _MIN_NUMBER_MATCHES = 3500
-    _NUMBER_QUERIES = 5000
+    MAX_NUMBER_MATCHES = 4500
+    MIN_NUMBER_MATCHES = 3500
+    NUMBER_QUERIES = 5000
 
 
 class TeacherMhr(AbsBaseEstimator):
 
-    _THREAD_LIMIT = 1
-    _MAX_NUMBER_MATCHES_INFORMATION = "Máximo número de resultados"
-    _MIN_NUMBER_MATCHES_INFORMATION = "Menor número de resultados"
-    _NUMBER_QUERIES_INFORMATION = "Número de buscas"
-    _MAX_NUMBER_MATCHES = 5000000
-    _MIN_NUMBER_MATCHES = 1
-    _NUMBER_QUERIES = 100
+    THREAD_LIMIT = 1
+    MAX_NUMBER_MATCHES_INFORMATION = "Máximo número de resultados"
+    MIN_NUMBER_MATCHES_INFORMATION = "Menor número de resultados"
+    NUMBER_QUERIES_INFORMATION = "Número de buscas"
+    MAX_NUMBER_MATCHES = 5000000
+    MIN_NUMBER_MATCHES = 1
+    NUMBER_QUERIES = 100
 
     @property
     def experiment_details(self):
-        additional_information = {type(self)._NUMBER_QUERIES_INFORMATION: type(self)._NUMBER_QUERIES,
-                                  type(self)._MAX_NUMBER_MATCHES_INFORMATION: type(self)._MAX_NUMBER_MATCHES,
-                                  type(self)._MIN_NUMBER_MATCHES_INFORMATION: type(self)._MIN_NUMBER_MATCHES,
-                                  AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
+        additional_information = {type(self).NUMBER_QUERIES_INFORMATION: type(self).NUMBER_QUERIES,
+                                  type(self).MAX_NUMBER_MATCHES_INFORMATION: type(self).MAX_NUMBER_MATCHES,
+                                  type(self).MIN_NUMBER_MATCHES_INFORMATION: type(self).MIN_NUMBER_MATCHES,
+                                  AbsBaseEstimator.QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
         return additional_information
 
     def __init__(self, crawler_api):
@@ -292,17 +292,17 @@ class TeacherMhr(AbsBaseEstimator):
         self.progress_count = 0
         self.total_unique_documents_returned = 0
 
-    def _reset(self):
+    def reset(self):
         self.query_count = 0
         self.total_matches = 0
         self.document_id_list_last_iteration = []
         self.total_documents_returned = 0
-        self.query_pool = self._read_query_pool()
+        self.query_pool = self.read_query_pool()
         self.query_pool_size = len(self.query_pool)
         self.progress_count = 0
         self.total_unique_documents_returned = 0
 
-    def _take_query(self):
+    def take_query(self):
         query = None
         with self.lock_query_list:
             if self.query_pool_size > 0:
@@ -312,11 +312,11 @@ class TeacherMhr(AbsBaseEstimator):
                 self.query_pool_size -= 1
         return query
 
-    def _collect_data_for_estimation(self, number):
-        query = self._take_query()
+    def collect_data_for_estimation(self, number):
+        query = self.take_query()
         search_result = self.crawler_api.download(query, True, False)
         number_matches = search_result.number_results
-        if type(self)._MIN_NUMBER_MATCHES <= number_matches <= type(self)._MAX_NUMBER_MATCHES:
+        if type(self).MIN_NUMBER_MATCHES <= number_matches <= type(self).MAX_NUMBER_MATCHES:
             document_list = search_result.results
             id_list = []
             number_documents_returned = 0
@@ -331,11 +331,11 @@ class TeacherMhr(AbsBaseEstimator):
                 self.total_unique_documents_returned += len(new_document_list)
                 self.document_id_list_last_iteration = new_document_list
                 self.progress_count += 1
-                self._report_progress(self.progress_count, type(self)._NUMBER_QUERIES)
+                self.report_progress(self.progress_count, type(self).NUMBER_QUERIES)
             return True
         return False
 
-    def _calculate_estimation(self):
+    def calculate_estimation(self):
         estimation = -1
         overlapping_rate = -1
         if self.total_documents_returned != 0 and self.total_unique_documents_returned != 0:
@@ -351,36 +351,36 @@ class TeacherMhr(AbsBaseEstimator):
 
     def estimate(self):
         super().estimate()
-        self._reset()
-        self.parallelizer.execute_in_parallel(type(self)._THREAD_LIMIT, range(0, type(self)._NUMBER_QUERIES),
-                                              self._collect_data_for_estimation)
-        estimation = self._calculate_estimation()
+        self.reset()
+        self.parallelizer.execute_in_parallel(type(self).THREAD_LIMIT, range(0, type(self).NUMBER_QUERIES),
+                                              self.collect_data_for_estimation)
+        estimation = self.calculate_estimation()
         return estimation
 
 class RandomWalk(AbsBaseEstimator):
 
-    _MIN_NUMBER_MATCHES_FOR_SEED_QUERY_INFORMATION = "Número mínimo de resultados para busca semente"
-    _MIN_NUMBER_MATCHES_FOR_SEED_QUERY = 2
-    _MIN_NUMBER_WORDS_INFORMATION = "Número mínimo de palavras em um dcumento sorteado"
-    _MIN_NUMBER_WORDS = 2
-    _RANDOM_WALK_SAMPLE_SIZE_INFORMATION = "Número de nós visitados durante um \"random walk\""
-    _RANDOM_WALK_SAMPLE_SIZE = 5000
+    MIN_NUMBER_MATCHES_FOR_SEED_QUERY_INFORMATION = "Número mínimo de resultados para busca semente"
+    MIN_NUMBER_MATCHES_FOR_SEED_QUERY = 2
+    MIN_NUMBER_WORDS_INFORMATION = "Número mínimo de palavras em um dcumento sorteado"
+    MIN_NUMBER_WORDS = 2
+    RANDOM_WALK_SAMPLE_SIZE_INFORMATION = "Número de nós visitados durante um \"random walk\""
+    RANDOM_WALK_SAMPLE_SIZE = 5000
 
     @property
     def experiment_details(self):
-        additional_information = {RandomWalk._MIN_NUMBER_WORDS_INFORMATION:
-                                  RandomWalk._MIN_NUMBER_WORDS,
-                                  RandomWalk._MIN_NUMBER_MATCHES_FOR_SEED_QUERY_INFORMATION:
-                                  RandomWalk._MIN_NUMBER_MATCHES_FOR_SEED_QUERY,
-                                  RandomWalk._RANDOM_WALK_SAMPLE_SIZE_INFORMATION:
-                                  RandomWalk._RANDOM_WALK_SAMPLE_SIZE,
-                                  AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
+        additional_information = {RandomWalk.MIN_NUMBER_WORDS_INFORMATION:
+                                  RandomWalk.MIN_NUMBER_WORDS,
+                                  RandomWalk.MIN_NUMBER_MATCHES_FOR_SEED_QUERY_INFORMATION:
+                                  RandomWalk.MIN_NUMBER_MATCHES_FOR_SEED_QUERY,
+                                  RandomWalk.RANDOM_WALK_SAMPLE_SIZE_INFORMATION:
+                                  RandomWalk.RANDOM_WALK_SAMPLE_SIZE,
+                                  AbsBaseEstimator.QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
         return additional_information
 
     def estimate(self):
         super().estimate()
         document_degree_list = []
-        frequency_number_nodes_dict = self._random_walk(document_degree_list)
+        frequency_number_nodes_dict = self.random_walk(document_degree_list)
         n = len(document_degree_list)
         dw = sum(document_degree_list) / n
         dh = n / sum([1 / x for x in document_degree_list])
@@ -390,19 +390,19 @@ class RandomWalk(AbsBaseEstimator):
         estimation = (dw / dh) * binomy_n_2 * (1 / c)
         return estimation
 
-    def _random_walk(self, document_degree_list):
-        query_pool = self._read_query_pool()
+    def random_walk(self, document_degree_list):
+        query_pool = self.read_query_pool()
         size = len(query_pool)
         query = query_pool[random.randrange(0, size)]
         number_matches = self.crawler_api.download_item(query, 0).number_results
-        while number_matches < RandomWalk._MIN_NUMBER_MATCHES_FOR_SEED_QUERY:
+        while number_matches < RandomWalk.MIN_NUMBER_MATCHES_FOR_SEED_QUERY:
             query = query_pool[random.randrange(0, size)]
             number_matches = self.crawler_api.download_item(query, 0).number_results
         words = []
         count = 0
         number_words = 0
         node_frequency_dict = {}
-        while count < RandomWalk._RANDOM_WALK_SAMPLE_SIZE:
+        while count < RandomWalk.RANDOM_WALK_SAMPLE_SIZE:
             if number_matches > 0:
                 random_index = random.randrange(0, number_matches)
                 results = self.crawler_api.download_item(query, random_index).results
@@ -413,7 +413,7 @@ class RandomWalk(AbsBaseEstimator):
                 document = results[0]
                 words_buffer = self.word_extractor.extract_words(document.content)
                 number_words_buffer = len(words_buffer)
-                if number_words_buffer < RandomWalk._MIN_NUMBER_WORDS:
+                if number_words_buffer < RandomWalk.MIN_NUMBER_WORDS:
                     query = words[random.randrange(0, number_words)]
                     number_matches = self.crawler_api.download_item(query, 0).number_results
                     continue
@@ -423,7 +423,7 @@ class RandomWalk(AbsBaseEstimator):
                 node_frequency_dict[document.identifier] = \
                     node_frequency_dict.get(document.identifier, 0) + 1
                 count += 1
-                self._report_progress(count, RandomWalk._RANDOM_WALK_SAMPLE_SIZE)
+                self.report_progress(count, RandomWalk.RANDOM_WALK_SAMPLE_SIZE)
             query = words[random.randrange(0, number_words)]
             number_matches = self.crawler_api.download_item(query, 0).number_results
         frequency_node_dict = {}
@@ -436,45 +436,45 @@ class RandomWalk(AbsBaseEstimator):
 
 class SumEst(AbsBaseEstimator):
 
-    _THREAD_LIMIT = 10
-    _ITERATION_NUMBER = 100
-    _POOL_SAMPLE_SIZE = 1000
-    _ITERATION_NUMBER_INFORMATION = "Number of iterations"
-    _POOL_SAMPLE_SIZE_INFORMATION = "Size of the query pool sample"
-    _PAIR_QUERY_INDEX = 0
-    _PAIR_DOCUMENT_INDEX = 1
+    THREAD_LIMIT = 10
+    ITERATION_NUMBER = 100
+    POOL_SAMPLE_SIZE = 1000
+    ITERATION_NUMBER_INFORMATION = "Number of iterations"
+    POOL_SAMPLE_SIZE_INFORMATION = "Size of the query pool sample"
+    PAIR_QUERY_INDEX = 0
+    PAIR_DOCUMENT_INDEX = 1
 
     @property
     def experiment_details(self):
-        additional_information = {SumEst._ITERATION_NUMBER_INFORMATION: SumEst._ITERATION_NUMBER,
-                                  SumEst._POOL_SAMPLE_SIZE_INFORMATION: SumEst._POOL_SAMPLE_SIZE,
-                                  AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
+        additional_information = {SumEst.ITERATION_NUMBER_INFORMATION: SumEst.ITERATION_NUMBER,
+                                  SumEst.POOL_SAMPLE_SIZE_INFORMATION: SumEst.POOL_SAMPLE_SIZE,
+                                  AbsBaseEstimator.QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
         return additional_information
 
     def estimate(self):
         super().estimate()
         estimation_acc = 0
-        query_pool = self._read_query_pool()
-        pool_size = self._estimate_pool_size(query_pool)
-        for i in range(0, SumEst._ITERATION_NUMBER):
-            query_document_pair = self._select_query_document_pair(query_pool)
-            document = query_document_pair[SumEst._PAIR_DOCUMENT_INDEX]
-            query = query_document_pair[SumEst._PAIR_QUERY_INDEX]
-            document_inverse_degree = self._calculate_document_inverse_degree(document, query_pool)
-            degree_query = self._calculate_degree_query(query)
+        query_pool = self.read_query_pool()
+        pool_size = self.estimate_pool_size(query_pool)
+        for i in range(0, SumEst.ITERATION_NUMBER):
+            query_document_pair = self.select_query_document_pair(query_pool)
+            document = query_document_pair[SumEst.PAIR_DOCUMENT_INDEX]
+            query = query_document_pair[SumEst.PAIR_QUERY_INDEX]
+            document_inverse_degree = self.calculate_document_inverse_degree(document, query_pool)
+            degree_query = self.calculate_degree_query(query)
             partial_estimation = pool_size * degree_query * document_inverse_degree
             estimation_acc += partial_estimation
-            self._report_progress(i, SumEst._ITERATION_NUMBER)
-        estimation = estimation_acc / SumEst._ITERATION_NUMBER
+            self.report_progress(i, SumEst.ITERATION_NUMBER)
+        estimation = estimation_acc / SumEst.ITERATION_NUMBER
         return estimation
 
-    def _verify_match(self, query, document):
+    def verify_match(self, query, document):
         content = document.content.lower()
         if content.find(query.lower()) != -1:
             return True
         return False
 
-    def _select_query_document_pair(self, query_pool):
+    def select_query_document_pair(self, query_pool):
         list_size = len(query_pool)
         while True:
             random_index = random.randrange(list_size)
@@ -485,41 +485,41 @@ class SumEst(AbsBaseEstimator):
                 continue
             valid_list = []
             for document in document_list:
-                if self._verify_match(random_query, document):
+                if self.verify_match(random_query, document):
                     valid_list.append(document)
             if len(valid_list) > 0:
                 random_index = random.randrange(len(valid_list))
                 random_document = valid_list[random_index]
                 return [random_query, random_document]
 
-    def _get_matching_query_list(self, document, query_pool):
+    def get_matching_query_list(self, document, query_pool):
         lock = threading.Lock()
         matching_query_list = []
 
         def iteration(query):
             nonlocal document, matching_query_list, lock
-            if self._verify_match(query, document):
+            if self.verify_match(query, document):
                 with lock:
                     matching_query_list.append(query)
 
-        self.parallelizer.execute_in_parallel(SumEst._THREAD_LIMIT, query_pool, iteration)
+        self.parallelizer.execute_in_parallel(SumEst.THREAD_LIMIT, query_pool, iteration)
         return matching_query_list
 
-    def _calculate_degree_query(self, query):
+    def calculate_degree_query(self, query):
         lock = threading.Lock()
         count = 0
 
         def iteration(document):
             nonlocal query, count, lock
-            if self._verify_match(query, document):
+            if self.verify_match(query, document):
                 with lock:
                     count += 1
 
         document_list = self.crawler_api.download(query).results
-        self.parallelizer.execute_in_parallel(SumEst._THREAD_LIMIT, document_list, iteration)
+        self.parallelizer.execute_in_parallel(SumEst.THREAD_LIMIT, document_list, iteration)
         return count
 
-    def _estimate_pool_size(self, query_pool):
+    def estimate_pool_size(self, query_pool):
         count = 0
         query_pool_size = len(query_pool)
         lock = threading.Lock()
@@ -530,17 +530,17 @@ class SumEst(AbsBaseEstimator):
             query = query_pool[random_index]
             document_list = self.crawler_api.download(query).results
             for document in document_list:
-                if self._verify_match(query, document):
+                if self.verify_match(query, document):
                     with lock:
                         count += 1
                     return
 
-        self.parallelizer.execute_in_parallel(self.crawler_api.thread_limit, range(0, SumEst._POOL_SAMPLE_SIZE),
+        self.parallelizer.execute_in_parallel(self.crawler_api.thread_limit, range(0, SumEst.POOL_SAMPLE_SIZE),
                                               iteration)
-        return len(query_pool) * count / SumEst._POOL_SAMPLE_SIZE
+        return len(query_pool) * count / SumEst.POOL_SAMPLE_SIZE
 
-    def _calculate_document_inverse_degree(self, document, query_pool):
-        matching_query_list = self._get_matching_query_list(document, query_pool)
+    def calculate_document_inverse_degree(self, document, query_pool):
+        matching_query_list = self.get_matching_query_list(document, query_pool)
         i = 1
         while True:
             random_index = random.randrange(0, len(matching_query_list))
@@ -557,46 +557,46 @@ class SumEst(AbsBaseEstimator):
 
 class BroderEtAl(AbsBaseEstimator):
 
-    _THREAD_LIMIT = 10
-    _QUERY_RANDOM_SAMPLE_SIZE_INFORMATION = "Size of the random sample of queries"
-    _DOCUMENT_RANDOM_SAMPLE_SIZE_INFORMATION = "Size of the random sample of documents"
-    _QUERY_RANDOM_SAMPLE_SIZE = 200
-    _DOCUMENT_RANDOM_SAMPLE_SIZE = 1000
+    THREAD_LIMIT = 10
+    QUERY_RANDOM_SAMPLE_SIZE_INFORMATION = "Size of the random sample of queries"
+    DOCUMENT_RANDOM_SAMPLE_SIZE_INFORMATION = "Size of the random sample of documents"
+    QUERY_RANDOM_SAMPLE_SIZE = 200
+    DOCUMENT_RANDOM_SAMPLE_SIZE = 1000
 
     @property
     def experiment_details(self):
-        additional_information = {BroderEtAl._QUERY_RANDOM_SAMPLE_SIZE_INFORMATION:
-                                  BroderEtAl._QUERY_RANDOM_SAMPLE_SIZE,
-                                  BroderEtAl._DOCUMENT_RANDOM_SAMPLE_SIZE_INFORMATION:
-                                  BroderEtAl._DOCUMENT_RANDOM_SAMPLE_SIZE,
-                                  AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
+        additional_information = {BroderEtAl.QUERY_RANDOM_SAMPLE_SIZE_INFORMATION:
+                                  BroderEtAl.QUERY_RANDOM_SAMPLE_SIZE,
+                                  BroderEtAl.DOCUMENT_RANDOM_SAMPLE_SIZE_INFORMATION:
+                                  BroderEtAl.DOCUMENT_RANDOM_SAMPLE_SIZE,
+                                  AbsBaseEstimator.QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
         return additional_information
 
     def estimate(self):
         super().estimate()
         entire_data_set = self.crawler_api.download_entire_data_set().results
-        random_document_sample = random.sample(entire_data_set, BroderEtAl._DOCUMENT_RANDOM_SAMPLE_SIZE)
-        self._report_progress(1, 5)
-        query_pool = self._read_query_pool()
-        self._report_progress(2, 5)
-        query_sample = random.sample(query_pool, BroderEtAl._QUERY_RANDOM_SAMPLE_SIZE)
-        self._report_progress(3, 5)
-        average_weight = self._calculate_average_query_weight(query_sample, query_pool)
-        self._report_progress(4, 5)
+        random_document_sample = random.sample(entire_data_set, BroderEtAl.DOCUMENT_RANDOM_SAMPLE_SIZE)
+        self.report_progress(1, 5)
+        query_pool = self.read_query_pool()
+        self.report_progress(2, 5)
+        query_sample = random.sample(query_pool, BroderEtAl.QUERY_RANDOM_SAMPLE_SIZE)
+        self.report_progress(3, 5)
+        average_weight = self.calculate_average_query_weight(query_sample, query_pool)
+        self.report_progress(4, 5)
         number_results_entire_pool = average_weight * len(query_pool)
-        number_visible_pool = self._count_matches(random_document_sample, query_pool)
-        self._report_progress(5, 5)
+        number_visible_pool = self.count_matches(random_document_sample, query_pool)
+        self.report_progress(5, 5)
         probability_visible_pool = number_visible_pool / len(random_document_sample)
         estimation = number_results_entire_pool / probability_visible_pool
         return estimation
 
-    def _verify_match(self, query, document):
+    def verify_match(self, query, document):
         content = document.content.lower()
         if content.find(query.lower()) != -1:
             return True
         return False
 
-    def _calculate_average_query_weight(self, query_sample, query_pool):
+    def calculate_average_query_weight(self, query_sample, query_pool):
         weight_sum = 0
         lock = threading.Lock()
 
@@ -607,7 +607,7 @@ class BroderEtAl(AbsBaseEstimator):
             for document in results:
                 count = 0
                 for query in query_pool:
-                    if self._verify_match(query, document):
+                    if self.verify_match(query, document):
                         count += 1
                 if count > 0:
                     query_weight += 1 / count
@@ -618,37 +618,37 @@ class BroderEtAl(AbsBaseEstimator):
         average_weight = weight_sum / len(query_sample)
         return average_weight
 
-    def _count_matches(self, document_sample, query_pool):
+    def count_matches(self, document_sample, query_pool):
         count = 0
         lock = threading.Lock()
 
         def iteration(document):
             nonlocal count, query_pool, lock
             for query in query_pool:
-                if self._verify_match(query, document):
+                if self.verify_match(query, document):
                     with lock:
                         count += 1
                     return
 
-        self.parallelizer.execute_in_parallel(BroderEtAl._THREAD_LIMIT, document_sample, iteration)
+        self.parallelizer.execute_in_parallel(BroderEtAl.THREAD_LIMIT, document_sample, iteration)
         return count
 
 
 class AbsShokouhi(AbsBaseEstimator, metaclass=abc.ABCMeta):
 
-    _MIN_NUMBER_MATCHES = 20
+    MIN_NUMBER_MATCHES = 20
     FACTOR_N = 10
-    _QUERY_SAMPLE_SIZE = 5000
-    _MIN_NUMBER_MATCHES_INFORMATION = "Min number of matches for queries to be in the sample"
-    _FACTOR_N_INFORMATION = "Factor N"
-    _QUERY_SAMPLE_SIZE_INFORMATION = "QUERY_SAMPLE_SIZE"
+    QUERY_SAMPLE_SIZE = 5000
+    MIN_NUMBER_MATCHES_INFORMATION = "Min number of matches for queries to be in the sample"
+    FACTOR_N_INFORMATION = "Factor N"
+    QUERY_SAMPLE_SIZE_INFORMATION = "QUERY_SAMPLE_SIZE"
 
     @property
     def experiment_details(self):
-        additional_information = {AbsShokouhi._QUERY_SAMPLE_SIZE_INFORMATION: AbsShokouhi._QUERY_SAMPLE_SIZE,
-                                  AbsShokouhi._FACTOR_N_INFORMATION: AbsShokouhi.FACTOR_N,
-                                  AbsShokouhi._MIN_NUMBER_MATCHES_INFORMATION: AbsShokouhi._MIN_NUMBER_MATCHES,
-                                  AbsBaseEstimator._QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
+        additional_information = {AbsShokouhi.QUERY_SAMPLE_SIZE_INFORMATION: AbsShokouhi.QUERY_SAMPLE_SIZE,
+                                  AbsShokouhi.FACTOR_N_INFORMATION: AbsShokouhi.FACTOR_N,
+                                  AbsShokouhi.MIN_NUMBER_MATCHES_INFORMATION: AbsShokouhi.MIN_NUMBER_MATCHES,
+                                  AbsBaseEstimator.QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
         return additional_information
 
     @abc.abstractmethod
@@ -659,7 +659,7 @@ class AbsShokouhi(AbsBaseEstimator, metaclass=abc.ABCMeta):
 
 class AbsMCR(AbsShokouhi, metaclass=abc.ABCMeta):
 
-    def _count_duplicates(self, data_list_1, data_list_2):
+    def count_duplicates(self, data_list_1, data_list_2):
         id_list_1 = [x.identifier for x in data_list_1]
         id_list_2 = [x.identifier for x in data_list_2]
         duplicates = [x for x in id_list_1 if x in id_list_2]
@@ -668,13 +668,13 @@ class AbsMCR(AbsShokouhi, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def estimate(self):
         super().estimate()
-        query_pool = self._read_query_pool()
-        query_sample =  random.sample(query_pool, AbsShokouhi._QUERY_SAMPLE_SIZE)
+        query_pool = self.read_query_pool()
+        query_sample =  random.sample(query_pool, AbsShokouhi.QUERY_SAMPLE_SIZE)
         random_sample_list = [self.crawler_api.download(x, True, False) for x in query_sample]
         random_sample_list = [x.results for x in random_sample_list if
-                              x.number_results > AbsShokouhi._MIN_NUMBER_MATCHES]
+                              x.number_results > AbsShokouhi.MIN_NUMBER_MATCHES]
         factor_t = len(random_sample_list)
-        factor_d = sum([self._count_duplicates(x, y) for x, y in itertools.combinations(random_sample_list, 2)])
+        factor_d = sum([self.count_duplicates(x, y) for x, y in itertools.combinations(random_sample_list, 2)])
         estimation = factor_t * (factor_t - 1) * AbsShokouhi.FACTOR_N ** 2 / (2 * factor_d)
         return estimation
 
@@ -684,11 +684,11 @@ class AbsCH(AbsShokouhi, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def estimate(self):
         super().estimate()
-        query_pool = self._read_query_pool()
-        query_sample =  random.sample(query_pool, AbsShokouhi._QUERY_SAMPLE_SIZE)
+        query_pool = self.read_query_pool()
+        query_sample =  random.sample(query_pool, AbsShokouhi.QUERY_SAMPLE_SIZE)
         random_sample_list = [self.crawler_api.download(x, True, False) for x in query_sample]
         random_sample_list = [x.results for x in random_sample_list if
-                              x.number_results > AbsShokouhi._MIN_NUMBER_MATCHES]
+                              x.number_results > AbsShokouhi.MIN_NUMBER_MATCHES]
         marked_list = []
         numerator = 0
         denominator = 0
