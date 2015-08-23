@@ -114,7 +114,7 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=abc.ABCMeta):
     def __init__(self, limit_results_per_query):
         self.__download_count = 0
         self.__factory = module_factory.CrawlerApiFactory()
-        self.__lock = threading.Lock()
+        self.lock = threading.Lock()
         self.__terminator = self.__factory.create_terminator()
         self.__limit_results_per_query = limit_results_per_query
 
@@ -140,7 +140,7 @@ class AbsBaseCrawlerApi(AbsCrawlerApi, metaclass=abc.ABCMeta):
         pass
 
     def inc_download(self):
-        with self.__lock:
+        with self.lock:
             self.download_count += 1
 
 
