@@ -634,16 +634,16 @@ class BroderEtAl(AbsBaseEstimator):
 
 class AbsShokouhi(AbsBaseEstimator, metaclass=abc.ABCMeta):
     MIN_NUMBER_MATCHES = 20
-    FACTOR_N = 10
+    FACTOR_K = 10
     QUERY_SAMPLE_SIZE = 5000
     MIN_NUMBER_MATCHES_INFORMATION = "Min number of matches for queries to be in the sample"
-    FACTOR_N_INFORMATION = "Factor N"
+    FACTOR_K_INFORMATION = "Factor K"
     QUERY_SAMPLE_SIZE_INFORMATION = "QUERY_SAMPLE_SIZE"
 
     @property
     def experiment_details(self):
         additional_information = {AbsShokouhi.QUERY_SAMPLE_SIZE_INFORMATION: AbsShokouhi.QUERY_SAMPLE_SIZE,
-                                  AbsShokouhi.FACTOR_N_INFORMATION: AbsShokouhi.FACTOR_N,
+                                  AbsShokouhi.FACTOR_K_INFORMATION: AbsShokouhi.FACTOR_K,
                                   AbsShokouhi.MIN_NUMBER_MATCHES_INFORMATION: AbsShokouhi.MIN_NUMBER_MATCHES,
                                   AbsBaseEstimator.QUERY_POOL_FILE_PATH_INFORMATION: self.query_pool_file_path}
         return additional_information
@@ -651,7 +651,7 @@ class AbsShokouhi(AbsBaseEstimator, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def estimate(self):
         super().estimate()
-        self.crawler_api.limit_results_per_query = AbsShokouhi.FACTOR_N
+        self.crawler_api.limit_results_per_query = AbsShokouhi.FACTOR_K
 
 
 class AbsMCR(AbsShokouhi, metaclass=abc.ABCMeta):
@@ -671,7 +671,7 @@ class AbsMCR(AbsShokouhi, metaclass=abc.ABCMeta):
                               x.number_results > AbsShokouhi.MIN_NUMBER_MATCHES]
         factor_t = len(random_sample_list)
         factor_d = sum([self.count_duplicates(x, y) for x, y in itertools.combinations(random_sample_list, 2)])
-        estimation = factor_t * (factor_t - 1) * AbsShokouhi.FACTOR_N ** 2 / (2 * factor_d)
+        estimation = factor_t * (factor_t - 1) * AbsShokouhi.FACTOR_K ** 2 / (2 * factor_d)
         return estimation
 
 
@@ -688,7 +688,7 @@ class AbsCH(AbsShokouhi, metaclass=abc.ABCMeta):
         numerator = 0
         denominator = 0
         for data_list in random_sample_list:
-            numerator += AbsCH.FACTOR_N * len(marked_list) ** 2
+            numerator += AbsCH.FACTOR_K * len(marked_list) ** 2
             id_list = [x.identifier for x in data_list]
             denominator += len([x for x in id_list if x in marked_list]) * len(marked_list)
             marked_list = list(itertools.chain(id_list, marked_list))
