@@ -199,7 +199,7 @@ class AbsMhr(AbsBaseEstimator, metaclass=abc.ABCMeta):
         if always_download_all:
             search_result = self.crawler_api.download(query, True, False)
         else:
-            search_result = self.crawler_api.download_item(query)
+            search_result = self.crawler_api.download_item(query, 0)
         number_matches = search_result.number_results
         if type(self).MIN_NUMBER_MATCHES <= number_matches <= type(self).MAX_NUMBER_MATCHES:
             if not always_download_all:
