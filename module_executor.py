@@ -202,7 +202,7 @@ class CHRegSolrExecutor(AbsSolrExecutor):
 
 
 class AbsIEEEExecutor(AbsBaseExecutor):
-    _NUMBER_ITERATIONS = 3
+    _NUMBER_ITERATIONS = 1
 
     @abc.abstractmethod
     def _create_factory(self):
@@ -388,7 +388,7 @@ class CHRegIEEEOnlyAbstractExecutor(AbsIEEEOnlyAbstractExecutor):
 
 
 class AbsACMExecutor(AbsBaseExecutor):
-    _NUMBER_ITERATIONS = 3
+    _NUMBER_ITERATIONS = 1
 
     @abc.abstractmethod
     def _create_factory(self):

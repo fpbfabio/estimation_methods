@@ -225,6 +225,8 @@ class AbsWebsiteCrawlerApi(AbsBaseCrawlerApi, metaclass=abc.ABCMeta):
         wait.until(cls.test_if_page_with_data_set_size_loaded)
         page_source = web_driver.execute_script(AbsWebsiteCrawlerApi.JAVASCRIPT_GET_PAGE_SOURCE_CODE)
         soup = bs4.BeautifulSoup(page_source, AbsWebsiteCrawlerApi.HTML_PARSER)
+        web_driver.close()
+        web_driver.quit()
         return cls.extract_data_set_size(soup)
 
     def download_entire_data_set(self):
@@ -428,6 +430,7 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
     DATA_SET_SIZE_TAG_ATTRIBUTE = "href"
     DATA_SET_SIZE_TAG_ATTRIBUTE_VALUE = "/search/searchresult.jsp?sortType=desc_p_Publication_Year&newsearch=true"
     THREAD_LIMIT = 1
+    NUMBER_MATCHES_REGEX = re.compile(r"[ \t\n\r]*Displaying results [0-9]+-[0-9]+ of ([0-9]+[,]?[0-9]*)")
     WEB_DOMAIN = "http://ieeexplore.ieee.org"
     NO_RESULTS_TAG = "li"
     NO_RESULTS_TAG_ATTRIBUTE = "class"
@@ -446,12 +449,15 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
     ID_TAG_ATTRIBUTE_VALUE = "icon-pdf ng-scope"
     HREF = "href"
     MAX_RESULTS_PER_PAGE = 100
-    ELEMENT_WITH_NUMBER_MATCHES_TAG = "span"
-    ELEMENT_WITH_NUMBER_MATCHES_ATTRIBUTE = "class"
-    ELEMENT_WITH_NUMBER_MATCHES_ATTRIBUTE_VALUE = "ng-binding ng-scope"
-    ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_TAG = "span"
-    ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE = "ng-if"
-    ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE_VALUE = "records.length === 1"
+    NUMBER_MATCHES_ANCESTOR_TAG = "span"
+    NUMBER_MATCHES_ANCESTOR_ATTRIBUTE = "ng-if"
+    NUMBER_MATCHES_ANCESTOR_ATTRIBUTE_VALUE = "records.length > 1"
+    NUMBER_MATCHES_TAG = "span"
+    NUMBER_MATCHES_ATTRIBUTE = "class"
+    NUMBER_MATCHES_ATTRIBUTE_VALUE = "ng-binding"
+    NUMBER_MATCHES_WHEN_ONE_RESULT_TAG = "span"
+    NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE = "ng-if"
+    NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE_VALUE = "records.length === 1"
     DATA_FOLDER_PATH = "AbsIEEECrawlerApi__DATA_FOLDER_PATH"
 
     def __init__(self, limit_number_results=None):
@@ -507,24 +513,26 @@ class AbsIEEECrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
         no_results_element = soup.find(AbsIEEECrawlerApi.NO_RESULTS_TAG, dictionary)
         if no_results_element is not None:
             return 0
-        dictionary = {AbsIEEECrawlerApi.ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE:
-                      AbsIEEECrawlerApi.ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE_VALUE}
-        one_result_element = soup.find(AbsIEEECrawlerApi.ELEMENT_WITH_NUMBER_MATCHES_WHEN_ONE_RESULT_TAG,
+        dictionary = {AbsIEEECrawlerApi.NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE:
+                      AbsIEEECrawlerApi.NUMBER_MATCHES_WHEN_ONE_RESULT_ATTRIBUTE_VALUE}
+        one_result_element = soup.find(AbsIEEECrawlerApi.NUMBER_MATCHES_WHEN_ONE_RESULT_TAG,
                                        dictionary)
         if one_result_element is not None:
             return 1
-        dictionary = {AbsIEEECrawlerApi.ELEMENT_WITH_NUMBER_MATCHES_ATTRIBUTE:
-                      AbsIEEECrawlerApi.ELEMENT_WITH_NUMBER_MATCHES_ATTRIBUTE_VALUE}
-        html_element = soup.find(AbsIEEECrawlerApi.ELEMENT_WITH_NUMBER_MATCHES_TAG, dictionary)
-        if html_element is not None:
-            try:
-                contents = html_element.next.strip().split()
-                number_matches = int(str(contents[4].replace(",", "")))
-            except:
-                return -1
-        else:
+        dictionary = {AbsIEEECrawlerApi.NUMBER_MATCHES_ANCESTOR_ATTRIBUTE:
+                      AbsIEEECrawlerApi.NUMBER_MATCHES_ANCESTOR_ATTRIBUTE_VALUE}
+        soup = soup.find(AbsIEEECrawlerApi.NUMBER_MATCHES_ANCESTOR_TAG, dictionary)
+        if soup is None:
             return -1
-        return number_matches
+        dictionary = {AbsIEEECrawlerApi.NUMBER_MATCHES_ATTRIBUTE:
+                      AbsIEEECrawlerApi.NUMBER_MATCHES_ATTRIBUTE_VALUE}
+        html_element = soup.find(AbsIEEECrawlerApi.NUMBER_MATCHES_TAG, dictionary)
+        if html_element is None:
+            return -1
+        regex_search_result = type(self).NUMBER_MATCHES_REGEX.match(html_element.next)
+        if regex_search_result is not None:
+            return int(regex_search_result.group(1).replace(",", ""))
+        return -1
 
     def extract_data_list_from_soup(self, soup):
         dictionary = {AbsIEEECrawlerApi.ITEM_TAG_ATTRIBUTE: AbsIEEECrawlerApi.ITEM_TAG_ATTRIBUTE_VALUE}
@@ -580,7 +588,7 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
     DEFAULT_LIMIT_RESULTS = 5000000
     URL_WITH_DATA_SET_SIZE = "http://dl.acm.org/results.cfm?h=1&query=test&dlr=GUIDE"
     THREAD_LIMIT = 1
-    ELEMENT_WITH_NUMBER_MATCHES_TAG = "b"
+    NUMBER_MATCHES_TAG = "b"
     DATA_FOLDER_PATH = "AbsACMCrawlerApi__DATA_FOLDER_PATH"
     MAX_RESULTS_PER_PAGE = 20
     WEB_DOMAIN = "http://dl.acm.org/"
@@ -664,7 +672,7 @@ class AbsACMCrawlerApi(AbsWebsiteCrawlerApi, metaclass=abc.ABCMeta):
         no_results_element = soup.find(AbsACMCrawlerApi.NO_RESULTS_TAG, dictionary)
         if no_results_element is not None:
             return 0
-        html_element = soup.find(AbsACMCrawlerApi.ELEMENT_WITH_NUMBER_MATCHES_TAG)
+        html_element = soup.find(AbsACMCrawlerApi.NUMBER_MATCHES_TAG)
         if html_element is not None:
             try:
                 number_matches = int(str(html_element.text.replace(",", "")))

@@ -192,6 +192,8 @@ class AbsMhr(AbsBaseEstimator, metaclass=abc.ABCMeta):
                 query = self.query_pool[random_index]
                 del (self.query_pool[random_index])
                 self.query_pool_size -= 1
+                self.progress_count += 1
+                self.report_progress(self.progress_count, type(self).NUMBER_QUERIES)
         return query
 
     def collect_data_for_estimation(self, number, always_download_all=False):
@@ -204,21 +206,13 @@ class AbsMhr(AbsBaseEstimator, metaclass=abc.ABCMeta):
         if type(self).MIN_NUMBER_MATCHES <= number_matches <= type(self).MAX_NUMBER_MATCHES:
             if not always_download_all:
                 search_result = self.crawler_api.download(query, True, False)
-                number_matches = search_result.number_results
-            document_list = search_result.results
-            id_list = []
-            number_documents_returned = 0
-            for document in document_list:
-                id_list.append(document.identifier)
-                number_documents_returned += 1
+            id_list = [x.identifier for x in search_result.results]
             with self.lock_accumulators:
                 self.query_count += 1
                 self.total_matches += number_matches
-                self.total_documents_returned += number_documents_returned
+                self.total_documents_returned += len(id_list)
                 for id_item in id_list:
                     self.document_id_dict[id_item] = self.document_id_dict.get(id_item, 0) + 1
-                self.progress_count += 1
-                self.report_progress(self.progress_count, type(self).NUMBER_QUERIES)
             return True
         return False
 
