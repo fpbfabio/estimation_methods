@@ -780,8 +780,7 @@ class SolrCrawlerApi(AbsBaseCrawlerApi):
 
 
 class IEEECrawlerApi(AbsIEEECrawlerApi):
-    BASE_URL = ("http://ieeexplore.ieee.org/search/searchresult.jsp?"
-                 + "queryText=<<query>>&rowsPerPage=100&pageNumber=<<offset>>&resultAction=ROWS_PER_PAGE")
+    BASE_URL = "http://ieeexplore.ieee.org/search/searchresult.jsp?queryText=<<query>>&pageNumber=<<offset>>&rowsPerPage=100&searchField=Search_All"
 
     @property
     def base_url(self):
